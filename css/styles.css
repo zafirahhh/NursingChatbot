@@ -137,6 +137,52 @@ button[type="submit"]:focus {
     outline: none;
 }
 
+#clear-chat {
+    background: var(--light-pink);
+    color: var(--charcoal);
+    border: none;
+    border-radius: 0.5rem;
+    padding: 0.5rem 1rem;
+    font-size: 1rem;
+    margin-bottom: 1rem;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+#clear-chat:hover, #clear-chat:focus {
+    background: var(--primary-blue);
+    color: var(--white);
+    outline: none;
+}
+
+#mic-btn {
+    background: var(--mint-green);
+    color: var(--charcoal);
+    border: none;
+    border-radius: 50%;
+    width: 2.5rem;
+    height: 2.5rem;
+    font-size: 1.3rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 0.3rem;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+}
+
+#mic-btn.recording {
+    background: var(--primary-blue);
+    color: var(--white);
+    animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(74,144,226,0.5); }
+    70% { box-shadow: 0 0 0 10px rgba(74,144,226,0); }
+    100% { box-shadow: 0 0 0 0 rgba(74,144,226,0); }
+}
+
 @media (max-width: 600px) {
     .chatbot-container {
         max-width: 100%;

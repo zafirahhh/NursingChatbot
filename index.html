@@ -14,8 +14,10 @@
     <main>
         <section class="chatbot-container" aria-label="Nursing Chatbot">
             <div id="chat-window" class="chat-window" tabindex="0" aria-live="polite"></div>
+            <button id="clear-chat" type="button" aria-label="Clear chat history">Clear Chat</button>
             <form id="chat-form" autocomplete="off">
                 <input type="text" id="user-input" placeholder="Type your question..." aria-label="Type your question" required />
+                <button type="button" id="mic-btn" aria-label="Record your question" title="Record your question">🎤</button>
                 <button type="submit" aria-label="Send">Send</button>
             </form>
         </section>
