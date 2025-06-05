@@ -82,31 +82,55 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!knowledgeText) return 'Knowledge base not loaded yet.';
       const lines = knowledgeText.split('\n');
       const keywords = query.toLowerCase().split(/\s+/);
+      // Expanded parameter synonyms
+      const paramMap = {
+        'heart rate': ['heart rate', 'pulse', 'pr'],
+        'blood pressure': ['blood pressure', 'bp'],
+        'respiratory rate': ['respiratory rate', 'rr'],
+        'temperature': ['temperature', 'temp'],
+        'weight': ['weight'],
+        'height': ['height'],
+        'spo2': ['spo2', 'oxygen saturation'],
+        'glucose': ['glucose', 'sugar'],
+        'bilirubin': ['bilirubin', 'jaundice'],
+        'urine': ['urine', 'output', 'input', 'fluid'],
+      };
       // Try to extract age and parameter from the query for table-aware search
       const ageMatch = query.match(/(\d+)[ -]?(year|month|day|week)s?/i);
-      const paramMatch = query.match(/(heart rate|pulse|blood pressure|respiratory rate|temperature|weight|height|spo2|oxygen saturation|glucose|sugar|bilirubin|jaundice|urine|output|input|fluid|bp|pr|rr|temp)/i);
       let age = ageMatch ? ageMatch[0] : null;
-      let param = paramMatch ? paramMatch[0].toLowerCase() : null;
-      // Table-aware extraction
+      let param = null;
+      for (const key in paramMap) {
+        if (paramMap[key].some(p => new RegExp(`\\b${p}\\b`, 'i').test(query))) {
+          param = key;
+          break;
+        }
+      }
+      // Table-aware extraction with improved age group matching
       if (param && age) {
-        // Find the table header
         for (let i = 0; i < lines.length; i++) {
-          if (lines[i].toLowerCase().includes(param)) {
+          if (paramMap[param].some(p => new RegExp(`\\b${p}\\b`, 'i').test(lines[i]))) {
             // Look for a table structure below
             for (let j = i + 1; j < Math.min(i + 15, lines.length); j++) {
-              if (lines[j].toLowerCase().includes(age.replace(/s?$/,''))) {
-                // Extract the row and header
+              // Try to match age group (e.g., 2 years matches 1-3 years)
+              const row = lines[j].toLowerCase();
+              const ageNum = parseInt(age);
+              if (row.match(/(\d+)[-–](\d+)/)) {
+                const [, min, max] = row.match(/(\d+)[-–](\d+)/);
+                if (ageNum >= parseInt(min) && ageNum <= parseInt(max)) {
+                  const header = lines[i];
+                  return `Relevant table for ${param} (age: ${age}):\n${header}\n${lines[j]}`;
+                }
+              } else if (row.includes(age.replace(/s?$/,''))) {
                 const header = lines[i];
-                const row = lines[j];
-                return `Relevant table for ${param} (age: ${age}):\n${header}\n${row}`;
+                return `Relevant table for ${param} (age: ${age}):\n${header}\n${lines[j]}`;
               }
             }
           }
         }
       }
-      // Fuzzy matching helper
+      // Fuzzy matching helper with word boundaries
       function fuzzyIncludes(line, word) {
-        return line.includes(word) || line.includes(word.replace(/s$/, '')) || line.includes(word.replace(/[^a-z]/g, ''));
+        return new RegExp(`\\b${word.replace(/[^a-z0-9]/g, '')}\\b`, 'i').test(line);
       }
       // Try to find a line that contains all keywords (fuzzy)
       for (let i = 0; i < lines.length; i++) {
