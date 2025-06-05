@@ -98,6 +98,8 @@ document.addEventListener('DOMContentLoaded', () => {
       // Try to extract age and parameter from the query for table-aware search
       const ageMatch = query.match(/(\d+)[ -]?(year|month|day|week)s?/i);
       let age = ageMatch ? ageMatch[0] : null;
+      let ageNum = ageMatch ? parseInt(ageMatch[1]) : null;
+      let ageUnit = ageMatch ? ageMatch[2] : null;
       let param = null;
       for (const key in paramMap) {
         if (paramMap[key].some(p => new RegExp(`\\b${p}\\b`, 'i').test(query))) {
@@ -105,24 +107,68 @@ document.addEventListener('DOMContentLoaded', () => {
           break;
         }
       }
-      // Table-aware extraction with improved age group matching
-      if (param && age) {
+      // Table-aware extraction with advanced age group matching
+      if (param && ageNum && ageUnit) {
         for (let i = 0; i < lines.length; i++) {
           if (paramMap[param].some(p => new RegExp(`\\b${p}\\b`, 'i').test(lines[i]))) {
-            // Look for a table structure below
             for (let j = i + 1; j < Math.min(i + 15, lines.length); j++) {
-              // Try to match age group (e.g., 2 years matches 1-3 years)
               const row = lines[j].toLowerCase();
-              const ageNum = parseInt(age);
-              if (row.match(/(\d+)[-–](\d+)/)) {
-                const [, min, max] = row.match(/(\d+)[-–](\d+)/);
-                if (ageNum >= parseInt(min) && ageNum <= parseInt(max)) {
+              // Match ranges like "1-12 years", ">12 years", "<1 year", "child 1-12 years", etc.
+              const rangeRegex = /(\d+)[-–](\d+)\s*(year|month|day|week)s?/i;
+              const gtRegex = />\s*(\d+)\s*(year|month|day|week)s?/i;
+              const ltRegex = /<\s*(\d+)\s*(year|month|day|week)s?/i;
+              const singleRegex = /\b(\d+)\s*(year|month|day|week)s?\b/i;
+              let match = row.match(rangeRegex);
+              if (match && match[3].toLowerCase() === ageUnit.toLowerCase()) {
+                const min = parseInt(match[1]);
+                const max = parseInt(match[2]);
+                if (ageNum >= min && ageNum <= max) {
                   const header = lines[i];
                   return `Relevant table for ${param} (age: ${age}):\n${header}\n${lines[j]}`;
                 }
-              } else if (row.includes(age.replace(/s?$/,''))) {
-                const header = lines[i];
-                return `Relevant table for ${param} (age: ${age}):\n${header}\n${lines[j]}`;
+              }
+              match = row.match(gtRegex);
+              if (match && match[2].toLowerCase() === ageUnit.toLowerCase()) {
+                const min = parseInt(match[1]);
+                if (ageNum > min) {
+                  const header = lines[i];
+                  return `Relevant table for ${param} (age: ${age}):\n${header}\n${lines[j]}`;
+                }
+              }
+              match = row.match(ltRegex);
+              if (match && match[2].toLowerCase() === ageUnit.toLowerCase()) {
+                const max = parseInt(match[1]);
+                if (ageNum < max) {
+                  const header = lines[i];
+                  return `Relevant table for ${param} (age: ${age}):\n${header}\n${lines[j]}`;
+                }
+              }
+              match = row.match(singleRegex);
+              if (match && match[2].toLowerCase() === ageUnit.toLowerCase()) {
+                const single = parseInt(match[1]);
+                if (ageNum === single) {
+                  const header = lines[i];
+                  return `Relevant table for ${param} (age: ${age}):\n${header}\n${lines[j]}`;
+                }
+              }
+              // Also match descriptive groups like "child 1-12 years"
+              if (row.match(/child|adolescent|infant|newborn/)) {
+                // Try to extract any numbers in the row
+                const nums = row.match(/(\d+)/g);
+                if (nums && nums.length >= 2 && row.includes(ageUnit.toLowerCase())) {
+                  const min = parseInt(nums[0]);
+                  const max = parseInt(nums[1]);
+                  if (ageNum >= min && ageNum <= max) {
+                    const header = lines[i];
+                    return `Relevant table for ${param} (age: ${age}):\n${header}\n${lines[j]}`;
+                  }
+                } else if (nums && nums.length === 1 && row.includes(ageUnit.toLowerCase())) {
+                  const single = parseInt(nums[0]);
+                  if (ageNum === single) {
+                    const header = lines[i];
+                    return `Relevant table for ${param} (age: ${age}):\n${header}\n${lines[j]}`;
+                  }
+                }
               }
             }
           }
