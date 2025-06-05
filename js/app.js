@@ -69,6 +69,23 @@ document.addEventListener('DOMContentLoaded', () => {
         if (typingDiv) typingDiv.remove();
     }
 
+    let knowledgeText = '';
+
+    // Load the knowledge base from the PDF (as text)
+    fetch('data/nursing_guide.txt')
+      .then(response => response.text())
+      .then(text => {
+        knowledgeText = text;
+      });
+
+    function searchKnowledge(query) {
+      if (!knowledgeText) return 'Knowledge base not loaded yet.';
+      const lines = knowledgeText.split('\n');
+      // Simple keyword search: return the first line that matches
+      const match = lines.find(line => line.toLowerCase().includes(query.toLowerCase()));
+      return match ? match : 'No relevant information found in the nursing guide.';
+    }
+
     chatForm.addEventListener('submit', (e) => {
         e.preventDefault();
         const userText = userInput.value.trim();
@@ -78,7 +95,9 @@ document.addEventListener('DOMContentLoaded', () => {
         showTyping();
         setTimeout(() => {
             removeTyping();
-            appendMessage('bot', 'Thank you for your question. A virtual nurse will respond shortly.');
+            // Use the knowledge base for the bot reply
+            const botReply = searchKnowledge(userText);
+            appendMessage('bot', botReply);
         }, 900);
     });
 

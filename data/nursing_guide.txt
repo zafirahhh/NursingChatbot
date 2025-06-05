@@ -1,0 +1,1753 @@
+AGE
+
+0- 1 month
+1 month - < 1 year
+1 year - < 2 year
+2 year - < 3 year
+3 yr - < 4 yr
+4- < 5 yr
+5- < 6
+6- < 7 yr
+7 - < 8 yr
+8- < 9 yr
+9-< 10
+10 - < 11 yr
+11-<12
+12 - < 13
+13 - < 14
+14 - < 15
+15 and above
+
+SYSTOLIC BLOOD PRESSURE
+Minimum
+Maximum (1 mmHg less than 95th % for
+heiQht @50th % Boy)
+90
+61
+71 (> 70)
+90
+102
+72 (>80)
+105
+74
+108
+76
+110
+78
+111
+81
+113
+82
+114
+84
+115
+86
+117
+91 (>90)
+118
+91
+120
+91
+122
+91
+125
+91
+127
+91
+130
+96
+
+Minimum systo!,c BP reference calculated from APLS minimum systolic BP formula 70 + (age x 2).(up ti/110 years of
+aae)
+
+Formulas for calculators:
+Fluids calculator:
+
+Systolic BP
+
+The following are the normal range of vital signs (heart rate/resp rate and systolic
+BP) in children.
+AGE
+Birth - < 3 months
+3 months - < 6 months
+6 months - <1 year
+1 year - < 6 years
+6 years - < 10 years
+10 years - < 15 years
+15 years and above
+
+HEART RATE
+Minimum
+90
+80
+80
+75
+70
+60
+60
+
+Maximum
+180
+160
+140
+130
+110
+90
+90
+
+RESPIRATORY RATE
+Minimum
+Maximum
+60
+30
+30
+60
+25
+45
+30
+20
+16
+24
+14
+20
+16
+12
+
+Reference from the Canadian Triage and Acuity Scale Paediatric Guidelines (PaedCTAS)
+ED ADMINISTRATION: Revisions to the Canadian Triage and Acuity Scale Paediatric Guidelines (PaedCTAS).
+Warren DW, Jarvis A, Leblanc Let al and the CTAS National Working Group (NWG). CJEM 2008;10(3):224-32
+Reference for the RR for 15 years and above from the clinical practice guidelines (adult patient) from Metropolitan
+Ambulance Service in Victoria Australia. http://www.ambulance.vic.gov.au/Medialdocs/x01_ CPG_ADULT-web-835ff459ac3e-454e-880b-Ofac0c92c212-0.pdf
+
+THE BABY BEAR BOOK - A Practical Guide on Paediatrics (4th Edition)
+© KK Women's and Children's Hospital. http://www.worldscientific.com/worldscibooks/10.1142/13141#t=toc
+No further distribution is allowed.
+
+SECTION 1
+
+MEDICAL EMERGENCIES
+
+1
+
+CHAPTER 1
+
+THE BABY BEAR BOOK - A Practical Guide on Paediatrics (4th Edition)
+© KK Women's and Children's Hospital. http://www.worldscientific.com/worldscibooks/10.1142/13141#t=toc
+No further distribution is allowed.
+
+Recognising the Critically Ill Child
+Loi V-Ter, Mervin; Lim Kian Boon, Joel
+
+Introduction
+
+Children are often unable or unwilling to verbalise complaints. In addition, symptoms and
+signs of sepsis or cardiopulmonary compromise are often vague and subtle in children.
+The ability to assess and recognise an ill child early allows for timely interventions
+and therapy, such as respiratory support, fluid resuscitation or early antibiotics to reverse
+potentially life-threatening cardiopulmonary instability.
+
+Anatomic and Physiological Considerations
+
+Respiratory arrest is the most common cause of cardiopulmonary collapse in children.
+This is largely because the paediatric respiratory system is ill-designed to cope with an
+increased work of breathing. The reasons are multi-factorial and include a relatively
+large tongue and floppy epiglottis, small airways with increased airway resistance, and
+increased chest wall compliance due to a cartilaginous chest wall. Respiratory failure is
+characterised by inadequate ventilation, insufficient oxygenation or both.
+Cardiac output is a product of stroke volume and heart rate, and blood pressure is
+a function of cardiac output and systemic vascular resistance.
+Circulatory shock is defined as the failure of the circulatory system to provide
+oxygen and nutrients to meet tissue metabolic demands. Shock can be classified into
+compensated, uncompensated or irreversible.
+Compensatory mechanisms include tachycardia and increased systemic vascular
+resistance in an effort to maintain cardiac output and perfusion pressure (blood pressure),
+respectively. Decompensation occurs when these mechanisms fail and result in end-organ
+hypoperfusion and hypotension. Untreated, shock states can rapidly deteriorate into
+failure of multiple organ systems and lead to irreversible shock and death.
+The pathophysiology of shock can be divided into distributive, hypovolaemic/
+haemorrhagic, cardiogenic or obstructive. It is not unusual for one patient to have a
+number of different pathophysiological patterns of shock, which can evolve depending
+on the time-course of their disease.
+Recognition of pre-shock states is important so that early goal-directed therapy can
+be instituted. The regimen of resuscitation includes fluid boluses, airway intervention and
+inotropic support. The key is early shock recognition and prompt action.
+
+2
+
+Recognising the Critically Ill Child
+
+3
+
+THE BABY BEAR BOOK - A Practical Guide on Paediatrics (4th Edition)
+© KK Women's and Children's Hospital. http://www.worldscientific.com/worldscibooks/10.1142/13141#t=toc
+No further distribution is allowed.
+
+History
+
+Functional status of the child is a simple but effective measure of how ill the child is.
+Questions to ask include:
+• Level of activity/play
+• Conscious level/irritability
+• Feeding/fluid intake
+• Urine output
+Red flags in the history include:
+• High-pitched cry/inconsolable crying
+• Grunting
+• Cyanosis
+• Apnoeic episodes
+• Pallor, cool and clammy peripheries
+• Shortness of breath or dyspnoea
+• Acute change in mentation
+• Focal seizures
+• Bloody stool in a neonate
+There should be a high index of suspicion in the very young or if there is a significant
+medical history, such as:
+• Maternal history of Group B Streptococcus (GBS) infection (for neonates)
+• Congenital cardiac defects
+• Primary immunodeficiency syndromes
+• Chronic steroid usage
+• Haematological-oncological disorders on active chemotherapy
+• History of adreno-cortical deficiency, e.g. hypopituitarism, congenital adrenal
+hyperplasia, hypothalamic or pituitary lesions
+
+Vital Parameters
+
+Hypotension is defined as systolic BP:
+• <60 mmHg in a neonate
+• <70 mmHg in infants (1–12 months)
+• <70 mmHg + [2 x (Age in Years)] in children 1–10 years
+• <90 mmHg in children older than 10 years
+Mean arterial pressure can be calculated as {50 + [2 x (Age in Years)} mmHg.
+There is significant inter-individual variability of pulse pressure (systolic minus
+diastolic BP), increasing with age and generally ranging between 20 and 40 mmHg. A
+widened pulse pressure is present in distributive shock. A narrow pulse pressure may
+suggest hypovolaemic or cardiogenic shock.
+Unexplained tachycardia may be one of the first signs of compensated shock.
+
+The Baby Bear Book
+
+4
+
+Table 1.1   Table of Normal Heart Rate, Respiratory Rate and Systolic Blood Pressure
+(BP) by Age
+Heart Rate
+(beats/min)
+
+Respiratory Rate
+(breaths/min)
+
+Systolic Blood
+Pressure (mmHg)
+
+Neonate
+
+120–180
+
+40–60
+
+60–80
+
+Infant (1 mth to 1 yr)
+
+110–160
+
+30–40
+
+70–90
+
+Toddler (1–2 yr)
+Young child (2–7 yr)
+
+100–150
+
+25–35
+
+80–95
+
+95–140
+
+25–30
+
+90–110
+
+Older child (7–12 yr)
+
+80–120
+
+20–25
+
+100–120
+
+THE BABY BEAR BOOK - A Practical Guide on Paediatrics (4th Edition)
+© KK Women's and Children's Hospital. http://www.worldscientific.com/worldscibooks/10.1142/13141#t=toc
+No further distribution is allowed.
+
+Age
+
+Physical Examination
+
+Clinical states which can rapidly progress and are life-threatening include:
+• Severe respiratory distress
+• Cardiovascular instability/cardiogenic shock
+• Sepsis/septic shock
+• Severe dehydration
+• Seizures/altered mental state
+• Trauma
+• Any organ failure, such as renal/hepatic failure
+Learn to integrate the signs of an unwell child as no single sign is definitive. If there
+are concerning features in the history and/or physical examination, consider the following:
+• Admit for observation or transport patient to an appropriate care facility after
+initial stabilisation.
+• Call for senior help if there is evidence of severe respiratory distress, poor
+perfusion and/or hypotension, obtundation/change in mentation, prolonged
+seizure or cardiac arrhythmias.
+• Activate the paediatric Emergency Code Team if there is imminent
+cardiopulmonary arrest, severe respiratory compromise needing intubation, or
+if there is difficulty stabilising the patient, e.g. difficult venous access, no response
+to therapeutic interventions, potential difficult airway.
+
+Investigations
+
+• Blood glucose: Exclude hypoglycaemia or diabetic ketoacidosis (DKA) as a cause
+for obtundation
+• Blood gas analysis: Evaluate for metabolic or respiratory acidosis, sodium/
+potassium/calcium derangements
+• Full blood count, renal panel and group and crossmatch
+• Imaging: Chest X-ray (CXR) to exclude pulmonary pathology, cardiomegaly.
+Computed tomography (CT) of the head if there are concerns regarding
+intracranial pathology.
+
+Recognising the Critically Ill Child
+
+5
+
+Table 1.2   Care of the Critically Ill Child (adapted from RCH, 2021)
+Assessment
+
+Clinical Features
+
+Management
+
+If compromised:
+• Abnormal breath sounds
+(stridor, stertor, snoring,
+gurgling, voice hoarseness)
+• Drooling
+• Tracheal tug
+• Dyspnoea
+• Respiratory distress
+• Paradoxical breathing
+• Inability to lie flat
+
+Ensure airway patency
+Avoid agitating child
+Optimise head position:
+• Continue child’s adopted posture if
+possible
+• Infant: neutral position
+• Child: head tilt, chin lift
+• Jaw thrust for suspected cervical injury
+
+Vital signs
+• Tachypnoea or bradypnoea
+• Oxygen desaturation or
+cyanosis
+
+Consider:
+• Elevating head of bed
+• Oxygen supplementation
+• Institute specific therapy for the
+underlying cause of respiratory failure
+• Medications, e.g. bronchodilators
+for asthma, diuretics in heart failure,
+antibiotics for pneumonia, etc.
+• Arterial/Capillary blood gas
+• Non-invasive ventilation, e.g. High flow
+nasal cannulae, CPAP, BiPAP
+• Invasive mechanical ventilation
+
+Airway
+
+THE BABY BEAR BOOK - A Practical Guide on Paediatrics (4th Edition)
+© KK Women's and Children's Hospital. http://www.worldscientific.com/worldscibooks/10.1142/13141#t=toc
+No further distribution is allowed.
+
+Patency
+
+Consider:
+• Suction
+• Oropharyngeal or nasopharyngeal airway
+• Oxygen (humidified if in respiratory
+distress)
+• PEEP if upper airway obstruction
+(If severe, escalate to a senior/
+anaesthetist for consideration for
+endotracheal intubation)
+
+Breathing
+• Adequacy of
+oxygenation
+and ventilation
+• Respiratory
+muscle
+endurance
+
+Effort of breathing
+• Limited ability to talk/fatigue
+• Symmetry and quality of chest
+rise/fall
+• Increased work of breathing
+(nasal flaring, grunting, head
+bobbing, accessory muscle
+use, retractions)
+• Auscultation findings (reduced
+air entry, wheezing or
+crepitations)
+• Abnormal breathing pattern
+(shallow breathing, Kussmaul
+breathing, Cheyne-Stokes)
+Secondary signs of inadequate
+oxygenation or ventilation:
+• Agitation
+• Altered mental state
+• Tachycardia/bradycardia
+• Pallor
+• Cool peripheries
+
+If the child is not breathing, commence
+bag-mask ventilation and prepare for
+endotracheal intubation
+Indications for intubation:
+• Reduced respiratory drive
+• Loss of protective airway reflexes
+• Intracranial hypertension
+• Severe airway obstruction
+• Respiratory failure/fatigue/apnoea
+• Shock
+• To reduce metabolic demand
+
+(Continued)
+
+The Baby Bear Book
+
+6
+
+Table 1.2  (Continued)
+
+THE BABY BEAR BOOK - A Practical Guide on Paediatrics (4th Edition)
+© KK Women's and Children's Hospital. http://www.worldscientific.com/worldscibooks/10.1142/13141#t=toc
+No further distribution is allowed.
+
+Assessment
+Circulation
+Efficacy of
+circulation
+
+Clinical Features
+Heart Rate/Rhythm:
+• Tachycardia/bradycardia
+• Arrhythmia
+Blood Pressure:
+• Narrow/wide pulse pressure
+• Hypotension (late sign)
+Assessment of Perfusion
+• Pallor/cyanosis
+• Weak/thready pulses
+• Flash or delayed capillary refill
+time (>2 s)
+• Cool/mottled peripheries
+Secondary signs:
+• Reduced conscious level
+• Reduced urine output
+• Tachypnoea or bradypnoea
+Praecordium:
+• New murmur
+• Gallop rhythm
+• Hyperdynamic praecordium
+
+Management
+• Determine cardiac rhythm and treat
+accordingly
+• Obtain large bore intravenous access x 2
+(consider intraosseous access early)
+• Arterial/capillary blood gas (including
+lactate if possible)
+• Fluid resuscitation (10–20 ml/kg bolus
+of 0.9% sodium chloride for acute
+resuscitation or over 15–60 min if less
+acute (up to 40 ml/kg, with caution
+if suspicious of cardiogenic shock —
+consider early inotropic support)
+• Consider blood products for haemorrhagic
+shock, severe anaemia or coagulopathic
+states
+• Consider early antibiotics (within 1 h)
+• Consider peripheral inotropes/
+vasopressors
+• Correct electrolyte imbalances
+Consider early endotracheal intubation
+and assisted ventilation in shock
+(reduces work of breathing and
+cardiac metabolic demands, especially
+in cardiogenic and septic shock)
+If there are no signs of circulation
+(no pulse, bradycardia <60/min),
+commence cardiac compressions
+
+Disability
+Altered mental
+state
+
+Exposure
+Assess child,
+equipment and
+environment
+systematically
+
+• Irritable
+• Lethargic
+• Asymmetrical pupillary
+reflexes
+• Tense fontanelles
+• Focal neurological deficits
+• Rapidly decreasing conscious
+level
+• Seizures
+
+• Avoid hypoxia or hypercarbia
+• Avoid hyperthermia
+• Avoid hypo/hypertension
+• Correct metabolic derangements
+(hypoglycaemia, symptomatic hypo/
+hypernatraemia or hypo/hypercalcaemia)
+• Manage seizures
+
+• Hypo/hyperthermia
+• Rash, petechiae, purpura
+• Signs of injury (spinal injury,
+penetrating injury, flail chest,
+deformities, open wounds,
+burns, ongoing bleeding)
+
+• Correct hypothermia
+• Analgesia/sedation
+• Secure tubes/lines
+• Secure haemostasis
+• Clean open wounds
+• Stabilise injuries
+• Consider cervical collar/spinal nursing
+
+Consider intracranial pathologies:
+• Stroke/haemorrhage
+• Meningitis/encephalitis/abscess
+• Ventriculo-peritoneal shunt complications
+
+THE BABY BEAR BOOK - A Practical Guide on Paediatrics (4th Edition)
+© KK Women's and Children's Hospital. http://www.worldscientific.com/worldscibooks/10.1142/13141#t=toc
+No further distribution is allowed.
+
+Recognising the Critically Ill Child
+
+7
+
+• Septic screen including blood and urine cultures if sepsis is suspected. Consider
+cerebrospinal fluid cultures if an intracranial infection is suspected.
+• Liver function test/coagulation profile if suspected liver dysfunction/bleeding
+diathesis.
+• Serum lactate if available. This reflects tissue hypoperfusion and can be used as
+a marker of response to therapy.
+• Metabolic screen if there is unexplained severe metabolic acidosis/hypoglycaemia.
+• Drug toxicology screen if suspected.
+
+Monitoring
+
+• Continuous pulse oximetry, heart rate and respiratory rate monitoring.
+• Close BP monitoring: Consider invasive BP/central venous pressure (CVP)
+monitoring if there are concerns about haemodynamic status.
+• Continuous cardiac monitoring if there are concerns about rhythm disturbances
+or myocardial dysfunction.
+• Conscious level monitoring.
+• Urine output as a marker of perfusion and end-organ function.
+
+Bibliography
+1.
+2.
+3.
+4.
+5.
+6.
+7.
+
+American Heart Association. (2006) 2005 American Heart Association (AHA) guidelines for
+cardiopulmonary resuscitation CPR) and emergency cardiovascular care (ECC) of pediatric and neonatal
+patients: Pediatric advanced life support. Pediatrics 117(5):1005–1028.
+Advanced Life Support Group. (2016) Advanced Paediatric Life Support: A Practical Approach to
+Emergencies, 6th ed. West Sussex: John Wiley & Sons, Ltd.
+Mejia R, Serrao K. (2008) Assessment of critically ill children. In: Mejia R (ed,), Pediatric Fundamental
+Critical Care Support. Mount Prospect, Ilinois: Society of Critical Care Medicine.
+Shann F. (2005) Drug Doses, 13th ed. Melbourne: Collective Pty Ltd.
+Kleinman ME, Chaemeides L, Schexnayder SM, et al. (2010) Part 14: Pediatric advanced life support: 2010
+American Heart Association guidelines for cardiopulmonary resuscitation and emergency cardiovascular
+care. Circulation 122(3): S876–908
+Carcillo JA, Fields AI, American College of Critical Care Medicine Task Force Committee Members.
+(2002) Clinical practice parameters for hemodynamic support of paediatric and neonatal patients in
+septic shock. Crit Care Med 30(6):1365–1378.
+The Royal Children’s Hospital. (nd) Clinical practice guidelines on resuscitation: Care of the seriously
+unwell child. Melbourne, Australia. https://www.rch.org.au/clinicalguide/
+
+CHAPTER 2
+
+THE BABY BEAR BOOK - A Practical Guide on Paediatrics (4th Edition)
+© KK Women's and Children's Hospital. http://www.worldscientific.com/worldscibooks/10.1142/13141#t=toc
+No further distribution is allowed.
+
+Cardiopulmonary Resuscitation
+Loi V-Ter, Mervin; Lim Kian Boon, Joel
+
+Introduction
+
+In children, cardiopulmonary arrests are usually a result of progressive respiratory failure
+or shock. While the survival of children with in-hospital cardiac arrests has improved
+over the years, with recent local data showing 45.6% survival-to-discharge, survival of
+children from out-of-hospital cardiac arrests remains poor (3.4%). Despite the improved
+outcome of in-hospital cardiopulmonary resuscitation (CPR), a substantial proportion
+of survivors have significant neurological deficits.
+The provision of advanced paediatric life support usually takes place in a hospital
+environment where multiple responders can be rapidly mobilised and are capable of
+simultaneous actions. Important aspects of a successful resuscitation from cardiac
+arrest include early high-quality chest compressions, early assisted ventilation and early
+defibrillation (if indicated).
+
+Assessment
+
+• Recognition of cardiac arrest should take no more than 10 seconds.
+• The absence or presence of a pulse is not a reliable determinant of cardiac
+arrest; other determinants include unresponsiveness, gasping breaths and no
+spontaneous respirations.
+• If cardiac arrest has occurred, activate the Emergency Code Team.
+
+Management (Infant <1 year, excluding newborns;
+child 1–12 years; adolescents >12 years)
+Airway/Breathing
+•
+•
+•
+•
+•
+
+Open airway by appropriate positioning of head.
+Infant: Neutral head position
+Child: Head tilt-chin lift
+Jaw thrust for suspected cervical injury.
+Clear the airway by brief suctioning of mouth and pharynx, if secretions are
+present.
+• Apply bag-mask ventilation with 100% oxygen (at least 15 L/min oxygen flow).
+
+8
+
+THE BABY BEAR BOOK - A Practical Guide on Paediatrics (4th Edition)
+© KK Women's and Children's Hospital. http://www.worldscientific.com/worldscibooks/10.1142/13141#t=toc
+No further distribution is allowed.
+
+Cardiopulmonary Resuscitation
+
+9
+
+• Use an appropriately sized oropharyngeal airway only in the unconscious child.
+(Measure the oropharyngeal airway length from incisors to angle of mandible.)
+• Ensure correct mask size, tight seal between mask and face, and assess for
+effectiveness of ventilation (saturations, chest rise, air entry) but avoid excessive
+ventilation.
+• Deliver each breath with an inspiratory time of about 1 s.
+• Ventilation should be synchronised with chest compressions at 30 compressions
+followed by 2 ventilations [i.e. 30:2 ratio] in un-intubated patients in cardiac arrest
+[if >12 years old and/or only 1 rescuer]; 15:2 ratio if ≤12 years old and at least
+two rescuers present. In intubated patients, ventilate asynchronously without
+interrupting chest compressions (30/min for infants, 20/min for children and
+10–12/min for adolescents).
+• In a patient with a perfusing rhythm but absent or inadequate respiratory effort,
+give rescue breathing (30/min for infants, 20/min for children and 12/min for
+adolescents).
+
+Circulation
+
+• Place on cardiac monitor/defibrillator monitoring.
+• Place the patient on a firm board and commence chest compressions if pulseless,
+or heart rate <60/min in child with evidence of shock (see algorithm on “pulseless
+arrest”).
+• High-quality CPR requires chest compressions to be of appropriate depth and
+rate, with complete chest recoil after each compression, minimal interruptions
+to the chest compressions and avoidance of excessive ventilation. (If manpower
+permits, it is a good practice to appoint a CPR coach to supervise and provide
+feedback for CPR.)
+• Use “two fingers” (lone rescuer) or “thumb encircling” technique for an infant,
+placed 1 finger breadth below the intermammary line (lower half of sternum).
+• Use the heel of 1–2 hands for an older child placed at the lower half of the sternum
+in the midline.
+• Push Hard: Depress at least a third of the Anterior-Posterior (AP) diameter of the
+chest (target 3–4 cm for infants, 4–5 cm for children and 4–6 cm for adolescents).
+• Push Fast: Chest compressions of at least 100–120/min.
+
+Endotracheal Intubation
+
+• Endotracheal intubation should be performed by an experienced doctor. (See
+Appendix III “Useful Formulae” for endotracheal tube (ETT) size formula and
+lengths.)
+• Use of Rapid Sequence Induction (RSI) drugs (See Appendix III “Useful
+Formulae”) facilitates emergency intubation and reduces the risk of complications
+associated with intubation. RSI should be used only by trained, experienced
+providers. Patients in cardiopulmonary arrest and/or deep coma do not need
+RSI; otherwise, intubation should be preceded by oxygenation and RSI agents.
+• RSI agents typically consist of an anaesthetic induction agent and a muscle
+relaxant. Maintenance of oxygenation and ventilation by bag-valve-mask
+
+The Baby Bear Book
+
+THE BABY BEAR BOOK - A Practical Guide on Paediatrics (4th Edition)
+© KK Women's and Children's Hospital. http://www.worldscientific.com/worldscibooks/10.1142/13141#t=toc
+No further distribution is allowed.
+
+10
+
+ventilation should be effective before paralysis is instituted. Use paralytic and
+sedative agents with caution in a patient with a difficult airway as sedating and
+paralysing such patients may render bag-mask ventilation more challenging.
+Plan ahead and consider early escalation to a more experienced provider.
+• Both cuffed and uncuffed ETT may be used in infants and children. If cuffed tubes
+are used, cuff inflating pressures should be monitored and limited according to
+manufacturer’s guidelines. Uncuffed ETTs are recommended for neonates.
+• Indications for cuffed ETTs include large ETT leak, poor lung compliance and
+high airway resistance.
+• Use both clinical assessment and confirmatory devices (where available) to verify
+correct ETT placement.
+
+Indications for Intubation
+
+• Severe airway obstruction
+• Airway protection in the presence of poor/absent airway reflexes, e.g. decreased
+conscious level, prolonged seizures, abnormal brainstem function, bulbar/
+pseudobulbar palsy
+• Apnoea or ineffective respiratory drive
+• Respiratory failure not responding to or not suitable for non-invasive ventilation
+• To assist with airway toileting
+
+Vascular Access
+
+• To obtain two large bore intravenous access for resuscitation. This attempt should
+take no longer than 60–90 sec.
+• Intraosseous (IO) access into the anterior tibial bone marrow (about 1–3 cm
+below and medial to the tibial tuberosity) can be used if venous access is difficult.
+All intravenous medications/blood products can be given intraosseously.
+• The endotracheal (ET) route can be used to give lipid-soluble emergency drugs
+(LEAN-lignocaine, epinephrine/adrenaline, atropine, naloxone) followed by a
+flush of 5 ml normal saline and five manual ventilations. Optimal ET drug doses
+are unknown, the general consensus is double or triple the dose of lignocaine,
+atropine or naloxone. For adrenaline, an ET dose ten times the intravenous dose
+(0.1 ml/kg of 1:1000 concentration) is recommended.
+• Central venous cannulation or a venous cutdown may be performed if expertise
+is available.
+• Drugs and fluids (See Appendix II — Drugs [Cardiovascular]). Use isotonic
+crystalloids as initial fluid for shock/fluid resuscitation. Give aliquots of 20 ml/kg
+boluses and assess for response.
+• There is no added benefit to using colloids during early resuscitative efforts, and
+there is an associated risk of mortality with the use of colloids for resuscitation
+in children with trauma, burns or traumatic brain injury.
+• Routine use of sodium bicarbonate is not recommended in cardiac arrest.
+It may be administered for treatment of tricyclic antidepressant overdose or
+hyperkalaemia.
+
+Cardiopulmonary Resuscitation
+
+11
+
+THE BABY BEAR BOOK - A Practical Guide on Paediatrics (4th Edition)
+© KK Women's and Children's Hospital. http://www.worldscientific.com/worldscibooks/10.1142/13141#t=toc
+No further distribution is allowed.
+
+• Routine use of calcium is not recommended for paediatric cardiopulmonary
+arrest in the absence of documented hypocalcaemia, calcium channel blocker
+overdose, hypermagnesaemia or hyperkalaemia.
+
+Gastric Insufflation
+
+• Insert a nasogastric tube if abdominal distension is marked and/or oxygenation
+and ventilation are compromised.
+• Pass the tube after intubation as it may interfere with gastroesophageal sphincter
+function, increasing risk of aspiration during intubation
+
+Termination of Resuscitative Efforts
+
+• Details of events and treatment must be recorded. Where there is no response
+after 20 minutes of adequate resuscitation, the senior doctor should decide how
+much longer resuscitative efforts should continue.
+
+Special Resuscitative Conditions
+Ventilation with a Tracheostomy
+
+• Use the tracheostomy tube for assisted ventilation and watch for adequate chest
+rise.
+• If the tracheostomy tube does not allow effective ventilation even after suctioning,
+change it.
+• If still unable to maintain effective ventilation, attempt alternative ventilation
+methods such as bag-mask ventilation through the nose and mouth while
+occluding the tracheal stoma.
+
+Bibliography
+1.
+2.
+3.
+4.
+5.
+
+Fuhrman BP, Zimmerman JJ (eds.). (1998) Pediatric Critical Care. 2nd ed. St Louis: Mosby, pp. 115–116.
+Van de Voorde P, Turner NM, Djakow J, et al. (20210 European Resuscitation Council guidelines 2021:
+Paediatric life support. Resuscitation 161:327–387
+Topjian AA, Raymond TT, Atkins D, et al. (2020) Part 4: Pediatric basic and advanced life support:
+2020 American Heart Association Guidelines for Cardiopulmonary Resuscitation and Emergency
+Cardiovascular Care. Circulation 142(16):S469–523.
+Choi PT, Yip G, Quinonez LG, Cook DJ. (1999) Crystalloids vs. colloids in fluid resuscitation: A systematic
+review. Crit Care Med 27:200–210.
+Ong GY, Ngiam N, Tham LP, et al. (2021) Singapore Paediatric Resuscitation guidelines 2021. Sing Med
+J 62:372–389.
+
+THE BABY BEAR BOOK - A Practical Guide on Paediatrics (4th Edition)
+© KK Women's and Children's Hospital. http://www.worldscientific.com/worldscibooks/10.1142/13141#t=toc
+No further distribution is allowed.
+12
+
+The Baby Bear Book
+
+RESUSCITATION ALGORITHMS
+
+ALGORITHM FOR PULSELESS ARREST
+
+ALGORITHM FOR PULSELESS ARREST (SHOCKABLE)
+
+THE BABY BEAR BOOK - A Practical Guide on Paediatrics (4th Edition)
+© KK Women's and Children's Hospital. http://www.worldscientific.com/worldscibooks/10.1142/13141#t=toc
+No further distribution is allowed.
+
+Cardiopulmonary Resuscitation
+13
+
+THE BABY BEAR BOOK - A Practical Guide on Paediatrics (4th Edition)
+© KK Women's and Children's Hospital. http://www.worldscientific.com/worldscibooks/10.1142/13141#t=toc
+No further distribution is allowed.
+14
+
+The Baby Bear Book
+
+ALGORITHM FOR BRADYCARDIA
+
+THE BABY BEAR BOOK - A Practical Guide on Paediatrics (4th Edition)
+© KK Women's and Children's Hospital. http://www.worldscientific.com/worldscibooks/10.1142/13141#t=toc
+No further distribution is allowed.
+
+Cardiopulmonary Resuscitation
+
+ALGORITHM FOR UNSTABLE TACHYCARDIA WITH POOR PERFUSION
+
+15
+
+CHAPTER 3
+
+THE BABY BEAR BOOK - A Practical Guide on Paediatrics (4th Edition)
+© KK Women's and Children's Hospital. http://www.worldscientific.com/worldscibooks/10.1142/13141#t=toc
+No further distribution is allowed.
+
+Drug Overdose and Poisoning
+Tan Shi Rui, Victoria; Lim Kae Shin; Ong Yong-Kwang, Gene
+
+Epidemiology
+
+There is usually a bimodal age peak distribution for paediatric poisoning. The first peak
+includes younger children (<6 years old) and the second peak includes the adolescents
+(>12 years old).
+Toddler toxicology is usually unintentional ingestion of pharmacological and nonpharmacological products and mostly benign due to the small quantities involved.
+
+General Approach
+
+The general approach to the poisoned patient can be summarised as stabilisation, history,
+examination, diagnosis, decontamination and enhanced elimination, poison-specific
+treatment and disposition (Figure 1.1).
+
+Stabilisation
+
+Stabilisation is priority in managing toxic ingestion. The patient should be rapidly
+assessed to determine patency of airway and adequacy of ventilation, mental status
+and cardiovascular stability. Correction of any associated hypoxia and hypoglycaemia
+is crucial. Initial management priorities are maintenance and protection of the airway,
+supporting ventilation and circulation. Unstable patients should be placed on a cardiac
+monitor with measurement of vital signs every 5 to 15 min until the patient is stabilised.
+The potential for rapid changes in the patient’s condition should be considered in making
+decisions about airway and ventilatory support.
+With regard to toxicology, prolonged resuscitation should be attempted in druginduced cardiac arrest. Extracorporeal membrane oxygenation (ECMO) should be
+considered if resources and expertise allow.
+
+History
+
+• History and physical examination are performed concurrently with stabilisation.
+• History should include
+Who: Patient characteristics, age, weight, relationship to others present and gender
+What: 	Name and dosage of medication(s) or substance(s) of abuse, co-ingestants
+and amount ingested
+When: 	Timing and date of ingestion
+
+16
+
+THE BABY BEAR BOOK - A Practical Guide on Paediatrics (4th Edition)
+© KK Women's and Children's Hospital. http://www.worldscientific.com/worldscibooks/10.1142/13141#t=toc
+No further distribution is allowed.
+
+Drug Overdose and Poisoning
+
+17
+
+Where: Route which toxins was taken
+Why: 	Whether intentional or accidental and associated details
+• For paediatric ingestions, thorough history from caregivers is crucial.
+• If the toxic ingestion is unwitnessed (time, dose), always manage as for worstcase scenario even if the patient is asymptomatic, especially if the alleged drug
+is highly toxic.
+
+Figure 1.1 Assessment and management of a poisoned child.
+
+The Baby Bear Book
+
+THE BABY BEAR BOOK - A Practical Guide on Paediatrics (4th Edition)
+© KK Women's and Children's Hospital. http://www.worldscientific.com/worldscibooks/10.1142/13141#t=toc
+No further distribution is allowed.
+
+18
+
+• Other important historical points from the caregivers include a systemic review,
+specifically the presence of seizures, agitation, coma, vomiting, headache and
+shortness of breath.
+• Clinicians should be aware that in some cases, the history may be unreliable for
+teenagers, especially if the toxic ingestion was intentional or if there was ongoing
+inappropriate substance use. Patients may not know what they ingested, the
+patient’s altered mental status may impede communication, or the patient may
+intentionally mislead the clinician.
+
+Clinical Examination
+
+• A thorough physical examination should be performed to help with the diagnosis
+and identify complications.
+• Specific attention to vital signs, mental status (depressed or agitated), respiration
+(depressed, evidence of pulmonary oedema or aspiration), pupils (size, reactivity,
+presence of nystagmus), skin (diaphoresis or abnormally dry, blisters), bowel
+sounds (increased or decreased).
+• Based on findings from physical examination, the clinician should specifically
+consider the presence of a toxidrome.
+• Note that for young paediatric patients, the classical findings may be different
+from adolescents and adults. For example, for organophosphate poisoning
+in young children, nicotinic symptoms may predominate over muscarinic
+symptoms, and they may present predominantly with muscle weakness with
+respiratory insufficiency, altered mental status and seizures. The pupils of the
+organophosphate poisoned young child may not exhibit the classical miosis.
+
+Decontamination
+
+After the patient is stabilised, consideration should be given to removing the toxin. The
+choice of decontamination should be made based on the clinical status and the suspected
+toxin. Patients with an inhalation exposure should be removed from the source, with
+care taken to avoid exposure of the rescuers. When toxic compounds have been splashed
+into the eyes or onto the skin, copious irrigation should be performed.
+
+Paediatric Gastrointestinal Decontamination
+
+1. Single-dose activated charcoal
+The preferred method of GI decontamination. It is indicated as a gastric decontaminant agent
+if a patient has ingested a potentially toxic amount of a poison up to 1 hour following ingestion.
+However, it can be considered for paracetamol toxic ingestion up to 2 hours.
+Other toxins for which delayed administration can be given include aspirin, digoxin,
+phenobarbitone, anticholinergics, tricyclics and sustained release tablets.
+Dose: 1 g/kg (maximum of 50 g if less than 12 years old).
+Drugs which are not absorbable by charcoal — PHAILS: Pesticides, Hydrocarbons,
+Acids/Alkalis, Iron, Lithium and Solvents.
+Activated charcoal is contraindicated in patients who are unable to protect their
+airway. The use of orogastric and nasogastric tubes for administration of activated charcoal
+
+Drug Overdose and Poisoning
+
+19
+
+THE BABY BEAR BOOK - A Practical Guide on Paediatrics (4th Edition)
+© KK Women's and Children's Hospital. http://www.worldscientific.com/worldscibooks/10.1142/13141#t=toc
+No further distribution is allowed.
+
+in a drowsy or vomiting patient has been associated with pulmonary complications,
+unless the airway has been secured.
+2. Whole bowel irrigation
+Whole bowel irrigation (WBI) is not routinely performed in the management of the
+poisoned patient. WBI is best used in patients who are not vomiting and have normal
+intestinal function. They are useful in patients with ingestions of highly toxic substances
+that are poorly bound to activated charcoal, such as iron, lithium or lead, as well as for
+sustained-release medications (e.g. certain formulations of lithium, theophylline or
+calcium channel blockers).
+WBI is contraindicated in patients with bowel obstruction, gastric haemorrhage,
+perforation and ileus. It is also contraindicated in unstable patients or inpatients with
+compromised unprotected airways, haemodynamic instability and intractable vomiting.
+The procedure is administered by giving polyethylene glycol bowel preparation at a
+rate of 1 to 2 L/h in adolescents and 500 ml/h in children through a nasogastric tube, to
+induce osmotic diarrhoea till rectal effluent is clear (usually about 6 hours). The electrolytes
+of small children must be closely monitored. For radio-opaque compounds (CHIPES:
+chloral hydrate, heavy metals, iron, phenothiazines, enteric-coated tablets, salicylates/
+substances in containers, e.g. body packers), continue until repeat radiographs are clear.
+3. Gastric lavage
+Gastric lavage is not routinely performed in the management of poisoned patients. In
+certain cases where the procedure is of attractive theoretical benefit (e.g. recent ingestion
+of a very toxic substance within 1 hour), the substantial risks should be weighed carefully
+against the sparse evidence that the procedure is of any benefit.
+
+Enhanced Elimination
+
+Enhanced elimination techniques aim to increase the rate of removal of an agent from
+the body with the aim of reducing the severity and duration of clinical intoxication.
+Enhanced elimination techniques are only indicated for poisonings when
+the following requirements are met: severe toxicity, poor outcome despite good
+supportive care/antidote administration, slow endogenous rates of elimination, suitable
+pharmacokinetic properties, benefit exceeds risks, and will not distract from other
+priorities (e.g. resuscitation, supportive care, decontamination and antidote therapy).
+Techniques for enhanced elimination include:
+1. Multiple-dose activated charcoal (MDAC)
+• This causes interruption of entero-hepatic circulation and gastrointestinal dialysis
+for small, lipid soluble molecule drugs with a small volume of distribution and
+low protein binding.
+• Drugs (ABCD): Antimalarials (quinine), Aminophylline (theophylline),
+Barbiturates, Carbamazepine, Dapsone.
+• Contraindications: decreased consciousness/anticipated decreased level of
+consciousness without prior airway protection, bowel obstruction.
+• Give an initial dose of activated charcoal 1 g/kg (children) or 50 g (adolescents) and
+repeat doses of 0.25 g/kg/h (paediatrics) or 12.5 g/h in divided doses over 2–4 hours.
+
+The Baby Bear Book
+
+THE BABY BEAR BOOK - A Practical Guide on Paediatrics (4th Edition)
+© KK Women's and Children's Hospital. http://www.worldscientific.com/worldscibooks/10.1142/13141#t=toc
+No further distribution is allowed.
+
+20
+
+• Check bowel sounds prior to administration of each dose and reconsider the
+indications and clinical endpoints for therapy every 6 hours. Multiple-dose
+activated charcoal should rarely be required beyond 6 hours.
+• Complications include emesis (30%), charcoal aspiration, constipation, charcoal
+bezoar formation, bowel obstruction, bowel perforation (rare) and corneal
+abrasions. MDAC also risks distracting manpower from resuscitation and
+supportive care priorities.
+2. Urinary alkalinisation
+• Urinary alkalinisation enhances renal elimination of weak acids such as
+salicylates, phenobarbital and chlorpropamide.
+• Loading dose of IV sodium bicarbonate 1–2 mmol/kg followed by infusing
+bicarbonate-containing fluids: 3 ampules (150 mmol) of sodium bicarbonate to
+1 L of dextrose 5% and run at 250 ml/h (run the IV at 1.5 times maintenance in
+children).
+• Achieving urinary alkalinisation is impossible if there is total body potassium
+depletion, even in the presence of normal potassium levels on the renal panel.
+Potassium supplementation is required.
+• Follow urinary pH hourly. Blood pH, salicylate levels and electrolytes should be
+monitored regularly. The frequency of monitoring is dependent upon the severity
+of the clinical situation
+• The goal is to achieve urine pH of 7.5–8.5.
+3.	Extracorporeal elimination (e.g. haemodialysis, haemofiltration, haemoperfusion,
+plasmapheresis and exchange transfusion)
+• Effectively enhances elimination of any drug that is a small molecule, has a
+small volume of distribution, rapid redistribution from tissues and plasma and
+slow endogenous elimination. Continuous renal replacement therapy (CRRT)
+has lower drug clearance per unit of time but slow continuous removal may be
+preferred when the patient is haemodynamically unstable (unable to tolerate
+rapid solute and fluid loss), the drugs are highly protein/tissue bound toxicant
+with large volume of distribution with very long plasma half-lives and exhibit
+‘rebound’ phenomenon (e.g. lithium)
+• Indications for haemodialysis/haemofiltration are: carbamazepine (if MDAC is
+inadequate or infeasible), valproate, lithium, concomitant severe hyperkalaemia,
+metformin lactic acidosis, methotrexate (if in acute renal failure or leucovorin is
+not available), paraquat (within 2 hours of ingestion), salicylates, toxic alcohols
+and theophylline.
+• Exchange transfusion can be considered for severe drug-induced
+methaemoglobinaemia, or if refractory to IV methylene blue and IV ascorbic
+acid, if antidote is contraindicated (e.g. methylene blue in G6PD deficiency) or
+antidotes are unavailable.
+
+Antidotes
+
+• Antidotes are typically given after stabilisation and when the diagnosis was made.
+
+Drug Overdose and Poisoning
+
+21
+
+THE BABY BEAR BOOK - A Practical Guide on Paediatrics (4th Edition)
+© KK Women's and Children's Hospital. http://www.worldscientific.com/worldscibooks/10.1142/13141#t=toc
+No further distribution is allowed.
+
+• In certain cases, prompt administration of antidote is imperative. E.g. prompt
+administration of naloxone may avoid the need for endotracheal intubation in
+opiate overdose.
+
+Investigations
+
+In general, toxicological testing can serve a number of purposes including:
+• Confirming a toxic aetiology and avoiding the need for further diagnostic studies
+• Identifying a specific agent
+• Assessing the severity of the intoxication
+• Assessing efficacy of treatment
+• Guiding management decisions
+• Prognostication
+• Guiding transfer decisions
+
+Disposition
+
+Consider transfer to higher centre in the following circumstances:
+• Inability to stabilise patient or deteriorating patient
+• Inability to provide patient with ongoing maintenance treatment
+• Lack of availability of toxin-specific therapy
+• Management and disposition of patients following decontamination is toxin
+and patient-specific, e.g. interventions such as dialysis, haemodialysis and
+haemoperfusion.
+• All patients who have taken a suicidal ingestion require assessment of suicidal
+risk prior to discharge, possibly transferring to Institute of Mental Health if still
+actively suicidal.
+Table 1.3   List of Antidotes for Initial Management of Common and Dangerous Poisons
+(Referral to clinical toxicologists for more detailed management is advised)
+Toxin
+
+Antidote/Paediatric dose
+
+Analgesia Poisoning
+Paracetamol
+
+Paediatric dosing for IV N-acetylcysteine
+Most effective within 8 hr but has significant effects post
+8 hr for documented toxicity
+See section on paracetamol.
+
+Salicylates
+
+IV Sodium bicarbonate1–2 mmol/kg bolus
+Followed by infusion: 150 mmol Sodium bicarbonate + 40 mmol
+KCI in total volume of 1 L of dextrose 5% infused to maintain
+urine output at 1.5–2 ml/kg/hr and urine pH at 7.5–8.5
+Repeat IV sodium bicarbonate bolus as necessary, keep serum
+potassium normal.
+
+Opioid
+
+Correct hypoxia and assist ventilate as main priority
+IV Naloxone hydrochloride 0.1 mg/kg/dose (max 2 mg/dose). Can
+repeat up to 0.5 mg/kg or max 10 mg total. Consider infusion
+in view of short half-life.
+(Continued)
+
+The Baby Bear Book
+
+22
+
+Table 1.3  (Continued)
+Toxin
+
+Antidote/Paediatric dose
+
+Cardiovascular drug toxicity
+
+THE BABY BEAR BOOK - A Practical Guide on Paediatrics (4th Edition)
+© KK Women's and Children's Hospital. http://www.worldscientific.com/worldscibooks/10.1142/13141#t=toc
+No further distribution is allowed.
+
+Calcium channel blocker
+Beta-blockers
+
+• IV Calcium
+- IV 10% Calcium gluconate 0.5 ml/kg (max 20 ml/dose)
+- IV 10% Calcium chloride 0.2 ml/kg (max 10 ml/dose)
+•	IV Glucagon (more effective for beta-blockers than calcium
+channel blockers)
+- Paediatric: Initial bolus of 150 mcg/kg and repeat as
+necessary (max 2 mg/dose up to a max of 10 mg). If
+effective, may be followed by an infusion of 50–100 mcg/kg/
+hr (max 5 mg/hr)
+• High-dose Insulin Euglycaemic Therapy (HIET)–IV Insulin 1 unit/kg
+with 0.5 g/kg dextrose bolus
+- Followed by insulin infusion 0.5–2 unit/kg/hr together with a
+dextrose 10%-saline infusion
+• 20% MCT emulsion: Intralipid/lipofundin
+- Bolus: 1.5 ml/kg and may repeat as needed.
+- Followed by infusion: 0.25 ml/kg/min over 30 to 60 min
+- Max total dose: 12 ml/kg
+
+Digoxin
+
+Digoxin immune antibody fragment: Empiric dosing: 10–20 vials IV
+bolus for life-threatening toxicity (See package insert for other
+dosing regimens)
+
+Tricyclic antidepressants
+and other sodium
+channel blockers
+
+IV sodium bicarbonate: 1–2 mmol/kg
+Repeat boluses titrate to QRS duration (do not exceed arterial pH
+7.55)
+
+Cholinergic Poisoning
+Carbamates
+
+IV Atropine 0.05–0.1 mg/kg
+
+Organophosphate
+
+IV Atropine 0.05–0.1 mg/kg
+Consider IV Pralidoxime 20–50 mg/kg (max 2 g/dose) for Diethyl
+organophosphate poisoning and specific nerve agent poisoning
+
+Heavy Metals
+Iron
+
+IV Deferoxamine 5–15 mg/kg/hr infusion
+
+Arsenic
+
+PO Succimer (DMSA) 10 mg/kg/dose TDS
+IM British Anti-Lewisite (BAL) (dimercaprol) 3–5 mg/kg/dose
+Q4-6H (only if unable to tolerate succimer). BAL is
+contraindicated in peanut allergic patients.
+
+Lead
+
+Lead encephalopathy:
+IM BAL (dimercaprol) 4 mg/kg or 50–75 mg/m2 Q4H;
+(BAL is contraindicated in peanut allergic patients.)
+Followed by
+IV Calcium disodium EDTA 50–75 mg/kg, to be administered 4
+hr after BAL (1 g of Calcium disodium EDTA can be diluted with
+250 ml dextrose 5% or normal saline. Administer over 8–12 hr
+or continuously over 24 hr).
+Succimer (DMSA) (if patient is able to tolerate oral medication) 10
+mg/kg/dose TDS, repeat doses are often needed
+Further management needed for chelation and referral is advised.
+
+Drug Overdose and Poisoning
+
+23
+
+Table 1.3  (Continued)
+Toxin
+
+Antidote/Paediatric dose
+
+Toxic Alcohols
+
+THE BABY BEAR BOOK - A Practical Guide on Paediatrics (4th Edition)
+© KK Women's and Children's Hospital. http://www.worldscientific.com/worldscibooks/10.1142/13141#t=toc
+No further distribution is allowed.
+
+Methanol
+Ethylene Glycol
+
+Ethanol (10%): Loading dose 10 ml/kg IV or orally followed by
+maintenance dose 1–2 ml/kg/hr orally
+OR IV Fomepizole: 15 mg/kg over 30 min, followed by
+maintenance dose.
+
+Others:
+Bupivacaine (L.A.
+toxicity)
+
+20% MCT emulsion: Lipofundin/Intralipid
+- Bolus: 1.5 ml/kg and may repeat as needed.
+-	Followed by infusion: 0.25 ml/kg/min over 30 to 60 min
+- Max total dose: 12 ml/kg
+
+Cyanide
+
+-	Hydroxocobalamin: IV 70 mg/kg (max 5 g/dose) over 15–30 min.
+Repeat once 70 mg/kg as needed depending on response
+(total dose 140 mg/kg or max 10 g).
+-	Sodium thiosulphate: Used in conjunction with
+hydroxocobalamin or sodium nitrite (synergistic). IV of 25%
+sodium thiosulphate 1–2 ml/kg; max 50 ml/dose.
+-	Sodium nitrite (not for cyanide toxicity in smoke inhalation): IV
+3% sodium nitrite 0.2 ml/kg; max 10 ml. Repeat 2 hr later or as
+necessary, 0.1 ml/kg; max 5 ml. Watch for methaemoglobinaemia.
+
+Isoniazid
+
+Pyridoxine: IV 70 mg/kg (max 5 g/dose) over 5 min
+
+Methemoglobinemia
+
+Methylene blue: IV 1–2 mg/kg slow infusion, repeat as needed
+every 30 to 60 min
+
+Sulphonylureas
+
+Octreotide: IV 1–1.5 mcg/kg bolus (max 150 mcg/dose) Q6H or
+continuous infusion
+
+Drug toxicities with antidotes to be used with caution
+Anticholinergics
+
+Physostigmine salicylate 0.02 mg/kg (max 0.5 mg/dose) slowly over
+5 min (may cause bradycardia, respiratory distress and seizures).
+Its use as an antidote for anti-cholinergic toxicity is controversial
+due to reports of associated seizures and life-threatening
+arrhythmias.
+
+Benzodiazepines
+
+Flumazenil IV 0.01 mg/kg (max 0.2 mg). It should not be routinely
+administered in the patient presenting with coma or altered
+mental status.
+Reversal of benzodiazepine effect in mixed drug ingestion
+involving cyclic antidepressants and chloral hydrate may result
+in seizures or arrhythmias with fatal outcomes.
+
+Pre-Hospital Paediatric Toxicology — Advice to Caregivers
+Primary Prevention
+
+Most poisonings occur when parents or caregivers are home but children may not be
+supervised.
+Advise caregivers to store medicine, cleaning and laundry products, paints/varnishes
+and pesticides in their original packaging in locked cabinets or containers, out of sight
+and reach of children.
+
+The Baby Bear Book
+
+24
+
+THE BABY BEAR BOOK - A Practical Guide on Paediatrics (4th Edition)
+© KK Women's and Children's Hospital. http://www.worldscientific.com/worldscibooks/10.1142/13141#t=toc
+No further distribution is allowed.
+
+Caregivers should never refer to medicine as “candy” or other appealing names.One
+should be reminded not to give or take medication in the dark. They should also check
+the label each time a child is given medicine to ensure proper dosage as the same drug
+may come in different concentrations.
+
+Home Management if Toxic Exposure has Occurred
+
+If a child is unconscious, not breathing, or having convulsions or seizures due to poison
+contact or ingestion, they should be advised to call for emergency services immediately.
+Caregivers or any one nearby should initiate basic life support if they are able to.
+
+Immediate Management for Home Poisonings
+
+• Toxic ingestion — Advise the caregivers to immediately remove the item away
+from the child and have the child spit out any remaining substance. Do not
+induce vomiting or use syrup of ipecac.
+• Skin exposures — Remove the child’s clothes and rinse the skin with lukewarm
+water for at least 15 minutes.
+• Ocular exposures — Flush the child’s eye by holding the eyelid open and pouring
+a steady stream of room temperature water into the inner corner for 15 minutes.
+• Inhalation exposures — The child should be evacuated outside or into fresh
+air immediately. If respiratory effort is compromised, start cardiopulmonary
+resuscitation (CPR) and do not stop until the child breathes on his or her own
+or until someone takes over.
+
+Clinical Presentations
+Drug-Induced Bradycardia and Hypotension
+
+• Paediatric advanced life support
+» Perform CPR if despite adequate oxygenation and ventilation heart rate <60/
+min with poor perfusion
+• Treat reversible causes like hypoxia, electrolyte disturbances
+• IV fluids
+• Inotropic support
+• Atropine
+• External or internal cardiac pacing
+• Resuscitative Extra-Corporeal Life Support (ECMO)
+
+Drug-Induced Seizures
+
+• The priority still is the management of reversible causes of seizures like hypoxia,
+hypoglycaemia, electrolyte disturbances and if the history and physical findings
+are not consistent with toxic seizures, intracranial infections, bleeds, space
+occupying lesions should be appropriately excluded.
+
+Drug Overdose and Poisoning
+
+25
+
+THE BABY BEAR BOOK - A Practical Guide on Paediatrics (4th Edition)
+© KK Women's and Children's Hospital. http://www.worldscientific.com/worldscibooks/10.1142/13141#t=toc
+No further distribution is allowed.
+
+Table
+1.4  
+Causes
+of
+Drug-Induced
+Bradycardia and Hypotension
+Calcium channel blockers
+Beta-blockers
+Digoxin
+Opiates
+Clonidine
+Severe tricyclic antidepressant poisoning
+Severe organophosphate poisoning
+
+Table 1.5   Causes of Toxic Seizures
+Isoniazid (INH)
+Gyromitra mushroom or false morel
+Hydrazine
+Sulphonylureas — refractory hypoglycaemic seizures
+Salicylates
+Tricyclic Antidepressants
+
+• Toxic seizures are often transient and no specific treatment is required. However
+close monitoring may be required depending on the half-life of the ingested toxin
+and other potential life-threatening conditions, e.g. arrhythmias.
+• Benzodiazepines (e.g. diazepam or lorazepam) are usually effective for toxic
+seizures.
+• If benzodiazepines are ineffective, barbiturates such as phenobarbital usually
+will suffice.
+• Phenytoin has no role in toxin-induced seizures and is theoretically harmful in
+poisoning with substances with sodium channel blockade such as tricyclics. It
+is also contraindicated in theophylline-induced seizures as it worsens toxicity.
+• Pyridoxine may be required only in unusual poisonings such as isoniazid
+toxicity.
+• It is essential that the patients who have or had toxic seizures to be on cardiac
+monitoring and have a 12-lead ECG performed.
+
+Drug-Induced Altered Mental Status
+
+• Treatment of the most common causes of altered mental status that can be
+recognised and treated immediately.
+• Exclude reversible causes like hypoxia, hypoglycaemia, electrolyte disturbances,
+sepsis, intracranial pathologies.
+
+The Baby Bear Book
+
+26
+
+Table 1.6   Drugs Causing Altered Mental Status
+Clinical Situation/Symptoms
+
+THE BABY BEAR BOOK - A Practical Guide on Paediatrics (4th Edition)
+© KK Women's and Children's Hospital. http://www.worldscientific.com/worldscibooks/10.1142/13141#t=toc
+No further distribution is allowed.
+
+Depressed sensorium with small pupils and hypotension
+Opioids
+Clonidine
+Phenothiazines
+Benzodiazepines
+Barbiturates
+Nerve agents
+Organophosphates
+Carbamates
+Classically small pupils are expected in cholinergic poisoning in adults but literature suggests
+this is variable, with miosis and mydriasis both reported in paediatrics
+Causes of toxidromes with hyperthermia and altered mental status
+Sympathomimetic syndrome
+(This is usually differentiated from the anticholinergic toxidrome by the presence of marked
+diaphoresis)
+Amphetamines
+Salbutamol
+Cocaine
+Anticholinergic toxidrome
+Antihistamines
+Anticholinergic plants (e.g. Dhatura)
+Antiparkinsonian agents
+Antiemetics
+Antispasmodics
+Antipruritic
+Cyclic antidepressants
+Serotonin syndrome
+Fluoxetine
+Citalopram
+Sertraline
+Bupropion
+Malignant neuroleptic syndrome
+Every class of neuroleptic drug has been implicated, including the low potency (e.g.
+chlorpromazine) and the newer “atypical” antipsychotic drugs (e.g. clozapine, risperidone,
+olanzapine)
+Antipsychotics, e.g. haloperidol, fluphenazine.
+Metoclopromide
+Malignant hyperthermia
+Succinylcholine
+General anaesthesia
+
+Drug Overdose and Poisoning
+Table 1.7  
+Other
+Presentations
+
+Drug-Induced
+
+27
+
+Clinical
+
+THE BABY BEAR BOOK - A Practical Guide on Paediatrics (4th Edition)
+© KK Women's and Children's Hospital. http://www.worldscientific.com/worldscibooks/10.1142/13141#t=toc
+No further distribution is allowed.
+
+Agitated delirium
+Anticholinergics
+Phencyclidine
+Sympathomimetics (e.g. cocaine)
+Hallucinogens
+Alcohol toxicity
+Drug-induced acute movement disorders
+Dyskinesia
+Amphetamines
+Anticholinergics
+Antihistamines
+Cocaine
+Gamma-hydroxybutyrate
+Dystonia
+Metoclopramide
+
+Paracetamol Poisoning
+
+I) Toxic ingestion if
+a) Single, acute ingestion of ≥200 mg/kg or 10 g (whichever is lesser)
+b) Repeated Supratherapeutic Ingestion (RSTI): defined as more than 1 dose of
+paracetamol ingested in the last >24–72H. (if repeated dosing ≤24 hours, to
+follow Acute Ingestion pathway)
+		 In symptomatic patients — irrespective of dose, if ≥daily therapeutic dose
+per day for more than 48 hours.
+		 In asymptomatic patients — cumulative dose of ≥10 g or ≥200 mg/kg
+(whichever is lesser) within a 24 hour period; or ingestion of ≥4 g/24 hours or
+≥100 mg/kg/24 hours beyond 24 hours.
+
+II) Presumed toxic ingestion in
+c) Symptomatic patients (even with known time of ingestion)
+
+Clinical Presentation
+
+Early:
+Non-specific with nausea and vomiting
+24–48 hours: Tender hepatomegaly with jaundice
+Day 4–5:
+Acute liver and renal failure
+Other features:	Erythema, urticaria, haemolytic anaemia, pancreatitis, haemorrhage
+(prolonged prothrombin time)
+
+Investigations
+
+Serum paracetamol level: taken at least 4 hours post-ingestion
+
+THE BABY BEAR BOOK - A Practical Guide on Paediatrics (4th Edition)
+© KK Women's and Children's Hospital. http://www.worldscientific.com/worldscibooks/10.1142/13141#t=toc
+No further distribution is allowed.
+
+28
+
+The Baby Bear Book
+
+For acute ingestions, refer to the Rumack–Matthew nomogram
+Liver function test (LFT):
+• Transaminases (ALT, AST) begin to rise by 12 hours and peak at 72 to 96 hours
+• Serum bilirubin (SB) rises more slowly
+• Prothrombin time (PT)/International Normalised Ratio (INR) abnormal by
+24 to 36 hours
+Other investigations: Renal panel/electrolytes, blood gas
+
+Treatment
+
+Activated charcoal 1 g/kg (most useful within 2 hours of ingestion).
+Specific antidote: IV N-acetyl-cysteine (NAC)
+NAC is indicated if:
+• Serum paracetamol level lies above the Treatment Nomogram Line on the
+Rumack–Matthew nomogram (“Probable Toxicity”) for acute ingestion
+• Asymptomatic with delayed presentation: ≥200 mg/kg or 10 g of paracetamol has
+been ingested and serum paracetamol level is not likely available within the 8-hour
+window. Effectiveness depends on initiation of NAC with maximal benefit within
+8–10 hours of acute ingestion, diminishing value after 12–16 hours. If paracetamol
+levels can be made known within 8 hours, need not start till levels are available.
+• Symptomatic — unusual for symptoms to occur if ingestion is less than
+8 hours (inaccurate timing or dose reporting).
+• Sustained-release (SR) preparation or co-ingestion of agents which affect gastric
+motility. In such cases, start IV NAC and follow RSTI workflow
+
+Dosage of N-Acetyl-Cysteine (NAC)
+
+For paracetamol poisoning, a total dose of NAC 300 mg/kg body weight was administered
+over 3 phases traditionally. The current recommended regimen is a 2-bag IV NAC over
+20 hours. Reported benefits of this 2-bag regime include significantly reduced non-immune
+mediated allergic reactions, and it has been shown to be as effective as the 3-bag regimen.
+This involves combining the first 2 bags of the traditional 3-course NAC infusion
+into the loading dose. i.e.
+• 1st bag is 200 mg/kg in TOTAL 500 ml (maximum concentration of 22 g over
+4 hours, then followed by
+• 2nd bag 100 mg/kg over 16 hours.
+Please refer to your institution’s guidelines for IV NAC infusion and dilution charts
+for details.
+Similar to the 3-bag regimen, the last dose may be repeated if there is ongoing
+hepatotoxicity. If the initial paracetamol concentration is more than double the
+nomogram line following acute ingestion, increase NAC dose to 200 mg/kg over
+16 hours.
+The administration of N-acetyl-cysteine will be dependent on the child’s weight for
+dosing and dilution.
+• Phase 1: 200 mg/kg over ≈4 hours
+» ≤25 kg: Add IV NAC 200 mg/kg in total volume of 100 ml
+» >25–80 kg: Add IV NAC 200 mg/kg to 500 ml
+
+THE BABY BEAR BOOK - A Practical Guide on Paediatrics (4th Edition)
+© KK Women's and Children's Hospital. http://www.worldscientific.com/worldscibooks/10.1142/13141#t=toc
+No further distribution is allowed.
+
+Drug Overdose and Poisoning
+
+29
+
+Figure 1.2 Single, acute toxic ingestion of paracetamol.
+
+» >80 kg: Add IV NAC 200 mg/kg to 1000 ml (in 2 bottles × 500 ml)
+• Phase 2: 100 mg/kg over ≈16 hours
+» ≤ 10 kg: Add IV NAC 100 mg/kg in total volume of 100 ml
+» >10–50 kg: Add IV NAC 100 mg/kg to 500 ml
+» >50 kg: Add IV NAC 100 mg/kg to 1000 ml (in 2 bottles × 500 ml)
+Total dose: 300 mg/kg
+Total duration: ≈20 hours
+In all cases, additional maintenance fluids can be given if required, or NAC may
+be administered in larger volume bags if more convenient. At 18 hours into the NAC
+infusion (2 hours before completion), send bloods for:
+• Paracetamol level
+• ALT
+• Urea, electrolytes, creatinine (5% of patients with paracetamol toxicity will
+develop acute renal injury)
+The NAC infusion should be discontinued only once the:
+• ALT < 50U/L, reached their peak levels and are declining
+
+The Baby Bear Book
+
+THE BABY BEAR BOOK - A Practical Guide on Paediatrics (4th Edition)
+© KK Women's and Children's Hospital. http://www.worldscientific.com/worldscibooks/10.1142/13141#t=toc
+No further distribution is allowed.
+
+30
+
+Figure 1.3 Repeated Supratherapeutic Ingestion of paracetamol.
+
+• Urea, electrolytes and creatinine are normal or have normalised (if previously
+abnormal)
+• Paracetamol level has returned to normal (i.e. below <10 mg/dL)
+
+Other Considerations
+
+1) Massive Paracetamol ingestion and its management
+Massive paracetamol ingestion is defined by ingestion of ≥30 g or ≥500 mg/kg (whichever
+is less). Patients should receive IV NAC till completion and increased doses may be needed.
+Consult clinical toxicologists and intensive care specialists early for further management.
+Patients may be symptomatic early and present with severe lactic acidosis with or without
+liver injury (direct effects on mitochondria).
+In addition to the standard paracetamol management, if the patient is
+haemodynamically unstable and with concerns of end-organ dysfunction or refractory
+
+THE BABY BEAR BOOK - A Practical Guide on Paediatrics (4th Edition)
+© KK Women's and Children's Hospital. http://www.worldscientific.com/worldscibooks/10.1142/13141#t=toc
+No further distribution is allowed.
+
+Drug Overdose and Poisoning
+
+31
+
+Figure 1.4 Nomogram-relating plasma or serum paracetamol concentration and
+probability of hepatotoxicity at varying intervals following ingestion of a single toxic dose
+of paracetamol.
+
+acidosis not responsive to standard resuscitation, consider haemodialysis early. If
+haemodialysis is needed, IV NAC dosing may need to be adjusted (consult pharmacists/
+toxicologists).
+Complete IV NAC 2-bag regimen but increased doses needed for the 2nd bag.
+If serum paracetamol at 4-hour post ingestion is:
+• 2X probable toxicity, i.e. levels are ~300 mg/dL at 4H post ingestion, double the
+2nd bag to 200 mg/kg over 16 hours.
+• 3X probable toxicity, i.e. levels are ~450 mg/dL at 4H post ingestion, triple the
+2nd bag to 300 mg/kg over 16 hours (consult pharmacists/toxicologists)
+		 Repeat paracetamol levels 4H apart to guide need for further decontamination
+(stat dose of activated charcoal) and IV NAC dose.
+At 18 hours into the NAC infusion (2 hours before completion), send bloods for:
+Paracetamol level, ALT, and Urea, electrolytes, creatinine.
+The NAC infusion should be discontinued only when the:
+• ALT < 50U/L, reached their peak levels and are declining
+• Urea, electrolytes and creatinine are normal or have normalised (if previously
+abnormal)
+• Paracetamol level has returned to normal (i.e. below <10 mg/dL)
+The 2nd bag over 16H may be repeated if there is ongoing hepatotoxicity at
+completion of IV NAC at 20 hours and dosing adjusted to serum paracetamol (should
+be <10 mg/dL at 20H).
+
+The Baby Bear Book
+
+32
+
+THE BABY BEAR BOOK - A Practical Guide on Paediatrics (4th Edition)
+© KK Women's and Children's Hospital. http://www.worldscientific.com/worldscibooks/10.1142/13141#t=toc
+No further distribution is allowed.
+
+Refer Gastroenterologists for review and possible need for liver transplant if liver
+injury is refractory to management.
+2)	Acute ingestion of Modified-Release paracetamol or co-ingestion of drugs that
+significant slow GI transit.
+Dose of modified release preparation ingested
+i) If ingestion is <10 g or <200 mg/kg (whichever is less), i.e. non-toxic dose.
+• If ≤4 hours post ingestion, administer activated charcoal, obtain bloods at
+4 hours post ingestion.
+• If presentation is >4 hours post ingestion, activated charcoal is not required.
+Obtain bloods for ALT, renal panel and paracetamol levels.
+• If ingestion occurred close to 8 hours post ingestion with concerns of toxic
+ingestion to start IV NAC (2-bag standard dosing).
+ii) If ingestion is ≥10 g or ≥200 mg/kg (whichever is less)
+• If ≤4 hours post ingestion, administer activated charcoal if no contradictions
+(e.g. ileus) and start IV NAC. Obtain bloods at 4-hour post ingestion.
+• If presentation is >4 hours post ingestion, obtain bloods for ALT, renal panel and
+paracetamol levels and commence IV NAC (2-bag standard dosing). Measure 2
+paracetamol concentrations: (i) at least 4 hours post-ingestion and (ii) 4 hours apart.
+» If either serum paracetamol levels are ≥150 mg/dL at 4H line (possible
+hepatotoxicity), to complete IV NAC (2-bag standard dosing). If serum
+paracetamol levels are increasing, consider stat dose activated charcoal and
+serum levels and ALT re-assessed as needed.
+» If either serum paracetamol levels are ≥2X probable toxicity, i.e. levels are 300
+mg/dL at 4H post-ingestion, double the 2nd bag to 200 mg/kg over 16 hours.
+Stopping IV NAC
+At 18 hours into the NAC infusion (2 hours before completion), send bloods for:
+Paracetamol level, ALT, Urea, electrolytes, creatinine.
+The NAC infusion should be discontinued only when the:
+- ALT < 50U/L, reached their peak levels and are declining
+- Urea, electrolytes and creatinine are normal or have normalised (if previously
+abnormal)
+- Paracetamol level has returned to normal (i.e. below <10 mg/dL)
+The 2nd bag over 16H may be repeated if there is ongoing hepatotoxicity at
+completion of IV NAC at 20 hours and dosing adjusted to serum paracetamol (should
+be <10 mg/dL at 20H).
+Bibliography
+1.
+2.
+
+Ministry of Health, Singapore. (nd) Management of acute poisoning, clinical practice guidelines.
+Cumberland Pharmaceuticals Inc. (nd) 2011 Acetadote® (N-acetyl-cysteine) product monograph, Nashville,
+TN, USA. www.acetadote.com
+
+Drug Overdose and Poisoning
+3.
+4.
+
+THE BABY BEAR BOOK - A Practical Guide on Paediatrics (4th Edition)
+© KK Women's and Children's Hospital. http://www.worldscientific.com/worldscibooks/10.1142/13141#t=toc
+No further distribution is allowed.
+
+5.
+6.
+
+33
+
+Sung L, Simon JA, Dayneka NL. (1997) Dilution of intravenous N-acetylcysteine as a cause of hyponatremia.
+Pediatrics 100:389–391.
+Marzullo L. (2005) An update of N-acetylcysteine treatment for acute acetaminophen toxicity in children.
+Curr Opin Pediatr 17:239–245.
+Kander MZ. (2006) Comparison of oral and IV acetylcysteine in the treatment of acetaminophen poisoning.
+Am J Health-Syst Pharm 63:1821–1827.
+Chiew AL, Reith D, Pomerleau A, et al. (2020) Updated guidelines for the management of paracetamol
+poisoning in Australia and New Zealand. Med J Aust 212(4):175–213.
+
+THE BABY BEAR BOOK - A Practical Guide on Paediatrics (4th Edition)
+© KK Women's and Children's Hospital. http://www.worldscientific.com/worldscibooks/10.1142/13141#t=toc
+No further distribution is allowed.
+
+This page intentionally left blank
+
+
