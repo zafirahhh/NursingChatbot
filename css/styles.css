@@ -221,6 +221,12 @@ button[type="submit"]:focus {
     align-items: center;
 }
 
+.center-chat {
+    justify-content: center;
+    align-items: flex-start;
+    display: flex;
+}
+
 @media (max-width: 900px) {
     .container {
         flex-direction: column;
@@ -241,6 +247,11 @@ button[type="submit"]:focus {
         max-width: 98vw;
         min-width: 0;
         padding: 1rem 0.5rem;
+    }
+    .center-chat {
+        flex-direction: column;
+        align-items: stretch;
+        justify-content: flex-start;
     }
 }
 @media (max-width: 600px) {
@@ -273,4 +284,12 @@ button[type="submit"]:focus {
     .subtitle {
         font-size: 0.93rem;
     }
+}
+
+.kkh-logo {
+    height: 48px;
+    width: auto;
+    margin-right: 0.7rem;
+    vertical-align: middle;
+    display: inline-block;
 }
