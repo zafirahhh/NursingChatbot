@@ -82,18 +82,44 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!knowledgeText) return 'Knowledge base not loaded yet.';
       const lines = knowledgeText.split('\n');
       const keywords = query.toLowerCase().split(/\s+/);
-      // Try to find a line that contains all keywords
+      // Try to extract age and parameter from the query for table-aware search
+      const ageMatch = query.match(/(\d+)[ -]?(year|month|day|week)s?/i);
+      const paramMatch = query.match(/(heart rate|pulse|blood pressure|respiratory rate|temperature|weight|height|spo2|oxygen saturation|glucose|sugar|bilirubin|jaundice|urine|output|input|fluid|bp|pr|rr|temp)/i);
+      let age = ageMatch ? ageMatch[0] : null;
+      let param = paramMatch ? paramMatch[0].toLowerCase() : null;
+      // Table-aware extraction
+      if (param && age) {
+        // Find the table header
+        for (let i = 0; i < lines.length; i++) {
+          if (lines[i].toLowerCase().includes(param)) {
+            // Look for a table structure below
+            for (let j = i + 1; j < Math.min(i + 15, lines.length); j++) {
+              if (lines[j].toLowerCase().includes(age.replace(/s?$/,''))) {
+                // Extract the row and header
+                const header = lines[i];
+                const row = lines[j];
+                return `Relevant table for ${param} (age: ${age}):\n${header}\n${row}`;
+              }
+            }
+          }
+        }
+      }
+      // Fuzzy matching helper
+      function fuzzyIncludes(line, word) {
+        return line.includes(word) || line.includes(word.replace(/s$/, '')) || line.includes(word.replace(/[^a-z]/g, ''));
+      }
+      // Try to find a line that contains all keywords (fuzzy)
       for (let i = 0; i < lines.length; i++) {
         const line = lines[i].toLowerCase();
-        if (keywords.every(word => line.includes(word))) {
+        if (keywords.every(word => fuzzyIncludes(line, word))) {
           // Return this line and the next 2 lines for context
           return lines.slice(i, i + 3).join('\n');
         }
       }
-      // Fallback: return the first line that contains any keyword
+      // Fallback: return the first line that contains any keyword (fuzzy)
       for (let i = 0; i < lines.length; i++) {
         const line = lines[i].toLowerCase();
-        if (keywords.some(word => line.includes(word))) {
+        if (keywords.some(word => fuzzyIncludes(line, word))) {
           return lines.slice(i, i + 3).join('\n');
         }
       }
