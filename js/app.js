@@ -81,9 +81,23 @@ document.addEventListener('DOMContentLoaded', () => {
     function searchKnowledge(query) {
       if (!knowledgeText) return 'Knowledge base not loaded yet.';
       const lines = knowledgeText.split('\n');
-      // Simple keyword search: return the first line that matches
-      const match = lines.find(line => line.toLowerCase().includes(query.toLowerCase()));
-      return match ? match : 'No relevant information found in the nursing guide.';
+      const keywords = query.toLowerCase().split(/\s+/);
+      // Try to find a line that contains all keywords
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i].toLowerCase();
+        if (keywords.every(word => line.includes(word))) {
+          // Return this line and the next 2 lines for context
+          return lines.slice(i, i + 3).join('\n');
+        }
+      }
+      // Fallback: return the first line that contains any keyword
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i].toLowerCase();
+        if (keywords.some(word => line.includes(word))) {
+          return lines.slice(i, i + 3).join('\n');
+        }
+      }
+      return 'No relevant information found in the nursing guide.';
     }
 
     chatForm.addEventListener('submit', (e) => {
