@@ -38,9 +38,39 @@ app.add_middleware(
 class QueryRequest(BaseModel):
     query: str
 
+# --- Q&A Extraction and Embedding ---
+def extract_qa_pairs(chunks):
+    qa_pairs = []
+    questions = []
+    answers = []
+    for chunk in chunks:
+        # Match Q: ... A: ...
+        match = re.match(r"Q:\s*(.*?)\nA:\s*(.*)", chunk, re.DOTALL)
+        if match:
+            q = match.group(1).strip()
+            a = match.group(2).strip()
+            qa_pairs.append((q, a))
+            questions.append(q)
+            answers.append(a)
+    return qa_pairs, questions, answers
+
+qa_pairs, qa_questions, qa_answers = extract_qa_pairs(chunks)
+if qa_questions:
+    qa_embeddings = model.encode(qa_questions, convert_to_tensor=True)
+else:
+    qa_embeddings = None
+
 @app.post('/search')
 async def search(request: QueryRequest):
     query_embedding = model.encode(request.query, convert_to_tensor=True)
+    # 1. Try Q&A semantic search first
+    if qa_embeddings is not None and len(qa_questions) > 0:
+        qa_hits = util.semantic_search(query_embedding, qa_embeddings, top_k=1)
+        qa_best_idx = qa_hits[0][0]['corpus_id']
+        qa_best_score = qa_hits[0][0]['score']
+        if qa_best_score > 0.6:
+            return {"answer": qa_answers[qa_best_idx]}
+    # 2. Fallback to chunk-based search
     hits = util.semantic_search(query_embedding, chunk_embeddings, top_k=1)
     best_idx = hits[0][0]['corpus_id']
     best_score = hits[0][0]['score']
