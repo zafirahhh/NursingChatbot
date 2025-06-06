@@ -82,6 +82,9 @@ async def search(request: QueryRequest):
         if best_qa['score'] > 0.5:
             return {"answer": qa_answers[best_qa['corpus_id']]}
     # 2. Fallback to chunk-based search (medical/nursing domain)
+    # Recompute chunk embeddings for each request to ensure up-to-date context
+    global chunk_embeddings
+    chunk_embeddings = model.encode(chunks, convert_to_tensor=True)
     hits = util.semantic_search(query_embedding, chunk_embeddings, top_k=1)
     best_idx = hits[0][0]['corpus_id']
     best_score = hits[0][0]['score']
