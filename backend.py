@@ -95,14 +95,6 @@ async def search(request: QueryRequest):
     # 1. Try Q&A semantic search first (medical/nursing domain)
     if qa_embeddings is not None and len(qa_questions) > 0:
         qa_hits = util.semantic_search(query_embedding, qa_embeddings, top_k=5)
-        for hit in qa_hits[0]:
-            idx = hit['corpus_id']
-            score = hit['score']
-            if score > 0.5:
-                user_q = request.query.strip().lower()
-                kb_q = qa_questions[idx].strip().lower()
-                if user_q == kb_q or user_q in kb_q or kb_q in user_q:
-                    return {"answer": qa_answers[idx]}
         best_qa = max(qa_hits[0], key=lambda x: x['score'])
         if best_qa['score'] > 0.5:
             return {"answer": qa_answers[best_qa['corpus_id']]}
