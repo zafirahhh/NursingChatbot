@@ -27,7 +27,18 @@ def extract_qa_pairs(chunks):
     questions = []
     answers = []
     for chunk in chunks:
-        # Match Q: ... A: ...
+        # Try to match: <question line> (ends with ?) + one or more answer lines
+        lines = chunk.split("\n")
+        if len(lines) >= 2 and lines[0].strip().endswith("?"):
+            q = lines[0].strip()
+            # Join all subsequent lines as the answer (handles multi-line answers)
+            a = "\n".join([l.strip() for l in lines[1:] if l.strip()])
+            if a:
+                qa_pairs.append((q, a))
+                questions.append(q)
+                answers.append(a)
+                continue
+        # Fallback: Q: ... A: ...
         match = re.match(r"Q:\s*(.*?)\nA:\s*(.*)", chunk, re.DOTALL)
         if match:
             q = match.group(1).strip()
@@ -35,17 +46,6 @@ def extract_qa_pairs(chunks):
             qa_pairs.append((q, a))
             questions.append(q)
             answers.append(a)
-            continue
-        # Match: <question line>\n<answer line>
-        lines = chunk.split("\n", 1)
-        if len(lines) == 2:
-            q = lines[0].strip()
-            a = lines[1].strip()
-            # Only treat as Q&A if question ends with ? and answer is not empty
-            if q.endswith("?") and a:
-                qa_pairs.append((q, a))
-                questions.append(q)
-                answers.append(a)
     return qa_pairs, questions, answers
 
 # Load the embedding model and precompute embeddings
