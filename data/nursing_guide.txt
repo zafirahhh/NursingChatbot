@@ -94,7 +94,6 @@ Minimum systo!,c BP reference calculated from APLS minimum systolic BP formula 7
 aae)
 
 Formulas for calculators:
-Fluids calculator:
 
 Systolic BP
 
@@ -1765,8 +1764,6 @@ No further distribution is allowed.
 5.
 6.
 
-33
-
 Sung L, Simon JA, Dayneka NL. (1997) Dilution of intravenous N-acetylcysteine as a cause of hyponatremia. Pediatrics 100:389–391.
 Marzullo L. (2005) An update of N-acetylcysteine treatment for acute acetaminophen toxicity in children.
 Curr Opin Pediatr 17:239–245.
@@ -1774,4 +1771,22 @@ Kander MZ. (2006) Comparison of oral and IV acetylcysteine in the treatment of a
 Am J Health-Syst Pharm 63:1821–1827.
 Chiew AL, Reith D, Pomerleau A, et al. (2020) Updated guidelines for the management of paracetamol
 poisoning in Australia and New Zealand. Med J Aust 212(4):175–213.
+
+Q: A patient with type 2 diabetes is admitted with confusion, rapid breathing, and high blood glucose. What is the likely diagnosis and first nursing steps?
+A: Likely diabetic ketoacidosis (DKA). Start IV fluids, monitor vitals and glucose, give insulin as ordered, and watch for low potassium.
+
+Q: How should a nurse assess and manage pain in a non-verbal, post-op elderly patient?
+A: Use behavioral pain scales (like FLACC), observe for pain signs, give prescribed pain relief, and reassess regularly.
+
+Q: What are key steps to prevent pressure injuries in immobile patients?
+A: Reposition often, use pressure-relief devices, keep skin clean and dry, check skin daily, and ensure good nutrition.
+
+Q: A patient on IV vancomycin develops flushing and redness during infusion. What is this and what should the nurse do?
+A: It’s likely Red Man Syndrome. Stop the infusion, assess, notify the doctor, and restart slowly when symptoms improve.
+
+Q: What should a nurse do if a patient with a chest tube suddenly has severe breathing trouble and tracheal deviation?
+A: Suspect tension pneumothorax. Call for help, check the tube, give oxygen, and alert the doctor or rapid response team.
+
+Q: What are nursing considerations for giving potassium chloride IV?
+A: Never give IV push. Dilute and infuse slowly, monitor the site, check potassium levels and heart rhythm.
 
