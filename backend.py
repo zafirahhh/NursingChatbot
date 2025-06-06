@@ -63,19 +63,22 @@ else:
 @app.post('/search')
 async def search(request: QueryRequest):
     query_embedding = model.encode(request.query, convert_to_tensor=True)
-    # 1. Try Q&A semantic search first
+    # 1. Try Q&A semantic search first (medical/nursing domain)
     if qa_embeddings is not None and len(qa_questions) > 0:
         qa_hits = util.semantic_search(query_embedding, qa_embeddings, top_k=1)
         qa_best_idx = qa_hits[0][0]['corpus_id']
         qa_best_score = qa_hits[0][0]['score']
         if qa_best_score > 0.6:
             return {"answer": qa_answers[qa_best_idx]}
-    # 2. Fallback to chunk-based search
+    # 2. Fallback to chunk-based search (medical/nursing domain)
     hits = util.semantic_search(query_embedding, chunk_embeddings, top_k=1)
     best_idx = hits[0][0]['corpus_id']
     best_score = hits[0][0]['score']
-    answer = chunks[best_idx] if best_score > 0.4 else "No relevant information found."
-    return {"answer": answer}
+    if best_score > 0.4:
+        return {"answer": chunks[best_idx]}
+    # 3. General fallback for non-medical questions
+    general_response = "I'm designed to answer nursing and medical questions. For other topics, please consult a general knowledge resource."
+    return {"answer": general_response}
 
 if __name__ == "__main__":
     uvicorn.run("backend:app", host="0.0.0.0", port=8000, reload=True)
