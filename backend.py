@@ -52,6 +52,17 @@ def extract_qa_pairs(chunks):
             qa_pairs.append((q, a))
             questions.append(q)
             answers.append(a)
+            continue
+        # Match: <question line>\n<answer line>
+        lines = chunk.split("\n", 1)
+        if len(lines) == 2:
+            q = lines[0].strip()
+            a = lines[1].strip()
+            # Only treat as Q&A if question ends with ? and answer is not empty
+            if q.endswith("?") and a:
+                qa_pairs.append((q, a))
+                questions.append(q)
+                answers.append(a)
     return qa_pairs, questions, answers
 
 qa_pairs, qa_questions, qa_answers = extract_qa_pairs(chunks)
