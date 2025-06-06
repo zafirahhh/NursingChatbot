@@ -18,8 +18,25 @@ def load_chunks(path):
     chunks = [chunk.strip() for chunk in re.split(r'\n\s*\n', text) if chunk.strip()]
     return chunks
 
+# Load the knowledge base as fine-grained chunks (split by line or short paragraph)
+def load_fine_chunks(path):
+    with open(path, encoding='utf-8') as f:
+        text = f.read()
+    # Split on blank lines or single lines (ignore lines that are too short or just section headers)
+    raw_chunks = re.split(r'\n\s*\n', text)
+    fine_chunks = []
+    for chunk in raw_chunks:
+        # Further split into lines if chunk is long
+        lines = [l.strip() for l in chunk.split('\n') if l.strip()]
+        for line in lines:
+            # Filter out section headers or very short lines
+            if len(line) > 20 and not line.isupper():
+                fine_chunks.append(line)
+    return fine_chunks
+
 # Load chunks and embeddings once at startup
 chunks = load_chunks(KNOWLEDGE_PATH)
+fine_chunks = load_fine_chunks(KNOWLEDGE_PATH)
 
 # --- Q&A Extraction and Embedding ---
 def extract_qa_pairs(chunks):
@@ -51,6 +68,7 @@ def extract_qa_pairs(chunks):
 # Load the embedding model and precompute embeddings
 model = SentenceTransformer('BAAI/bge-base-en-v1.5')
 chunk_embeddings = model.encode(chunks, convert_to_tensor=True)
+fine_chunk_embeddings = model.encode(fine_chunks, convert_to_tensor=True)
 qa_pairs, qa_questions, qa_answers = extract_qa_pairs(chunks)
 if qa_questions:
     qa_embeddings = model.encode(qa_questions, convert_to_tensor=True)
@@ -77,26 +95,25 @@ async def search(request: QueryRequest):
     # 1. Try Q&A semantic search first (medical/nursing domain)
     if qa_embeddings is not None and len(qa_questions) > 0:
         qa_hits = util.semantic_search(query_embedding, qa_embeddings, top_k=5)
-        # Try to find an exact or near-exact match in the top 5
         for hit in qa_hits[0]:
             idx = hit['corpus_id']
             score = hit['score']
-            # Normalize and compare questions for near-exact match
             if score > 0.5:
                 user_q = request.query.strip().lower()
                 kb_q = qa_questions[idx].strip().lower()
                 if user_q == kb_q or user_q in kb_q or kb_q in user_q:
                     return {"answer": qa_answers[idx]}
-        # If no near-exact match, return the best scoring answer above threshold
         best_qa = max(qa_hits[0], key=lambda x: x['score'])
         if best_qa['score'] > 0.5:
             return {"answer": qa_answers[best_qa['corpus_id']]}
-    # 2. Fallback to chunk-based search (medical/nursing domain)
-    hits = util.semantic_search(query_embedding, chunk_embeddings, top_k=1)
-    best_idx = hits[0][0]['corpus_id']
-    best_score = hits[0][0]['score']
-    if best_score > 0.5:
-        return {"answer": chunks[best_idx]}
+    # 2. Fallback to fine-grained chunk-based search
+    hits = util.semantic_search(query_embedding, fine_chunk_embeddings, top_k=3)
+    # Return the best scoring fine chunk above a lower threshold
+    for hit in hits[0]:
+        best_idx = hit['corpus_id']
+        best_score = hit['score']
+        if best_score > 0.4:
+            return {"answer": fine_chunks[best_idx]}
     # 3. General fallback for non-medical questions or no good match
     general_response = "Sorry, I couldn't find a relevant answer. Please consult a healthcare professional for more information."
     return {"answer": general_response}
