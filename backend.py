@@ -59,7 +59,7 @@ def extract_qa_pairs(chunks):
     return qa_pairs, questions, answers
 
 # Load the embedding model and precompute embeddings
-model = SentenceTransformer('BAAI/bge-base-en-v1.5')
+model = SentenceTransformer('all-MiniLM-L6-v2')
 chunk_embeddings = model.encode(chunks, convert_to_tensor=True)
 fine_chunk_embeddings = model.encode(fine_chunks, convert_to_tensor=True)
 qa_pairs, qa_questions, qa_answers = extract_qa_pairs(chunks)
