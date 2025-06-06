@@ -1,36 +1,3 @@
-What is the formula for minimum systolic blood pressure in children?
-Minimum systolic blood pressure = 70 + (age in years x 2) mmHg
-
-What is the normal urine output for a child?
-Normal urine output for a child is 1.5–2 ml/kg/hr and urine pH at 7.5–8.5
-
-What is the normal blood pressure for a 5-year-old?
-Normal blood pressure for a 5-year-old is about 95/55 mmHg
-
-What is the normal body temperature for a child?
-Normal body temperature for a child is about 36.5°C to 37.5°C
-
-What does BP stand for?
-BP stands for blood pressure.
-
-How often should vital signs be checked in a hospital?
-Vital signs are usually checked every 4 to 6 hours in a hospital.
-
-What is the normal heart rate for an infant?
-Normal heart rate for an infant is 100-160 beats per minute.
-
-What is SPO2?
-SPO2 is the measurement of blood oxygen saturation.
-
-What is the normal respiratory rate for a child?
-Normal respiratory rate for a child is 20-30 breaths per minute.
-
-What is the normal glucose level in children?
-Normal glucose level in children is 4-7 mmol/L before meals.
-
-What does PR mean in vital signs?
-PR means pulse rate.
-
 AGE
 
 0- 1 month
@@ -94,6 +61,7 @@ Minimum systo!,c BP reference calculated from APLS minimum systolic BP formula 7
 aae)
 
 Formulas for calculators:
+Fluids calculator:
 
 Systolic BP
 
@@ -880,6 +848,7 @@ Cardiopulmonary Resuscitation
 ALGORITHM FOR UNSTABLE TACHYCARDIA WITH POOR PERFUSION
 
 15
+
 CHAPTER 3
 
 THE BABY BEAR BOOK - A Practical Guide on Paediatrics (4th Edition)
@@ -1624,6 +1593,8 @@ Drug Overdose and Poisoning
 
 29
 
+Figure 1.2 Single, acute toxic ingestion of paracetamol.
+
 » >80 kg: Add IV NAC 200 mg/kg to 1000 ml (in 2 bottles × 500 ml)
 • Phase 2: 100 mg/kg over ≈16 hours
 » ≤ 10 kg: Add IV NAC 100 mg/kg in total volume of 100 ml
@@ -1762,7 +1733,10 @@ No further distribution is allowed.
 5.
 6.
 
-Sung L, Simon JA, Dayneka NL. (1997) Dilution of intravenous N-acetylcysteine as a cause of hyponatremia. Pediatrics 100:389–391.
+33
+
+Sung L, Simon JA, Dayneka NL. (1997) Dilution of intravenous N-acetylcysteine as a cause of hyponatremia.
+Pediatrics 100:389–391.
 Marzullo L. (2005) An update of N-acetylcysteine treatment for acute acetaminophen toxicity in children.
 Curr Opin Pediatr 17:239–245.
 Kander MZ. (2006) Comparison of oral and IV acetylcysteine in the treatment of acetaminophen poisoning.
@@ -1770,42 +1744,10 @@ Am J Health-Syst Pharm 63:1821–1827.
 Chiew AL, Reith D, Pomerleau A, et al. (2020) Updated guidelines for the management of paracetamol
 poisoning in Australia and New Zealand. Med J Aust 212(4):175–213.
 
-Q: A patient with type 2 diabetes is admitted with confusion, rapid breathing, and high blood glucose. What is the likely diagnosis and first nursing steps?
-A: Likely diabetic ketoacidosis (DKA). Start IV fluids, monitor vitals and glucose, give insulin as ordered, and watch for low potassium.
+THE BABY BEAR BOOK - A Practical Guide on Paediatrics (4th Edition)
+© KK Women's and Children's Hospital. http://www.worldscientific.com/worldscibooks/10.1142/13141#t=toc
+No further distribution is allowed.
 
-Q: How should a nurse assess and manage pain in a non-verbal, post-op elderly patient?
-A: Use behavioral pain scales (like FLACC), observe for pain signs, give prescribed pain relief, and reassess regularly.
+This page intentionally left blank
 
-Q: What are key steps to prevent pressure injuries in immobile patients?
-A: Reposition often, use pressure-relief devices, keep skin clean and dry, check skin daily, and ensure good nutrition.
-
-Q: A patient on IV vancomycin develops flushing and redness during infusion. What is this and what should the nurse do?
-A: It’s likely Red Man Syndrome. Stop the infusion, assess, notify the doctor, and restart slowly when symptoms improve.
-
-Q: What should a nurse do if a patient with a chest tube suddenly has severe breathing trouble and tracheal deviation?
-A: Suspect tension pneumothorax. Call for help, check the tube, give oxygen, and alert the doctor or rapid response team.
-
-Q: What are nursing considerations for giving potassium chloride IV?
-A: Never give IV push. Dilute and infuse slowly, monitor the site, check potassium levels and heart rhythm.
-
-Q: What should I do if my child has a fever?
-A: Make sure your child drinks plenty of fluids, dress them lightly, and use a fever medicine like paracetamol if needed. If the fever is very high or lasts more than a few days, see a doctor.
-
-Q: When should I take someone to the emergency room for breathing problems?
-A: Go to the emergency room if someone is having trouble breathing, is breathing very fast, turns blue, or cannot speak in full sentences.
-
-Q: What does it mean if someone faints?
-A: Fainting is a brief loss of consciousness, often from standing up too quickly, dehydration, or stress. If someone faints and does not wake up quickly, or if it happens often, seek medical help.
-
-Q: How do I know if a cut needs stitches?
-A: A cut may need stitches if it is deep, the edges are far apart, it keeps bleeding after 10 minutes of pressure, or it is on the face or a joint.
-
-Q: What should I do if someone is having a seizure?
-A: Keep them safe by moving objects away, do not put anything in their mouth, and turn them on their side. Call for help if the seizure lasts more than 5 minutes or they do not wake up after.
-
-Q: What is a normal heart rate for adults?
-A: A normal adult heart rate is usually between 60 and 100 beats per minute.
-
-Q: What should I do if someone is choking?
-A: If they cannot cough, speak, or breathe, call for help and perform the Heimlich maneuver (abdominal thrusts) until the object is cleared or help arrives.
-
+
