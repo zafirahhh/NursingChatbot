@@ -78,151 +78,34 @@ document.addEventListener('DOMContentLoaded', () => {
         knowledgeText = text;
       });
 
-    function searchKnowledge(query) {
-      if (!knowledgeText) return 'Knowledge base not loaded yet.';
-      const lines = knowledgeText.split('\n');
-      const keywords = query.toLowerCase().split(/\s+/);
-      // Expanded parameter synonyms
-      const paramMap = {
-        'heart rate': ['heart rate', 'pulse', 'pr'],
-        'blood pressure': ['blood pressure', 'bp'],
-        'respiratory rate': ['respiratory rate', 'rr'],
-        'temperature': ['temperature', 'temp'],
-        'weight': ['weight'],
-        'height': ['height'],
-        'spo2': ['spo2', 'oxygen saturation'],
-        'glucose': ['glucose', 'sugar'],
-        'bilirubin': ['bilirubin', 'jaundice'],
-        'urine': ['urine', 'output', 'input', 'fluid'],
-      };
-      // Try to extract age and parameter from the query for table-aware search
-      const ageMatch = query.match(/(\d+)[ -]?(year|month|day|week)s?/i);
-      let age = ageMatch ? ageMatch[0] : null;
-      let ageNum = ageMatch ? parseInt(ageMatch[1]) : null;
-      let ageUnit = ageMatch ? ageMatch[2] : null;
-      let param = null;
-      for (const key in paramMap) {
-        if (paramMap[key].some(p => new RegExp(`\\b${p}\\b`, 'i').test(query))) {
-          param = key;
-          break;
-        }
-      }
-      // Table-aware extraction with advanced age group matching
-      if (param && ageNum && ageUnit) {
-        for (let i = 0; i < lines.length; i++) {
-          if (paramMap[param].some(p => new RegExp(`\\b${p}\\b`, 'i').test(lines[i]))) {
-            for (let j = i + 1; j < Math.min(i + 15, lines.length); j++) {
-              const row = lines[j].toLowerCase();
-              // Match ranges like "1-12 years", ">12 years", "<1 year", "child 1-12 years", etc.
-              const rangeRegex = /(\d+)[-–](\d+)\s*(year|month|day|week)s?/i;
-              const gtRegex = />\s*(\d+)\s*(year|month|day|week)s?/i;
-              const ltRegex = /<\s*(\d+)\s*(year|month|day|week)s?/i;
-              const singleRegex = /\b(\d+)\s*(year|month|day|week)s?\b/i;
-              let match = row.match(rangeRegex);
-              if (match && match[3].toLowerCase() === ageUnit.toLowerCase()) {
-                const min = parseInt(match[1]);
-                const max = parseInt(match[2]);
-                if (ageNum >= min && ageNum <= max) {
-                  const header = lines[i];
-                  return `<b>Relevant table for ${param} (age: ${age}):</b><br>${header}<br>${lines[j]}`;
-                }
-              }
-              match = row.match(gtRegex);
-              if (match && match[2].toLowerCase() === ageUnit.toLowerCase()) {
-                const min = parseInt(match[1]);
-                if (ageNum > min) {
-                  const header = lines[i];
-                  return `<b>Relevant table for ${param} (age: ${age}):</b><br>${header}<br>${lines[j]}`;
-                }
-              }
-              match = row.match(ltRegex);
-              if (match && match[2].toLowerCase() === ageUnit.toLowerCase()) {
-                const max = parseInt(match[1]);
-                if (ageNum < max) {
-                  const header = lines[i];
-                  return `<b>Relevant table for ${param} (age: ${age}):</b><br>${header}<br>${lines[j]}`;
-                }
-              }
-              match = row.match(singleRegex);
-              if (match && match[2].toLowerCase() === ageUnit.toLowerCase()) {
-                const single = parseInt(match[1]);
-                if (ageNum === single) {
-                  const header = lines[i];
-                  return `<b>Relevant table for ${param} (age: ${age}):</b><br>${header}<br>${lines[j]}`;
-                }
-              }
-              // Also match descriptive groups like "child 1-12 years"
-              if (row.match(/child|adolescent|infant|newborn/)) {
-                // Try to extract any numbers in the row
-                const nums = row.match(/(\d+)/g);
-                if (nums && nums.length >= 2 && row.includes(ageUnit.toLowerCase())) {
-                  const min = parseInt(nums[0]);
-                  const max = parseInt(nums[1]);
-                  if (ageNum >= min && ageNum <= max) {
-                    const header = lines[i];
-                    return `<b>Relevant table for ${param} (age: ${age}):</b><br>${header}<br>${lines[j]}`;
-                  }
-                } else if (nums && nums.length === 1 && row.includes(ageUnit.toLowerCase())) {
-                  const single = parseInt(nums[0]);
-                  if (ageNum === single) {
-                    const header = lines[i];
-                    return `<b>Relevant table for ${param} (age: ${age}):</b><br>${header}<br>${lines[j]}`;
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-      // Fuzzy matching helper with word boundaries
-      function fuzzyIncludes(line, word) {
-        return new RegExp(`\\b${word.replace(/[^a-z0-9]/g, '')}\\b`, 'i').test(line);
-      }
-      // Scoring system for best match
-      let bestScore = 0;
-      let bestIndex = -1;
-      for (let i = 0; i < lines.length; i++) {
-        let score = 0;
-        const line = lines[i].toLowerCase();
-        keywords.forEach(word => {
-          if (fuzzyIncludes(line, word)) score += 2;
-          else if (line.includes(word)) score += 1;
+    // Replace searchKnowledge with backend API call
+    async function searchKnowledge(query) {
+      try {
+        const response = await fetch('http://localhost:8000/search', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ query })
         });
-        if (score > bestScore) {
-          bestScore = score;
-          bestIndex = i;
-        }
+        if (!response.ok) throw new Error('Backend error');
+        const data = await response.json();
+        return data.answer || 'No relevant information found.';
+      } catch (err) {
+        return 'Error contacting backend: ' + err.message;
       }
-      if (bestScore > 0 && bestIndex !== -1) {
-        // Return 5 lines of context around the best match
-        const start = Math.max(0, bestIndex - 2);
-        const end = Math.min(lines.length, bestIndex + 3);
-        let result = lines.slice(start, end).join('<br>');
-        // Highlight keywords
-        keywords.forEach(word => {
-          if (word.length > 2) {
-            const re = new RegExp(`(${word})`, 'gi');
-            result = result.replace(re, '<b>$1</b>');
-          }
-        });
-        return result;
-      }
-      return 'No relevant information found in the nursing guide.';
     }
 
-    chatForm.addEventListener('submit', (e) => {
+    // Update chat submit handler to use async/await
+    chatForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const userText = userInput.value.trim();
         if (!userText) return;
         appendMessage('user', userText);
         userInput.value = '';
         showTyping();
-        setTimeout(() => {
-            removeTyping();
-            // Use the knowledge base for the bot reply
-            const botReply = searchKnowledge(userText);
-            appendMessage('bot', botReply);
-        }, 900);
+        // Use the backend for the bot reply
+        const botReply = await searchKnowledge(userText);
+        removeTyping();
+        appendMessage('bot', botReply);
     });
 
     // Clear chat functionality
