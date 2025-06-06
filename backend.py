@@ -6,31 +6,10 @@ from sentence_transformers import SentenceTransformer, util
 import uvicorn
 import os
 import re
+import torch
+import time
 
-# Path to your knowledge base text file
-KNOWLEDGE_PATH = os.path.join('data', 'nursing_guide.txt')
-
-# Load the knowledge base as chunks (paragraphs separated by blank lines)
-def load_chunks_from_text(text):
-    chunks = [chunk.strip() for chunk in re.split(r'\n\s*\n', text) if chunk.strip()]
-    return chunks
-
-def load_fine_chunks_from_text(text):
-    raw_chunks = re.split(r'\n\s*\n', text)
-    fine_chunks = []
-    for chunk in raw_chunks:
-        lines = [l.strip() for l in chunk.split('\n') if l.strip()]
-        for line in lines:
-            if len(line) > 20 and not line.isupper():
-                fine_chunks.append(line)
-    return fine_chunks
-
-# Load chunks and embeddings once at startup
-with open(KNOWLEDGE_PATH, encoding='utf-8') as f:
-    text = f.read()
-chunks = load_chunks_from_text(text)
-fine_chunks = load_fine_chunks_from_text(text)
-
+start_time = time.time()
 # --- Q&A Extraction and Embedding ---
 def extract_qa_pairs(chunks):
     qa_pairs = []
@@ -58,15 +37,74 @@ def extract_qa_pairs(chunks):
             answers.append(a)
     return qa_pairs, questions, answers
 
-# Load the embedding model and precompute embeddings
+# Path to your knowledge base text file
+KNOWLEDGE_PATH = os.path.join('data', 'nursing_guide.txt')
+
+# Load the knowledge base as chunks (paragraphs separated by blank lines)
+def load_chunks_from_text(text):
+    chunks = [chunk.strip() for chunk in re.split(r'\n\s*\n', text) if chunk.strip()]
+    return chunks
+
+def load_fine_chunks_from_text(text):
+    raw_chunks = re.split(r'\n\s*\n', text)
+    fine_chunks = []
+    for chunk in raw_chunks:
+        lines = [l.strip() for l in chunk.split('\n') if l.strip()]
+        for line in lines:
+            if len(line) > 20 and not line.isupper():
+                fine_chunks.append(line)
+    return fine_chunks
+
+# Load chunks and embeddings once at startup
+print('Loading knowledge base...')
+with open(KNOWLEDGE_PATH, encoding='utf-8') as f:
+    text = f.read()
+chunks = load_chunks_from_text(text)
+fine_chunks = load_fine_chunks_from_text(text)
+print(f'Loaded {len(chunks)} chunks and {len(fine_chunks)} fine chunks in {time.time() - start_time:.2f} seconds.')
+
+EMBEDDINGS_DIR = os.path.join('data', 'embeddings')
+chunk_embeddings_path = os.path.join(EMBEDDINGS_DIR, 'chunk_embeddings.pt')
+fine_chunk_embeddings_path = os.path.join(EMBEDDINGS_DIR, 'fine_chunk_embeddings.pt')
+qa_embeddings_path = os.path.join(EMBEDDINGS_DIR, 'qa_embeddings.pt')
+
+print('Loading model...')
+model_load_start = time.time()
 model = SentenceTransformer('all-MiniLM-L6-v2')
-chunk_embeddings = model.encode(chunks, convert_to_tensor=True)
-fine_chunk_embeddings = model.encode(fine_chunks, convert_to_tensor=True)
+print(f'Model loaded in {time.time() - model_load_start:.2f} seconds.')
+
+print('Loading chunk embeddings...')
+emb_start = time.time()
+if os.path.exists(chunk_embeddings_path):
+    chunk_embeddings = torch.load(chunk_embeddings_path)
+    print(f'Loaded chunk embeddings in {time.time() - emb_start:.2f} seconds.')
+else:
+    chunk_embeddings = model.encode(chunks, convert_to_tensor=True)
+    print(f'Encoded chunk embeddings in {time.time() - emb_start:.2f} seconds.')
+
+print('Loading fine chunk embeddings...')
+emb_start = time.time()
+if os.path.exists(fine_chunk_embeddings_path):
+    fine_chunk_embeddings = torch.load(fine_chunk_embeddings_path)
+    print(f'Loaded fine chunk embeddings in {time.time() - emb_start:.2f} seconds.')
+else:
+    fine_chunk_embeddings = model.encode(fine_chunks, convert_to_tensor=True)
+    print(f'Encoded fine chunk embeddings in {time.time() - emb_start:.2f} seconds.')
+
 qa_pairs, qa_questions, qa_answers = extract_qa_pairs(chunks)
-if qa_questions:
+print(f'Extracted {len(qa_questions)} QA pairs.')
+emb_start = time.time()
+if qa_questions and os.path.exists(qa_embeddings_path):
+    qa_embeddings = torch.load(qa_embeddings_path)
+    print(f'Loaded QA embeddings in {time.time() - emb_start:.2f} seconds.')
+elif qa_questions:
     qa_embeddings = model.encode(qa_questions, convert_to_tensor=True)
+    print(f'Encoded QA embeddings in {time.time() - emb_start:.2f} seconds.')
 else:
     qa_embeddings = None
+    print('No QA embeddings.')
+
+print(f'Backend ready in {time.time() - start_time:.2f} seconds.')
 
 app = FastAPI()
 
