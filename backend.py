@@ -6,37 +6,63 @@ from sentence_transformers import SentenceTransformer, util
 import uvicorn
 import os
 import re
+import PyPDF2
 
 # Path to your knowledge base text file
 KNOWLEDGE_PATH = os.path.join('data', 'nursing_guide.txt')
+# Path to your knowledge base PDF file
+PDF_PATH = os.path.join('data', 'nursing_guide.pdf')
+
+# Extract text from PDF
+def extract_text_from_pdf(pdf_path):
+    text = ""
+    with open(pdf_path, 'rb') as f:
+        reader = PyPDF2.PdfReader(f)
+        for page in reader.pages:
+            text += page.extract_text() + "\n"
+    return text
 
 # Load the knowledge base as chunks (paragraphs separated by blank lines)
-def load_chunks(path):
-    with open(path, encoding='utf-8') as f:
-        text = f.read()
-    # Split on two or more newlines (paragraphs)
+def load_chunks_from_text(text):
     chunks = [chunk.strip() for chunk in re.split(r'\n\s*\n', text) if chunk.strip()]
     return chunks
 
 # Load the knowledge base as fine-grained chunks (split by line or short paragraph)
-def load_fine_chunks(path):
-    with open(path, encoding='utf-8') as f:
-        text = f.read()
-    # Split on blank lines or single lines (ignore lines that are too short or just section headers)
+def load_fine_chunks_from_text(text):
     raw_chunks = re.split(r'\n\s*\n', text)
     fine_chunks = []
     for chunk in raw_chunks:
-        # Further split into lines if chunk is long
         lines = [l.strip() for l in chunk.split('\n') if l.strip()]
         for line in lines:
-            # Filter out section headers or very short lines
             if len(line) > 20 and not line.isupper():
                 fine_chunks.append(line)
     return fine_chunks
 
 # Load chunks and embeddings once at startup
-chunks = load_chunks(KNOWLEDGE_PATH)
-fine_chunks = load_fine_chunks(KNOWLEDGE_PATH)
+if os.path.exists(PDF_PATH):
+    pdf_text = extract_text_from_pdf(PDF_PATH)
+    chunks = load_chunks_from_text(pdf_text)
+    fine_chunks = load_fine_chunks_from_text(pdf_text)
+else:
+    # Fallback: define load_chunks and load_fine_chunks inline for .txt fallback
+    def load_chunks(path):
+        with open(path, encoding='utf-8') as f:
+            text = f.read()
+        chunks = [chunk.strip() for chunk in re.split(r'\n\s*\n', text) if chunk.strip()]
+        return chunks
+    def load_fine_chunks(path):
+        with open(path, encoding='utf-8') as f:
+            text = f.read()
+        raw_chunks = re.split(r'\n\s*\n', text)
+        fine_chunks = []
+        for chunk in raw_chunks:
+            lines = [l.strip() for l in chunk.split('\n') if l.strip()]
+            for line in lines:
+                if len(line) > 20 and not line.isupper():
+                    fine_chunks.append(line)
+        return fine_chunks
+    chunks = load_chunks(KNOWLEDGE_PATH)
+    fine_chunks = load_fine_chunks(KNOWLEDGE_PATH)
 
 # --- Q&A Extraction and Embedding ---
 def extract_qa_pairs(chunks):
