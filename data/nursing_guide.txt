@@ -1,3 +1,36 @@
+What is the formula for minimum systolic blood pressure in children?
+Minimum systolic blood pressure = 70 + (age in years x 2) mmHg
+
+What is the normal urine output for a child?
+Normal urine output for a child is 1.5–2 ml/kg/hr and urine pH at 7.5–8.5
+
+What is the normal blood pressure for a 5-year-old?
+Normal blood pressure for a 5-year-old is about 95/55 mmHg
+
+What is the normal body temperature for a child?
+Normal body temperature for a child is about 36.5°C to 37.5°C
+
+What does BP stand for?
+BP stands for blood pressure.
+
+How often should vital signs be checked in a hospital?
+Vital signs are usually checked every 4 to 6 hours in a hospital.
+
+What is the normal heart rate for an infant?
+Normal heart rate for an infant is 100-160 beats per minute.
+
+What is SPO2?
+SPO2 is the measurement of blood oxygen saturation.
+
+What is the normal respiratory rate for a child?
+Normal respiratory rate for a child is 20-30 breaths per minute.
+
+What is the normal glucose level in children?
+Normal glucose level in children is 4-7 mmol/L before meals.
+
+What does PR mean in vital signs?
+PR means pulse rate.
+
 AGE
 
 0- 1 month
@@ -848,7 +881,6 @@ Cardiopulmonary Resuscitation
 ALGORITHM FOR UNSTABLE TACHYCARDIA WITH POOR PERFUSION
 
 15
-
 CHAPTER 3
 
 THE BABY BEAR BOOK - A Practical Guide on Paediatrics (4th Edition)
@@ -1735,8 +1767,7 @@ No further distribution is allowed.
 
 33
 
-Sung L, Simon JA, Dayneka NL. (1997) Dilution of intravenous N-acetylcysteine as a cause of hyponatremia.
-Pediatrics 100:389–391.
+Sung L, Simon JA, Dayneka NL. (1997) Dilution of intravenous N-acetylcysteine as a cause of hyponatremia. Pediatrics 100:389–391.
 Marzullo L. (2005) An update of N-acetylcysteine treatment for acute acetaminophen toxicity in children.
 Curr Opin Pediatr 17:239–245.
 Kander MZ. (2006) Comparison of oral and IV acetylcysteine in the treatment of acetaminophen poisoning.
@@ -1744,10 +1775,3 @@ Am J Health-Syst Pharm 63:1821–1827.
 Chiew AL, Reith D, Pomerleau A, et al. (2020) Updated guidelines for the management of paracetamol
 poisoning in Australia and New Zealand. Med J Aust 212(4):175–213.
 
-THE BABY BEAR BOOK - A Practical Guide on Paediatrics (4th Edition)
-© KK Women's and Children's Hospital. http://www.worldscientific.com/worldscibooks/10.1142/13141#t=toc
-No further distribution is allowed.
-
-This page intentionally left blank
-
-
