@@ -103,6 +103,8 @@ async def search(request: QueryRequest):
     general_response = "Sorry, I couldn't find a relevant answer. Please consult a healthcare professional for more information."
     return {"answer": general_response}
 
+# Only run uvicorn if this file is executed directly (for local dev)
+# In production (Render), gunicorn/uvicorn will use the correct port from the start command
 if __name__ == "__main__":
     import os
     port = int(os.environ.get("PORT", 10000))
