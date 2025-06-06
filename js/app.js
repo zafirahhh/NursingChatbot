@@ -81,7 +81,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Replace searchKnowledge with backend API call
     async function searchKnowledge(query) {
       try {
-        const response = await fetch('http://localhost:8000/search', {
+        const response = await fetch('https://your-backend.onrender.com/search', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ query })
