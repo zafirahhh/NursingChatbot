@@ -21,7 +21,7 @@ def load_chunks(path):
 chunks = load_chunks(KNOWLEDGE_PATH)
 
 # Load the embedding model
-model = SentenceTransformer('all-MiniLM-L6-v2')
+model = SentenceTransformer('BAAI/bge-base-en-v1.5')
 chunk_embeddings = model.encode(chunks, convert_to_tensor=True)
 
 app = FastAPI()
