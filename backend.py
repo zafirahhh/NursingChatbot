@@ -18,31 +18,8 @@ def load_chunks(path):
     chunks = [chunk.strip() for chunk in re.split(r'\n\s*\n', text) if chunk.strip()]
     return chunks
 
-chunks = None
-
-def reload_chunks():
-    global chunks
-    chunks = load_chunks(KNOWLEDGE_PATH)
-
-reload_chunks()
-
-# Load the embedding model
-model = SentenceTransformer('BAAI/bge-base-en-v1.5')
-chunk_embeddings = model.encode(chunks, convert_to_tensor=True)
-
-app = FastAPI()
-
-# Allow CORS for local frontend
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-class QueryRequest(BaseModel):
-    query: str
+# Load chunks and embeddings once at startup
+chunks = load_chunks(KNOWLEDGE_PATH)
 
 # --- Q&A Extraction and Embedding ---
 def extract_qa_pairs(chunks):
@@ -71,20 +48,39 @@ def extract_qa_pairs(chunks):
                 answers.append(a)
     return qa_pairs, questions, answers
 
+# Load the embedding model and precompute embeddings
+model = SentenceTransformer('BAAI/bge-base-en-v1.5')
+chunk_embeddings = model.encode(chunks, convert_to_tensor=True)
+qa_pairs, qa_questions, qa_answers = extract_qa_pairs(chunks)
+if qa_questions:
+    qa_embeddings = model.encode(qa_questions, convert_to_tensor=True)
+else:
+    qa_embeddings = None
+
+app = FastAPI()
+
+# Allow CORS for local frontend
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+class QueryRequest(BaseModel):
+    query: str
+
 @app.post('/search')
 async def search(request: QueryRequest):
-    reload_chunks()  # Ensure chunks are always loaded from file
     query_embedding = model.encode(request.query, convert_to_tensor=True)
     # 1. Try Q&A semantic search first (medical/nursing domain)
-    qa_pairs, qa_questions, qa_answers = extract_qa_pairs(chunks)
-    if qa_questions:
-        qa_embeddings = model.encode(qa_questions, convert_to_tensor=True)
+    if qa_embeddings is not None and len(qa_questions) > 0:
         qa_hits = util.semantic_search(query_embedding, qa_embeddings, top_k=3)
         best_qa = max(qa_hits[0], key=lambda x: x['score'])
         if best_qa['score'] > 0.5:
             return {"answer": qa_answers[best_qa['corpus_id']]}
     # 2. Fallback to chunk-based search (medical/nursing domain)
-    chunk_embeddings = model.encode(chunks, convert_to_tensor=True)
     hits = util.semantic_search(query_embedding, chunk_embeddings, top_k=1)
     best_idx = hits[0][0]['corpus_id']
     best_score = hits[0][0]['score']
