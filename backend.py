@@ -145,5 +145,5 @@ async def search(request: QueryRequest):
 # In production (Render), gunicorn/uvicorn will use the correct port from the start command
 if __name__ == "__main__":
     import os
-    port = int(os.environ.get("PORT", 10000))
+    port = int(os.environ["PORT"])  # Only use the PORT env variable, no fallback
     uvicorn.run("backend:app", host="0.0.0.0", port=port)
