@@ -5,17 +5,24 @@ from pydantic import BaseModel
 from sentence_transformers import SentenceTransformer, util
 import uvicorn
 import os
+import re
 
 # Path to your knowledge base text file
 KNOWLEDGE_PATH = os.path.join('data', 'nursing_guide.txt')
 
-# Load the knowledge base
-with open(KNOWLEDGE_PATH, encoding='utf-8') as f:
-    knowledge_lines = [line.strip() for line in f if line.strip()]
+# Load the knowledge base as chunks (paragraphs separated by blank lines)
+def load_chunks(path):
+    with open(path, encoding='utf-8') as f:
+        text = f.read()
+    # Split on two or more newlines (paragraphs)
+    chunks = [chunk.strip() for chunk in re.split(r'\n\s*\n', text) if chunk.strip()]
+    return chunks
+
+chunks = load_chunks(KNOWLEDGE_PATH)
 
 # Load the embedding model
 model = SentenceTransformer('all-MiniLM-L6-v2')
-knowledge_embeddings = model.encode(knowledge_lines, convert_to_tensor=True)
+chunk_embeddings = model.encode(chunks, convert_to_tensor=True)
 
 app = FastAPI()
 
@@ -34,10 +41,10 @@ class QueryRequest(BaseModel):
 @app.post('/search')
 async def search(request: QueryRequest):
     query_embedding = model.encode(request.query, convert_to_tensor=True)
-    hits = util.semantic_search(query_embedding, knowledge_embeddings, top_k=1)
+    hits = util.semantic_search(query_embedding, chunk_embeddings, top_k=1)
     best_idx = hits[0][0]['corpus_id']
     best_score = hits[0][0]['score']
-    answer = knowledge_lines[best_idx] if best_score > 0.4 else "No relevant information found."
+    answer = chunks[best_idx] if best_score > 0.4 else "No relevant information found."
     return {"answer": answer}
 
 if __name__ == "__main__":
