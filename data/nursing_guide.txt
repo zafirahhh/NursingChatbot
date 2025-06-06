@@ -1624,8 +1624,6 @@ Drug Overdose and Poisoning
 
 29
 
-Figure 1.2 Single, acute toxic ingestion of paracetamol.
-
 » >80 kg: Add IV NAC 200 mg/kg to 1000 ml (in 2 bottles × 500 ml)
 • Phase 2: 100 mg/kg over ≈16 hours
 » ≤ 10 kg: Add IV NAC 100 mg/kg in total volume of 100 ml
@@ -1789,4 +1787,25 @@ A: Suspect tension pneumothorax. Call for help, check the tube, give oxygen, and
 
 Q: What are nursing considerations for giving potassium chloride IV?
 A: Never give IV push. Dilute and infuse slowly, monitor the site, check potassium levels and heart rhythm.
+
+Q: What should I do if my child has a fever?
+A: Make sure your child drinks plenty of fluids, dress them lightly, and use a fever medicine like paracetamol if needed. If the fever is very high or lasts more than a few days, see a doctor.
+
+Q: When should I take someone to the emergency room for breathing problems?
+A: Go to the emergency room if someone is having trouble breathing, is breathing very fast, turns blue, or cannot speak in full sentences.
+
+Q: What does it mean if someone faints?
+A: Fainting is a brief loss of consciousness, often from standing up too quickly, dehydration, or stress. If someone faints and does not wake up quickly, or if it happens often, seek medical help.
+
+Q: How do I know if a cut needs stitches?
+A: A cut may need stitches if it is deep, the edges are far apart, it keeps bleeding after 10 minutes of pressure, or it is on the face or a joint.
+
+Q: What should I do if someone is having a seizure?
+A: Keep them safe by moving objects away, do not put anything in their mouth, and turn them on their side. Call for help if the seizure lasts more than 5 minutes or they do not wake up after.
+
+Q: What is a normal heart rate for adults?
+A: A normal adult heart rate is usually between 60 and 100 beats per minute.
+
+Q: What should I do if someone is choking?
+A: If they cannot cough, speak, or breathe, call for help and perform the Heimlich maneuver (abdominal thrusts) until the object is cleared or help arrives.
 
