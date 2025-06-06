@@ -124,7 +124,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const max = parseInt(match[2]);
                 if (ageNum >= min && ageNum <= max) {
                   const header = lines[i];
-                  return `Relevant table for ${param} (age: ${age}):\n${header}\n${lines[j]}`;
+                  return `<b>Relevant table for ${param} (age: ${age}):</b><br>${header}<br>${lines[j]}`;
                 }
               }
               match = row.match(gtRegex);
@@ -132,7 +132,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const min = parseInt(match[1]);
                 if (ageNum > min) {
                   const header = lines[i];
-                  return `Relevant table for ${param} (age: ${age}):\n${header}\n${lines[j]}`;
+                  return `<b>Relevant table for ${param} (age: ${age}):</b><br>${header}<br>${lines[j]}`;
                 }
               }
               match = row.match(ltRegex);
@@ -140,7 +140,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const max = parseInt(match[1]);
                 if (ageNum < max) {
                   const header = lines[i];
-                  return `Relevant table for ${param} (age: ${age}):\n${header}\n${lines[j]}`;
+                  return `<b>Relevant table for ${param} (age: ${age}):</b><br>${header}<br>${lines[j]}`;
                 }
               }
               match = row.match(singleRegex);
@@ -148,7 +148,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const single = parseInt(match[1]);
                 if (ageNum === single) {
                   const header = lines[i];
-                  return `Relevant table for ${param} (age: ${age}):\n${header}\n${lines[j]}`;
+                  return `<b>Relevant table for ${param} (age: ${age}):</b><br>${header}<br>${lines[j]}`;
                 }
               }
               // Also match descriptive groups like "child 1-12 years"
@@ -160,13 +160,13 @@ document.addEventListener('DOMContentLoaded', () => {
                   const max = parseInt(nums[1]);
                   if (ageNum >= min && ageNum <= max) {
                     const header = lines[i];
-                    return `Relevant table for ${param} (age: ${age}):\n${header}\n${lines[j]}`;
+                    return `<b>Relevant table for ${param} (age: ${age}):</b><br>${header}<br>${lines[j]}`;
                   }
                 } else if (nums && nums.length === 1 && row.includes(ageUnit.toLowerCase())) {
                   const single = parseInt(nums[0]);
                   if (ageNum === single) {
                     const header = lines[i];
-                    return `Relevant table for ${param} (age: ${age}):\n${header}\n${lines[j]}`;
+                    return `<b>Relevant table for ${param} (age: ${age}):</b><br>${header}<br>${lines[j]}`;
                   }
                 }
               }
@@ -178,20 +178,34 @@ document.addEventListener('DOMContentLoaded', () => {
       function fuzzyIncludes(line, word) {
         return new RegExp(`\\b${word.replace(/[^a-z0-9]/g, '')}\\b`, 'i').test(line);
       }
-      // Try to find a line that contains all keywords (fuzzy)
+      // Scoring system for best match
+      let bestScore = 0;
+      let bestIndex = -1;
       for (let i = 0; i < lines.length; i++) {
+        let score = 0;
         const line = lines[i].toLowerCase();
-        if (keywords.every(word => fuzzyIncludes(line, word))) {
-          // Return this line and the next 2 lines for context
-          return lines.slice(i, i + 3).join('\n');
+        keywords.forEach(word => {
+          if (fuzzyIncludes(line, word)) score += 2;
+          else if (line.includes(word)) score += 1;
+        });
+        if (score > bestScore) {
+          bestScore = score;
+          bestIndex = i;
         }
       }
-      // Fallback: return the first line that contains any keyword (fuzzy)
-      for (let i = 0; i < lines.length; i++) {
-        const line = lines[i].toLowerCase();
-        if (keywords.some(word => fuzzyIncludes(line, word))) {
-          return lines.slice(i, i + 3).join('\n');
-        }
+      if (bestScore > 0 && bestIndex !== -1) {
+        // Return 5 lines of context around the best match
+        const start = Math.max(0, bestIndex - 2);
+        const end = Math.min(lines.length, bestIndex + 3);
+        let result = lines.slice(start, end).join('<br>');
+        // Highlight keywords
+        keywords.forEach(word => {
+          if (word.length > 2) {
+            const re = new RegExp(`(${word})`, 'gi');
+            result = result.replace(re, '<b>$1</b>');
+          }
+        });
+        return result;
       }
       return 'No relevant information found in the nursing guide.';
     }
