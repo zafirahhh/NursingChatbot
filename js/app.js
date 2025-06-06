@@ -81,7 +81,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // Replace searchKnowledge with backend API call
     async function searchKnowledge(query) {
       try {
-        const response = await fetch('https://nursingchatbot.onrender.com/search', {
+        // Use local backend for development
+        const response = await fetch('http://localhost:10000/search', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ query })
