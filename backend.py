@@ -142,24 +142,28 @@ class QueryRequest(BaseModel):
 
 @app.post('/search')
 async def search(request: QueryRequest):
-    query_embedding = model.encode(request.query, convert_to_tensor=True, dtype=torch.float16)
-    # 1. Try Q&A semantic search first (medical/nursing domain)
-    if qa_embeddings is not None and len(qa_questions) > 0:
-        qa_hits = util.semantic_search(query_embedding, qa_embeddings, top_k=5)
-        best_qa = max(qa_hits[0], key=lambda x: x['score'])
-        if best_qa['score'] > 0.5:
-            return {"answer": qa_answers[best_qa['corpus_id']]}
-    # 2. Fallback to fine-grained chunk-based search
-    hits = util.semantic_search(query_embedding, fine_chunk_embeddings, top_k=3)
-    # Return the best scoring fine chunk above a lower threshold
-    for hit in hits[0]:
-        best_idx = hit['corpus_id']
-        best_score = hit['score']
-        if best_score > 0.4:
-            return {"answer": fine_chunks[best_idx]}
-    # 3. General fallback for non-medical questions or no good match
-    general_response = "Sorry, I couldn't find a relevant answer. Please consult a healthcare professional for more information."
-    return {"answer": general_response}
+    try:
+        query_embedding = model.encode(request.query, convert_to_tensor=True, dtype=torch.float16)
+        # 1. Try Q&A semantic search first (medical/nursing domain)
+        if qa_embeddings is not None and len(qa_questions) > 0:
+            qa_hits = util.semantic_search(query_embedding, qa_embeddings, top_k=5)
+            best_qa = max(qa_hits[0], key=lambda x: x['score'])
+            if best_qa['score'] > 0.5:
+                return {"answer": qa_answers[best_qa['corpus_id']]}
+        # 2. Fallback to fine-grained chunk-based search
+        hits = util.semantic_search(query_embedding, fine_chunk_embeddings, top_k=3)
+        # Return the best scoring fine chunk above a lower threshold
+        for hit in hits[0]:
+            best_idx = hit['corpus_id']
+            best_score = hit['score']
+            if best_score > 0.4:
+                return {"answer": fine_chunks[best_idx]}
+        # 3. General fallback for non-medical questions or no good match
+        general_response = "Sorry, I couldn't find a relevant answer. Please consult a healthcare professional for more information."
+        return {"answer": general_response}
+    except Exception as e:
+        print(f"Error in /search: {e}")
+        return {"answer": "Internal server error. Please check backend logs."}
 
 @app.get("/")
 def root():
