@@ -169,5 +169,5 @@ def root():
 # In production (Render), gunicorn/uvicorn will use the correct port from the start command
 if __name__ == "__main__":
     import os
-    port = int(os.environ.get("PORT", 8000))  # Use 8000 as default if PORT is not set
+    port = int(os.environ["PORT"])  # Only use the PORT env variable, no fallback
     uvicorn.run("backend:app", host="0.0.0.0", port=port)
