@@ -156,6 +156,10 @@ async def search(request: QueryRequest):
     general_response = "Sorry, I couldn't find a relevant answer. Please consult a healthcare professional for more information."
     return {"answer": general_response}
 
+@app.get("/")
+def root():
+    return {"message": "Nursing Chatbot backend is running. Use the /search endpoint with POST requests."}
+
 # Only run uvicorn if this file is executed directly (for local dev)
 # In production (Render), gunicorn/uvicorn will use the correct port from the start command
 if __name__ == "__main__":
