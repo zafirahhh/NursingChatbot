@@ -8,6 +8,8 @@ import os
 import re
 import torch
 import time
+import nltk
+from nltk.tokenize import sent_tokenize
 
 start_time = time.time()
 # --- Q&A Extraction and Embedding ---
@@ -160,7 +162,22 @@ async def search(request: QueryRequest):
                 # Find the parent chunk for this fine chunk
                 fine_text = fine_chunks[best_idx]
                 parent_chunk = next((chunk for chunk in chunks if fine_text in chunk), fine_text)
-                return {"answer": parent_chunk}
+                # NEW: Extract the most relevant sentence(s) from the parent chunk
+                sentences = sent_tokenize(parent_chunk)
+                # Score each sentence by semantic similarity to the query
+                sent_embeddings = model.encode(sentences, convert_to_tensor=True, dtype=torch.float32)
+                sent_scores = util.pytorch_cos_sim(query_embedding, sent_embeddings)[0]
+                # Get the best scoring sentence(s)
+                best_sent_idx = int(torch.argmax(sent_scores))
+                best_sentence = sentences[best_sent_idx]
+                # Optionally, if the best sentence is too short, return 2 best sentences
+                if len(best_sentence) < 30 and len(sentences) > 1:
+                    # Get top 2 sentences
+                    top2_idx = torch.topk(sent_scores, 2).indices.tolist()
+                    answer = ' '.join([sentences[i] for i in top2_idx])
+                else:
+                    answer = best_sentence
+                return {"answer": answer}
         # 3. General fallback for non-medical questions or no good match
         general_response = "Sorry, I couldn't find a relevant answer. Please consult a healthcare professional for more information."
         return {"answer": general_response}

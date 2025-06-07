@@ -2,6 +2,7 @@ fastapi
 uvicorn
 sentence-transformers
 torch
+nltk
 pydantic
 PyPDF2
 gunicorn
