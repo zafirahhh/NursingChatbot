@@ -134,7 +134,7 @@ class QueryRequest(BaseModel):
 
 @app.post('/search')
 async def search(request: QueryRequest):
-    query_embedding = model.encode(request.query, convert_to_tensor=True)
+    query_embedding = model.encode(request.query, convert_to_tensor=True, dtype=torch.float16)
     # 1. Try Q&A semantic search first (medical/nursing domain)
     if qa_embeddings is not None and len(qa_questions) > 0:
         qa_hits = util.semantic_search(query_embedding, qa_embeddings, top_k=5)
