@@ -123,7 +123,11 @@ app = FastAPI()
 # Allow CORS for local frontend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://127.0.0.1:5500", "http://localhost:5500"],  # or your frontend's port
+    allow_origins=[
+        "http://127.0.0.1:5500",
+        "http://localhost:5500",
+        "https://zafirahhh.github.io"
+    ],  # Added GitHub Pages origin
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
