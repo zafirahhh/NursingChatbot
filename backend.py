@@ -152,12 +152,15 @@ async def search(request: QueryRequest):
                 return {"answer": qa_answers[best_qa['corpus_id']]}
         # 2. Fallback to fine-grained chunk-based search
         hits = util.semantic_search(query_embedding, fine_chunk_embeddings, top_k=3)
-        # Return the best scoring fine chunk above a lower threshold
+        # Return the parent chunk containing the best scoring fine chunk above a lower threshold
         for hit in hits[0]:
             best_idx = hit['corpus_id']
             best_score = hit['score']
             if best_score > 0.4:
-                return {"answer": fine_chunks[best_idx]}
+                # Find the parent chunk for this fine chunk
+                fine_text = fine_chunks[best_idx]
+                parent_chunk = next((chunk for chunk in chunks if fine_text in chunk), fine_text)
+                return {"answer": parent_chunk}
         # 3. General fallback for non-medical questions or no good match
         general_response = "Sorry, I couldn't find a relevant answer. Please consult a healthcare professional for more information."
         return {"answer": general_response}
