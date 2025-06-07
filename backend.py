@@ -76,33 +76,47 @@ print(f'Model loaded in {time.time() - model_load_start:.2f} seconds.')
 print('Loading chunk embeddings...')
 emb_start = time.time()
 if os.path.exists(chunk_embeddings_path):
-    chunk_embeddings = torch.load(chunk_embeddings_path)
-    print(f'Loaded chunk embeddings in {time.time() - emb_start:.2f} seconds.')
+    chunk_embeddings = torch.load(chunk_embeddings_path, map_location='cpu')
+    if chunk_embeddings.dtype == torch.float32:
+        chunk_embeddings = chunk_embeddings.half()  # Convert to float16 to save memory
+    print(f'Loaded chunk embeddings in {time.time() - emb_start:.2f} seconds. (dtype: {chunk_embeddings.dtype})')
 else:
-    chunk_embeddings = model.encode(chunks, convert_to_tensor=True)
-    print(f'Encoded chunk embeddings in {time.time() - emb_start:.2f} seconds.')
+    chunk_embeddings = model.encode(chunks, convert_to_tensor=True, dtype=torch.float16)
+    print(f'Encoded chunk embeddings in {time.time() - emb_start:.2f} seconds. (dtype: {chunk_embeddings.dtype})')
 
 print('Loading fine chunk embeddings...')
 emb_start = time.time()
 if os.path.exists(fine_chunk_embeddings_path):
-    fine_chunk_embeddings = torch.load(fine_chunk_embeddings_path)
-    print(f'Loaded fine chunk embeddings in {time.time() - emb_start:.2f} seconds.')
+    fine_chunk_embeddings = torch.load(fine_chunk_embeddings_path, map_location='cpu')
+    if fine_chunk_embeddings.dtype == torch.float32:
+        fine_chunk_embeddings = fine_chunk_embeddings.half()
+    print(f'Loaded fine chunk embeddings in {time.time() - emb_start:.2f} seconds. (dtype: {fine_chunk_embeddings.dtype})')
 else:
-    fine_chunk_embeddings = model.encode(fine_chunks, convert_to_tensor=True)
-    print(f'Encoded fine chunk embeddings in {time.time() - emb_start:.2f} seconds.')
+    fine_chunk_embeddings = model.encode(fine_chunks, convert_to_tensor=True, dtype=torch.float16)
+    print(f'Encoded fine chunk embeddings in {time.time() - emb_start:.2f} seconds. (dtype: {fine_chunk_embeddings.dtype})')
 
 qa_pairs, qa_questions, qa_answers = extract_qa_pairs(chunks)
 print(f'Extracted {len(qa_questions)} QA pairs.')
 emb_start = time.time()
 if qa_questions and os.path.exists(qa_embeddings_path):
-    qa_embeddings = torch.load(qa_embeddings_path)
-    print(f'Loaded QA embeddings in {time.time() - emb_start:.2f} seconds.')
+    qa_embeddings = torch.load(qa_embeddings_path, map_location='cpu')
+    if qa_embeddings.dtype == torch.float32:
+        qa_embeddings = qa_embeddings.half()
+    print(f'Loaded QA embeddings in {time.time() - emb_start:.2f} seconds. (dtype: {qa_embeddings.dtype})')
 elif qa_questions:
-    qa_embeddings = model.encode(qa_questions, convert_to_tensor=True)
-    print(f'Encoded QA embeddings in {time.time() - emb_start:.2f} seconds.')
+    qa_embeddings = model.encode(qa_questions, convert_to_tensor=True, dtype=torch.float16)
+    print(f'Encoded QA embeddings in {time.time() - emb_start:.2f} seconds. (dtype: {qa_embeddings.dtype})')
 else:
     qa_embeddings = None
     print('No QA embeddings.')
+
+import gc
+# Release unused variables to free memory
+try:
+    del text
+    gc.collect()
+except Exception:
+    pass
 
 print(f'Backend ready in {time.time() - start_time:.2f} seconds.')
 
