@@ -16,12 +16,16 @@ def extract_qa_pairs(chunks):
     questions = []
     answers = []
     for chunk in chunks:
-        # Try to match: <question line> (ends with ?) + one or more answer lines
-        lines = chunk.split("\n")
-        if len(lines) >= 2 and lines[0].strip().endswith("?"):
-            q = lines[0].strip()
-            # Join all subsequent lines as the answer (handles multi-line answers)
-            a = "\n".join([l.strip() for l in lines[1:] if l.strip()])
+        # Improved: Find the first line ending with '?' as the question, rest as answer
+        lines = [l.strip() for l in chunk.split("\n") if l.strip()]
+        q_idx = None
+        for idx, line in enumerate(lines):
+            if line.endswith('?'):
+                q_idx = idx
+                break
+        if q_idx is not None and q_idx < len(lines) - 1:
+            q = lines[q_idx]
+            a = "\n".join(lines[q_idx + 1:]).strip()
             if a:
                 qa_pairs.append((q, a))
                 questions.append(q)
@@ -165,5 +169,5 @@ def root():
 # In production (Render), gunicorn/uvicorn will use the correct port from the start command
 if __name__ == "__main__":
     import os
-    port = int(os.environ["PORT"])  # Only use the PORT env variable, no fallback
+    port = int(os.environ.get("PORT", 8000))  # Use 8000 as default if PORT is not set
     uvicorn.run("backend:app", host="0.0.0.0", port=port)
