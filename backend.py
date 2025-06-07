@@ -82,18 +82,18 @@ def safe_load_embeddings(path, encode_fn, items, name):
     try:
         if os.path.exists(path):
             emb = torch.load(path, map_location='cpu')
-            if emb.dtype == torch.float32:
-                emb = emb.half()
+            if emb.dtype != torch.float32:
+                emb = emb.float()
             print(f'Loaded {name} embeddings from disk. (dtype: {emb.dtype})')
             return emb
         else:
-            emb = encode_fn(items, convert_to_tensor=True, dtype=torch.float16)
+            emb = encode_fn(items, convert_to_tensor=True, dtype=torch.float32)
             torch.save(emb, path)
             print(f'Encoded and saved {name} embeddings. (dtype: {emb.dtype})')
             return emb
     except Exception as e:
         print(f'Error loading {name} embeddings: {e}. Regenerating...')
-        emb = encode_fn(items, convert_to_tensor=True, dtype=torch.float16)
+        emb = encode_fn(items, convert_to_tensor=True, dtype=torch.float32)
         torch.save(emb, path)
         print(f'Regenerated and saved {name} embeddings. (dtype: {emb.dtype})')
         return emb
