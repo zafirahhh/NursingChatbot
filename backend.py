@@ -158,31 +158,33 @@ async def search(request: QueryRequest):
         for hit in hits[0]:
             best_idx = hit['corpus_id']
             best_score = hit['score']
+            print(f"[DEBUG] Fine chunk idx: {best_idx}, score: {best_score}")
             if best_score > 0.4:
-                # Find the parent chunk for this fine chunk
                 fine_text = fine_chunks[best_idx]
                 parent_chunk = next((chunk for chunk in chunks if fine_text in chunk), fine_text)
-                # NEW: Extract the most relevant sentence(s) from the parent chunk
+                print(f"[DEBUG] Parent chunk: {parent_chunk}")
                 sentences = sent_tokenize(parent_chunk)
-                # Score each sentence by semantic similarity to the query
+                print(f"[DEBUG] Sentences: {sentences}")
                 sent_embeddings = model.encode(sentences, convert_to_tensor=True, dtype=torch.float32)
                 sent_scores = util.pytorch_cos_sim(query_embedding, sent_embeddings)[0]
-                # Get the best scoring sentence(s)
+                print(f"[DEBUG] Sentence scores: {sent_scores}")
                 best_sent_idx = int(torch.argmax(sent_scores))
                 best_sentence = sentences[best_sent_idx]
-                # Optionally, if the best sentence is too short, return 2 best sentences
+                print(f"[DEBUG] Best sentence: {best_sentence}")
                 if len(best_sentence) < 30 and len(sentences) > 1:
-                    # Get top 2 sentences
                     top2_idx = torch.topk(sent_scores, 2).indices.tolist()
                     answer = ' '.join([sentences[i] for i in top2_idx])
                 else:
                     answer = best_sentence
+                print(f"[DEBUG] Final answer: {answer}")
                 return {"answer": answer}
-        # 3. General fallback for non-medical questions or no good match
         general_response = "Sorry, I couldn't find a relevant answer. Please consult a healthcare professional for more information."
+        print(f"[DEBUG] General fallback triggered.")
         return {"answer": general_response}
     except Exception as e:
+        import traceback
         print(f"Error in /search: {e}")
+        traceback.print_exc()
         return {"answer": "Internal server error. Please check backend logs."}
 
 @app.get("/")
