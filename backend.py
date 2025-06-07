@@ -70,8 +70,8 @@ qa_embeddings_path = os.path.join(EMBEDDINGS_DIR, 'qa_embeddings.pt')
 
 print('Loading model...')
 model_load_start = time.time()
-# Use a smaller model to reduce memory usage
-model = SentenceTransformer('all-MiniLM-L3-v2')
+# Use a smaller, public model to reduce memory usage
+model = SentenceTransformer('paraphrase-MiniLM-L3-v2')
 print(f'Model loaded in {time.time() - model_load_start:.2f} seconds.')
 
 print('Loading chunk embeddings...')
