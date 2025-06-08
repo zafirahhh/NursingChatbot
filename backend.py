@@ -287,35 +287,39 @@ async def search(request: QueryRequest):
         matched_param = None
         best_age_score = 0
         best_param_score = 0
-        # 1. Age group matching: pick the row with the longest matching synonym
+        matched_age_syn = None
+        matched_param_syn = None
+        # 1. Age group matching: try all synonyms, prefer longest match, allow partials
         for key, vals in age_synonyms.items():
-            if key in ql:
-                for v in vals:
-                    v_norm = normalize(v)
+            for v in vals:
+                v_norm = normalize(v)
+                if v_norm in normalize(ql) or normalize(ql) in v_norm:
                     for cell in table_cell_lookup:
                         row_norm = normalize(cell[1])
                         if v_norm in row_norm or row_norm in v_norm:
                             score = len(v_norm)
                             if score > best_age_score:
                                 matched_age = cell[1]
+                                matched_age_syn = v
                                 best_age_score = score
-        # 2. Parameter matching: pick the column with the longest matching synonym
+        # 2. Parameter matching: try all synonyms, prefer longest match, allow partials
         for key, vals in param_synonyms.items():
-            if key in ql:
-                for v in vals:
-                    v_norm = normalize(v)
+            for v in vals:
+                v_norm = normalize(v)
+                if v_norm in normalize(ql) or normalize(ql) in v_norm:
                     for cell in table_cell_lookup:
                         col_norm = normalize(cell[2])
                         if v_norm in col_norm or col_norm in v_norm:
                             score = len(v_norm)
                             if score > best_param_score:
                                 matched_param = cell[2]
+                                matched_param_syn = v
                                 best_param_score = score
+        # Debug print for matching
+        print(f"[DEBUG] Query: {q}\nMatched age: {matched_age} (via '{matched_age_syn}')\nMatched param: {matched_param} (via '{matched_param_syn}')")
         # --- Improved Table Parsing with pandas ---
-        # Try to find a table with vital signs or relevant parameters
         vital_terms = ["vital sign", "vitals", "all vital", "normal vital"]
         if any(term in ql for term in vital_terms):
-            # Find the best matching table (by title)
             vital_table = None
             for table in all_tables:
                 if any(x in normalize(table['title']) for x in ["vital", "sign"]):
@@ -323,14 +327,18 @@ async def search(request: QueryRequest):
                     break
             if vital_table and matched_age:
                 df = pd.DataFrame(vital_table['rows'])
-                # Find the row for the matched age group
+                # Try exact, then partial match for row
                 row = None
                 for idx, r in df.iterrows():
                     if normalize(r[df.columns[0]]) == normalize(matched_age):
                         row = r
                         break
+                if row is None:
+                    for idx, r in df.iterrows():
+                        if normalize(matched_age_syn or "") in normalize(r[df.columns[0]]):
+                            row = r
+                            break
                 if row is not None:
-                    # Compose a natural sentence for all vital columns
                     vital_cols = [c for c in df.columns if any(x in normalize(c) for x in ["heart rate", "respiratory rate", "bp", "blood pressure"])]
                     vital_answers = []
                     for col in vital_cols:
@@ -340,10 +348,8 @@ async def search(request: QueryRequest):
                     if vital_answers:
                         age_label = row[df.columns[0]]
                         return {"answer": f"For {age_label}, the normal vital signs are: " + ", ".join(vital_answers) + "."}
-            # If no age group matched, fallback to semantic search
         # 4. For all other queries, only answer if BOTH age and parameter are matched
         if matched_age and matched_param:
-            # Find the best matching table for the parameter
             best_table = None
             for table in all_tables:
                 if any(normalize(matched_param) in normalize(h) for h in table['header']):
@@ -351,12 +357,16 @@ async def search(request: QueryRequest):
                     break
             if best_table:
                 df = pd.DataFrame(best_table['rows'])
-                # Find the row for the matched age group
                 row = None
                 for idx, r in df.iterrows():
                     if normalize(r[df.columns[0]]) == normalize(matched_age):
                         row = r
                         break
+                if row is None:
+                    for idx, r in df.iterrows():
+                        if normalize(matched_age_syn or "") in normalize(r[df.columns[0]]):
+                            row = r
+                            break
                 if row is not None:
                     value = row[matched_param]
                     param_label = matched_param.replace("(mmHg)", "").replace(":", "").strip()
@@ -371,7 +381,6 @@ async def search(request: QueryRequest):
             table_title, row_label, col, value = table_cell_lookup[best_idx]
             param_label = col.replace("(mmHg)", "").replace(":", "").strip()
             age_label = row_label
-            # Compose a natural sentence
             return {"answer": f"For {age_label}, the normal {param_label.lower()} is {value}."}
         # 6. Fallback: semantic search over QA pairs
         if qa_embeddings is not None:
