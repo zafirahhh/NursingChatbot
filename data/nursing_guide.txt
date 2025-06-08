@@ -1,126 +1,64 @@
-# Age Group|Heart Rate (beats/min)|Respiratory Rate (breaths/min)|Systolic BP (mmHg)
-neonate|100-160|30-60|60-90
-infant|100-150|30-60|70-100
-toddler|80-140|24-40|80-100
-young child|70-120|20-30|80-110
-older child|60-100|12-20|90-120
+# Age Group|Heart Rate Min|Heart Rate Max|Respiratory Rate Min|Respiratory Rate Max
+Birth - < 3 months|90|180|30|60
+3 months - < 6 months|80|160|30|60
+6 months - <1 year|80|140|25|45
+1 year - < 6 years|75|130|20|30
+6 years - < 10 years|70|110|16|24
+10 years - < 15 years|60|90|14|20
+15 years and above|60|90|12|16
+
+# Systolic BP by Age Group (APLS minimum systolic BP formula)
+# Age Group|Minimum Systolic BP (mmHg)
+0-1 month|90
+1 month - < 1 year|61
+1 year - < 2 year|71 (> 70)
+2 year - < 3 year|90
+3 yr - < 4 yr|102
+4- < 5 yr|72 (>80)
+5- < 6|105
+6- < 7 yr|74
+7 - < 8 yr|108
+8- < 9 yr|76
+9-< 10|110
+10 - < 11 yr|78
+11-<12|111
+12 - < 13|81
+13 - < 14|113
+14 - < 15|82
+15 and above|114
+
+# Canadian Triage and Acuity Scale Paediatric Guidelines (PaedCTAS)
+# Age Group|Heart Rate Min|Heart Rate Max|Respiratory Rate Min|Respiratory Rate Max
+Birth - < 3 months|90|180|30|60
+3 months - < 6 months|80|160|30|60
+6 months - <1 year|80|140|25|45
+1 year - < 6 years|75|130|20|30
+6 years - < 10 years|70|110|16|24
+10 years - < 15 years|60|90|14|20
+15 years and above|60|90|12|16
 
 # (Add any other content below this line)
 
-AGE
+Minimum systolic BP reference calculated from APLS minimum systolic BP formula 70 + (age x 2).(up ti/110 years of
+age)
 
-0- 1 month
-1 month - < 1 year
-1 year - < 2 year
-2 year - < 3 year
-3 yr - < 4 yr
-4- < 5 yr
-5- < 6
-6- < 7 yr
-7 - < 8 yr
-8- < 9 yr
-9-< 10
-10 - < 11 yr
-11-<12
-12 - < 13
-13 - < 14
-14 - < 15
-15 and above
+Formulas for calculators:
+# Fluids Calculator (Holliday-Segar Rule)
+# Calculation|Per Day|Per Hour
+100ml/kg for the 1st 10kg|100ml/kg/day|4ml/kg/hr
+50ml/kg for the 2nd 10kg|50ml/kg/day|2ml/kg/hr
+20ml/kg for every kg thereafter|20ml/kg/day|1ml/kg/hr
 
-SYSTOLIC BLOOD PRESSURE
-Minimum
-Maximum (1 mmHg less than 95th % for
-heiQht @50th % Boy)
-90
-61
-71 (> 70)
-90
-102
-72 (>80)
-105
-74
-108
-76
-110
-78
-111
-81
-113
-82
-114
-84
-115
-86
-117
-91 (>90)
-118
-91
-120
-91
-122
-91
-125
-91
-127
-91
-130
-96
+# Normal Urine Output
+# Age Group|Normal Urine Output (ml/kg/h)
+Neonates|>0.5
+Infants and above|>1
 
-Minimum systo!,c BP reference calculated from APLS minimum systolic BP formula 70 + (age x 2).(up ti/110 years of
-aae)
-
-Formulas for calculators:
-Fluids calculator:
-
-Systolic BP
-
-The following are the normal range of vital signs (heart rate/resp rate and systolic
-BP) in children.
-AGE
-Birth - < 3 months
-3 months - < 6 months
-6 months - <1 year
-1 year - < 6 years
-6 years - < 10 years
-10 years - < 15 years
-15 years and above
-
-HEART RATE
-Minimum
-90
-80
-80
-75
-70
-60
-60
-
-Maximum
-180
-160
-140
-130
-110
-90
-90
-
-RESPIRATORY RATE
-Minimum
-Maximum
-60
-30
-30
-60
-25
-45
-30
-20
-16
-24
-14
-20
-16
-12
+# Expected Systolic Blood Pressure
+# Age Group|Expected Systolic BP (mmHg)
+<1 month|>60
+1 month to 1 year|>70
+1 to 10 years|>70 + (age in years x 2)
 
 Reference from the Canadian Triage and Acuity Scale Paediatric Guidelines (PaedCTAS)
 ED ADMINISTRATION: Revisions to the Canadian Triage and Acuity Scale Paediatric Guidelines (PaedCTAS).
@@ -907,10 +845,6 @@ When: 	Timing and date of ingestion
 © KK Women's and Children's Hospital. http://www.worldscientific.com/worldscibooks/10.1142/13141#t=toc
 No further distribution is allowed.
 
-Drug Overdose and Poisoning
-
-17
-
 Where: Route which toxins was taken
 Why: 	Whether intentional or accidental and associated details
 • For paediatric ingestions, thorough history from caregivers is crucial.
@@ -925,7 +859,7 @@ THE BABY BEAR BOOK - A Practical Guide on Paediatrics (4th Edition)
 © KK Women's and Children's Hospital. http://www.worldscientific.com/worldscibooks/10.1142/13141#t=toc
 No further distribution is allowed.
 
-18
+17
 
 • Other important historical points from the caregivers include a systemic review,
 specifically the presence of seizures, agitation, coma, vomiting, headache and
@@ -1376,10 +1310,6 @@ occupying lesions should be appropriately excluded.
 
 25
 
-THE BABY BEAR BOOK - A Practical Guide on Paediatrics (4th Edition)
-© KK Women's and Children's Hospital. http://www.worldscientific.com/worldscibooks/10.1142/13141#t=toc
-No further distribution is allowed.
-
 Table
 1.4  
 Causes
@@ -1726,18 +1656,10 @@ Bibliography
 
 Ministry of Health, Singapore. (nd) Management of acute poisoning, clinical practice guidelines.
 Cumberland Pharmaceuticals Inc. (nd) 2011 Acetadote® (N-acetyl-cysteine) product monograph, Nashville,
-TN, USA. www.acetadote.com
+ TN, USA. www.acetadote.com
 
-Drug Overdose and Poisoning
 3.
 4.
-
-THE BABY BEAR BOOK - A Practical Guide on Paediatrics (4th Edition)
-© KK Women's and Children's Hospital. http://www.worldscientific.com/worldscibooks/10.1142/13141#t=toc
-No further distribution is allowed.
-
-5.
-6.
 
 Ministry of Health, Singapore. (nd) Management of acute poisoning, clinical practice guidelines.
 Cumberland Pharmaceuticals Inc. (nd) 2011 Acetadote® (N-acetyl-cysteine) product monograph, Nashville,
@@ -1748,11 +1670,5 @@ Marzullo L. (2005) An update of N-acetylcysteine treatment for acute acetaminoph
 Curr Opin Pediatr 17:239–245.
 Kander MZ. (2006) Comparison of oral and IV acetylcysteine in the treatment of acetaminophen poisoning.
 Am J Health-Syst Pharm 63:1821–1827.
-Chiew AL, Reith D, Pomerleau A, et al. (2020) Updated guidelines for the management of paracetamol poisoning in Australia and New Zealand. Med J Aust 212(4):175–213.
-
-THE BABY BEAR BOOK - A Practical Guide on Paediatrics (4th Edition)
-© KK Women's and Children's Hospital. http://www.worldscientific.com/worldscibooks/10.1142/13141#t=toc
-No further distribution is allowed.
-
-This page intentionally left blank
+Chiew AL, Reith D, Pomerleau A, et al . (2020) Updated guidelines for the management of paracetamol poisoning in Australia and New Zealand. Med J Aust 212(4):175–213.
 
