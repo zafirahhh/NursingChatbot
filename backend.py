@@ -273,7 +273,7 @@ async def search(request: QueryRequest):
     try:
         q = request.query.strip()
         threshold = 0.3
-        # --- Improved robust matching logic with best-match selection ---
+        # --- Improved robust matching logic with best-match selection and table context ---
         import re
         def normalize(s):
             s = s.lower()
@@ -287,19 +287,20 @@ async def search(request: QueryRequest):
         matched_param = None
         best_age_score = 0
         best_param_score = 0
-        # 1. Age group matching: pick the row with the longest matching synonym
+        # 1. Age group matching: pick the row with the longest matching synonym, but only from the correct table if possible
         for key, vals in age_synonyms.items():
             if key in ql:
                 for v in vals:
                     v_norm = normalize(v)
                     for cell in table_cell_lookup:
                         row_norm = normalize(cell[1])
+                        # Only match if the row is from a table that contains the parameter (if specified)
                         if v_norm in row_norm or row_norm in v_norm:
                             score = len(v_norm)
                             if score > best_age_score:
                                 matched_age = cell[1]
                                 best_age_score = score
-        # 2. Parameter matching: pick the column with the longest matching synonym
+        # 2. Parameter matching: pick the column with the longest matching synonym, but only from the correct table if possible
         for key, vals in param_synonyms.items():
             if key in ql:
                 for v in vals:
@@ -311,7 +312,22 @@ async def search(request: QueryRequest):
                             if score > best_param_score:
                                 matched_param = cell[2]
                                 best_param_score = score
-        # 3. If query is for vital signs and age group is matched, return all vital sign values for that row
+        # 3. If both age group and parameter are matched, return that cell value (prefer main value, not min/max)
+        if matched_age and matched_param:
+            prefer_min = 'min' in ql
+            prefer_max = 'max' in ql
+            best_cell = None
+            for cell in table_cell_lookup:
+                if normalize(cell[1]) == normalize(matched_age) and normalize(cell[2]) == normalize(matched_param):
+                    # Only return min/max if specifically asked
+                    if (prefer_min and 'min' in cell[2].lower()) or (prefer_max and 'max' in cell[2].lower()) or (not prefer_min and not prefer_max and 'min' not in cell[2].lower() and 'max' not in cell[2].lower()):
+                        best_cell = cell
+                        break
+            if best_cell:
+                param_label = best_cell[2].replace("(mmHg)", "").replace(":", "").strip()
+                age_label = best_cell[1]
+                return {"answer": f"The {param_label.lower()} for {age_label} is {best_cell[3]}."}
+        # 4. If query is for vital signs and age group is matched, return all vital sign values for that row
         if any(term in ql for term in ["vital sign", "vitals", "all vital", "normal vital"]) and matched_age:
             vital_cols = [c for c in set([cell[2] for cell in table_cell_lookup]) if any(x in normalize(c) for x in ["heart rate", "respiratory rate", "bp", "blood pressure"])]
             vital_answers = []
@@ -323,21 +339,6 @@ async def search(request: QueryRequest):
                         break
             if vital_answers:
                 return {"answer": f"For {matched_age}: " + ", ".join(vital_answers)}
-        # 4. If both age group and parameter are matched, return that cell value (prefer main value, not min/max)
-        if matched_age and matched_param:
-            # Prefer columns that do not contain 'min' or 'max' unless asked
-            prefer_min = 'min' in ql
-            prefer_max = 'max' in ql
-            best_cell = None
-            for cell in table_cell_lookup:
-                if normalize(cell[1]) == normalize(matched_age) and normalize(cell[2]) == normalize(matched_param):
-                    if (prefer_min and 'min' in cell[2].lower()) or (prefer_max and 'max' in cell[2].lower()) or (not prefer_min and not prefer_max and 'min' not in cell[2].lower() and 'max' not in cell[2].lower()):
-                        best_cell = cell
-                        break
-            if best_cell:
-                param_label = best_cell[2].replace("(mmHg)", "").replace(":", "").strip()
-                age_label = best_cell[1]
-                return {"answer": f"The {param_label.lower()} for {age_label} is {best_cell[3]}."}
         # 5. Fallback to previous logic (semantic search)
         threshold = 0.3
         q_emb = model.encode(q, convert_to_tensor=True, dtype=torch.float32)
