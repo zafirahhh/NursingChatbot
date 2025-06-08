@@ -207,16 +207,36 @@ table_row_embeddings = safe_load_table_row_embeddings()
 async def search(request: QueryRequest):
     try:
         q = request.query.strip()
+        q_lower = q.lower()
         # 1. Semantic search over table rows
         q_emb = model.encode(q, convert_to_tensor=True, dtype=torch.float32)
         cos_scores = util.pytorch_cos_sim(q_emb, table_row_embeddings)[0]
-        best_idx = int(torch.argmax(cos_scores))
-        best_score = float(cos_scores[best_idx])
-        # Threshold for a confident match (tune as needed)
+        # Get top 3 indices
+        topk = min(3, len(cos_scores))
+        top_indices = torch.topk(cos_scores, k=topk).indices.tolist()
+        top_scores = [float(cos_scores[i]) for i in top_indices]
         threshold = 0.3
-        if best_score > threshold:
-            table_title, row = table_row_lookup[best_idx]
-            return {"answer": f"Table: {table_title}\nRow: {row}"}
+        # Table preference logic
+        vital_keywords = ["vital", "heart rate", "respiratory", "bp", "blood pressure"]
+        prefer_vital = any(kw in q_lower for kw in vital_keywords)
+        vital_rows = []
+        other_rows = []
+        for idx, score in zip(top_indices, top_scores):
+            if score > threshold:
+                table_title, row = table_row_lookup[idx]
+                if prefer_vital and "vital" in table_title.lower():
+                    vital_rows.append((table_title, row, score))
+                else:
+                    other_rows.append((table_title, row, score))
+        # Prefer vital rows if any
+        answer_rows = vital_rows if vital_rows else (vital_rows + other_rows if prefer_vital else vital_rows + other_rows)
+        if answer_rows:
+            # Format all matched rows
+            formatted = []
+            for table_title, row, score in answer_rows:
+                row_str = '\n'.join([f"{k}: {v}" for k, v in row.items()])
+                formatted.append(f"Table: {table_title}\n{row_str}")
+            return {"answer": '\n\n'.join(formatted)}
         # 2. Fallback: semantic search over QA pairs
         if qa_embeddings is not None:
             qa_scores = util.pytorch_cos_sim(q_emb, qa_embeddings)[0]
