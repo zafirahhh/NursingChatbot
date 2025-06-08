@@ -163,104 +163,69 @@ def extract_vital_signs_table():
             break  # Stop at first blank line after table
     return table
 
+def extract_all_pipe_tables():
+    table_path = os.path.join('data', 'nursing_guide.txt')
+    with open(table_path, encoding='utf-8') as f:
+        lines = f.readlines()
+    tables = []
+    i = 0
+    while i < len(lines):
+        line = lines[i]
+        if line.strip().startswith('#') and '|' in line:
+            header = [h.strip('# ').strip() for h in line.strip().split('|')]
+            table_rows = []
+            i += 1
+            while i < len(lines) and '|' in lines[i]:
+                row = [col.strip() for col in lines[i].strip().split('|')]
+                if len(row) == len(header):
+                    table_rows.append(dict(zip(header, row)))
+                i += 1
+            tables.append({'header': header, 'rows': table_rows, 'title': line.strip('#').strip()})
+        else:
+            i += 1
+    return tables
+
 vital_signs_table = extract_vital_signs_table()
+all_tables = extract_all_pipe_tables()
 
 @app.post('/search')
 async def search(request: QueryRequest):
     try:
-        # 0. Improved vital signs table lookup with robust matching
-        if vital_signs_table:
-            q = request.query.lower()
-            # Map keywords to age groups
-            age_keywords = {
-                'neonate': 'neonate',
-                'infant': 'infant',
-                'toddler': 'toddler',
-                'young child': 'young child',
-                'older child': 'older child',
-            }
-            vital_keywords = {
-                'heart rate': ['heart rate', 'pulse', 'hr'],
-                'respiratory rate': ['respiratory rate', 'resp rate', 'rr', 'breathing rate'],
-                'systolic bp': ['systolic bp', 'bp', 'blood pressure', 'systolic', 'sbp'],
-            }
-            matched_row = None
-            matched_age = None
-            for keyword, label in age_keywords.items():
-                if keyword in q:
-                    for row in vital_signs_table:
-                        if label in row['Age Group'].lower():
-                            matched_row = row
-                            matched_age = label
-                            break
-                if matched_row:
-                    break
-            if matched_row:
-                # Check for specific vital sign in query (robust matching)
-                for vital_col, synonyms in vital_keywords.items():
-                    if any(s in q for s in synonyms):
-                        # Map vital_col to actual table column
-                        if vital_col == 'heart rate':
-                            col = 'Heart Rate (beats/min)'
-                        elif vital_col == 'respiratory rate':
-                            col = 'Respiratory Rate (breaths/min)'
-                        elif vital_col == 'systolic bp':
-                            col = 'Systolic BP (mmHg)'
-                        else:
-                            continue
-                        value = matched_row.get(col, None)
-                        if value:
-                            return {"answer": value}
-                        else:
-                            return {"answer": f"No data for {vital_col} in {matched_row['Age Group']}"}
-                # If only age group is matched, return all vital signs for that group
-                answer = (f"Heart Rate: {matched_row['Heart Rate (beats/min)']}, "
-                          f"Respiratory Rate: {matched_row['Respiratory Rate (breaths/min)']}, "
-                          f"Systolic BP: {matched_row['Systolic BP (mmHg)']}")
-                return {"answer": answer}
-        query_embedding = model.encode(request.query, convert_to_tensor=True, dtype=torch.float32)
-        # 1. Try Q&A semantic search first (medical/nursing domain)
-        if qa_embeddings is not None and len(qa_questions) > 0:
-            qa_hits = util.semantic_search(query_embedding, qa_embeddings, top_k=5)
-            best_qa = max(qa_hits[0], key=lambda x: x['score'])
-            if best_qa['score'] > 0.5:
-                return {"answer": qa_answers[best_qa['corpus_id']]}
-        # 2. Fallback to fine-grained chunk-based search
-        hits = util.semantic_search(query_embedding, fine_chunk_embeddings, top_k=3)
-        # Return the parent chunk containing the best scoring fine chunk above a lower threshold
-        for hit in hits[0]:
-            best_idx = hit['corpus_id']
-            best_score = hit['score']
-            print(f"[DEBUG] Fine chunk idx: {best_idx}, score: {best_score}")
-            if best_score > 0.4:
-                fine_text = fine_chunks[best_idx]
-                parent_chunk = next((chunk for chunk in chunks if fine_text in chunk), fine_text)
-                print(f"[DEBUG] Parent chunk: {parent_chunk}")
-                sentences = sent_tokenize(parent_chunk)
-                print(f"[DEBUG] Sentences: {sentences}")
-                sent_embeddings = model.encode(sentences, convert_to_tensor=True, dtype=torch.float32)
-                sent_scores = util.pytorch_cos_sim(query_embedding, sent_embeddings)[0]
-                print(f"[DEBUG] Sentence scores: {sent_scores}")
-                best_sent_idx = int(torch.argmax(sent_scores))
-                best_sentence = sentences[best_sent_idx]
-                print(f"[DEBUG] Best sentence: {best_sentence}")
-                # If the best sentence looks like a table header, return the next 8 lines as well
-                if ("table" in best_sentence.lower() or "table of" in best_sentence.lower()) and len(sentences) > best_sent_idx + 1:
-                    # Skip the header and return the next 8 lines (or as many as available)
-                    answer = '\n'.join(sentences[best_sent_idx+1:best_sent_idx+9])
-                    # If the answer is empty, fallback to the next best sentence
-                    if not answer.strip() and len(sentences) > best_sent_idx + 1:
-                        answer = sentences[best_sent_idx+1]
-                elif len(best_sentence) < 30 and len(sentences) > 1:
-                    top2_idx = torch.topk(sent_scores, 2).indices.tolist()
-                    answer = ' '.join([sentences[i] for i in top2_idx])
-                else:
-                    answer = best_sentence
-                print(f"[DEBUG] Final answer: {answer}")
-                return {"answer": answer}
-        general_response = "Sorry, I couldn't find a relevant answer. Please consult a healthcare professional for more information."
-        print(f"[DEBUG] General fallback triggered.")
-        return {"answer": general_response}
+        q = request.query.lower()
+        # Table selection logic
+        table_map = {
+            'vital': 'age group',
+            'heart rate': 'age group',
+            'respiratory rate': 'age group',
+            'bp': 'age group',
+            'blood pressure': 'age group',
+            'systolic': 'age group',
+            'urine': 'normal urine output',
+            'fluid': 'fluids calculator',
+            'holliday': 'fluids calculator',
+            'output': 'normal urine output',
+            'expected systolic': 'expected systolic blood pressure',
+        }
+        # Find the best matching table
+        selected_table = None
+        for k, v in table_map.items():
+            if k in q:
+                for table in all_tables:
+                    if v.lower() in table['title'].lower():
+                        selected_table = table
+                        break
+            if selected_table:
+                break
+        if not selected_table:
+            return {"answer": "Sorry, I couldn't find relevant data for your query."}
+        # Try to match a row based on age/weight/description
+        for row in selected_table['rows']:
+            for value in row.values():
+                if value.lower() in q:
+                    return {"answer": str(row)}
+        # If no row match, return the whole table as a string
+        table_str = '\n'.join([' | '.join(selected_table['header'])] + [' | '.join(row.values()) for row in selected_table['rows']])
+        return {"answer": table_str}
     except Exception as e:
         import traceback
         print(f"Error in /search: {e}")
