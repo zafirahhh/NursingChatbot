@@ -168,13 +168,40 @@ vital_signs_table = extract_vital_signs_table()
 @app.post('/search')
 async def search(request: QueryRequest):
     try:
-        # 0. Try direct vital signs table lookup
+        # 0. Improved vital signs table lookup with fuzzy/keyword matching
         if vital_signs_table:
             q = request.query.lower()
-            for row in vital_signs_table:
-                if any(label.lower() in q for label in [row['Age Group']] + row['Age Group'].replace('(', '').replace(')', '').replace('to', '').replace('<', '').replace('yr', '').replace('mth', '').replace('years', '').replace('year', '').replace(' ', '').split()):
-                    answer = f"Age Group: {row['Age Group']}\nHeart Rate: {row['Heart Rate (beats/min)']}\nRespiratory Rate: {row['Respiratory Rate (breaths/min)']}\nSystolic BP: {row['Systolic BP (mmHg)']}"
-                    return {"answer": answer}
+            # Map keywords to age groups
+            age_keywords = {
+                'neonate': 'neonate',
+                'infant': 'infant',
+                'toddler': 'toddler',
+                'young child': 'young child',
+                'older child': 'older child',
+            }
+            matched_row = None
+            for keyword, label in age_keywords.items():
+                if keyword in q:
+                    for row in vital_signs_table:
+                        if label in row['Age Group'].lower():
+                            matched_row = row
+                            break
+                if matched_row:
+                    break
+            if matched_row:
+                # Check for specific vital sign in query
+                if 'heart rate' in q:
+                    answer = f"{matched_row['Age Group']} Heart Rate: {matched_row['Heart Rate (beats/min)']}"
+                elif 'respiratory rate' in q or 'resp rate' in q:
+                    answer = f"{matched_row['Age Group']} Respiratory Rate: {matched_row['Respiratory Rate (breaths/min)']}"
+                elif 'systolic' in q or 'bp' in q or 'blood pressure' in q:
+                    answer = f"{matched_row['Age Group']} Systolic BP: {matched_row['Systolic BP (mmHg)']}"
+                else:
+                    answer = (f"Age Group: {matched_row['Age Group']}\n"
+                              f"Heart Rate: {matched_row['Heart Rate (beats/min)']}\n"
+                              f"Respiratory Rate: {matched_row['Respiratory Rate (breaths/min)']}\n"
+                              f"Systolic BP: {matched_row['Systolic BP (mmHg)']}")
+                return {"answer": answer}
         query_embedding = model.encode(request.query, convert_to_tensor=True, dtype=torch.float32)
         # 1. Try Q&A semantic search first (medical/nursing domain)
         if qa_embeddings is not None and len(qa_questions) > 0:
