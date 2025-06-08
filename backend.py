@@ -144,9 +144,37 @@ app.add_middleware(
 class QueryRequest(BaseModel):
     query: str
 
+# --- Structured Table Extraction ---
+def extract_vital_signs_table():
+    table_path = os.path.join('data', 'nursing_guide.txt')
+    with open(table_path, encoding='utf-8') as f:
+        lines = f.readlines()
+    table = []
+    header = None
+    for line in lines:
+        if line.strip().startswith('# Age Group|'):
+            header = [h.strip('# ').strip() for h in line.strip().split('|')]
+            continue
+        if header and '|' in line:
+            row = [col.strip() for col in line.strip().split('|')]
+            if len(row) == len(header):
+                table.append(dict(zip(header, row)))
+        elif header and not line.strip():
+            break  # Stop at first blank line after table
+    return table
+
+vital_signs_table = extract_vital_signs_table()
+
 @app.post('/search')
 async def search(request: QueryRequest):
     try:
+        # 0. Try direct vital signs table lookup
+        if vital_signs_table:
+            q = request.query.lower()
+            for row in vital_signs_table:
+                if any(label.lower() in q for label in [row['Age Group']] + row['Age Group'].replace('(', '').replace(')', '').replace('to', '').replace('<', '').replace('yr', '').replace('mth', '').replace('years', '').replace('year', '').replace(' ', '').split()):
+                    answer = f"Age Group: {row['Age Group']}\nHeart Rate: {row['Heart Rate (beats/min)']}\nRespiratory Rate: {row['Respiratory Rate (breaths/min)']}\nSystolic BP: {row['Systolic BP (mmHg)']}"
+                    return {"answer": answer}
         query_embedding = model.encode(request.query, convert_to_tensor=True, dtype=torch.float32)
         # 1. Try Q&A semantic search first (medical/nursing domain)
         if qa_embeddings is not None and len(qa_questions) > 0:

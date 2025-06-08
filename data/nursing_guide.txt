@@ -848,7 +848,6 @@ Cardiopulmonary Resuscitation
 ALGORITHM FOR UNSTABLE TACHYCARDIA WITH POOR PERFUSION
 
 15
-
 CHAPTER 3
 
 THE BABY BEAR BOOK - A Practical Guide on Paediatrics (4th Edition)
@@ -1593,8 +1592,6 @@ Drug Overdose and Poisoning
 
 29
 
-Figure 1.2 Single, acute toxic ingestion of paracetamol.
-
 » >80 kg: Add IV NAC 200 mg/kg to 1000 ml (in 2 bottles × 500 ml)
 • Phase 2: 100 mg/kg over ≈16 hours
 » ≤ 10 kg: Add IV NAC 100 mg/kg in total volume of 100 ml
@@ -1733,8 +1730,9 @@ No further distribution is allowed.
 5.
 6.
 
-33
-
+Ministry of Health, Singapore. (nd) Management of acute poisoning, clinical practice guidelines.
+Cumberland Pharmaceuticals Inc. (nd) 2011 Acetadote® (N-acetyl-cysteine) product monograph, Nashville,
+TN, USA. www.acetadote.com
 Sung L, Simon JA, Dayneka NL. (1997) Dilution of intravenous N-acetylcysteine as a cause of hyponatremia.
 Pediatrics 100:389–391.
 Marzullo L. (2005) An update of N-acetylcysteine treatment for acute acetaminophen toxicity in children.
@@ -1750,4 +1748,3 @@ No further distribution is allowed.
 
 This page intentionally left blank
 
-
