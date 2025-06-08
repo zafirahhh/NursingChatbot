@@ -264,6 +264,39 @@ def safe_load_table_cell_embeddings():
 
 table_cell_embeddings = safe_load_table_cell_embeddings()
 
+# --- Row-level Embedding Preparation ---
+row_texts = []  # List of row text for semantic search
+row_lookup = []
+for table in all_tables:
+    for row in table['rows']:
+        # Join all values for semantic search, include table title and column names for context
+        row_text = f"Table: {table['title']} | " + ' | '.join([f"{col}: {row[col]}" for col in table['header']])
+        row_texts.append(row_text)
+        row_lookup.append((table['title'], row))
+
+ROW_EMB_PATH = os.path.join('data', 'embeddings', 'row_embeddings.pt')
+def safe_load_row_embeddings():
+    try:
+        if os.path.exists(ROW_EMB_PATH):
+            emb = torch.load(ROW_EMB_PATH, map_location='cpu')
+            if emb.dtype != torch.float32:
+                emb = emb.float()
+            print(f'Loaded row embeddings from disk. (dtype: {emb.dtype})')
+            return emb
+        else:
+            emb = model.encode(row_texts, convert_to_tensor=True, dtype=torch.float32)
+            torch.save(emb, ROW_EMB_PATH)
+            print(f'Encoded and saved row embeddings. (dtype: {emb.dtype})')
+            return emb
+    except Exception as e:
+        print(f'Error loading row embeddings: {e}. Regenerating...')
+        emb = model.encode(row_texts, convert_to_tensor=True, dtype=torch.float32)
+        torch.save(emb, ROW_EMB_PATH)
+        print(f'Regenerated and saved row embeddings. (dtype: {emb.dtype})')
+        return emb
+
+row_embeddings = safe_load_row_embeddings()
+
 # --- Clinical Synonym Map ---
 age_synonyms = {
     'neonate': ['birth - < 3 months', '<1 month', '0-1 month', 'neonate'],
@@ -371,7 +404,6 @@ async def search(request: QueryRequest):
                 age_phrase = age_label if age_label else row[vitals_df.columns[0]]
                 return {"answer": f"For {age_phrase} ({row[vitals_df.columns[0]]}), " + ' and '.join(values) + "."}
         # --- Direct Table Cell Answer for Specific Parameter ---
-        # Try to match age and parameter for non-vitals queries (e.g. urine output)
         matched_age = None
         matched_param = None
         best_age_score = 0
@@ -402,7 +434,6 @@ async def search(request: QueryRequest):
                                 matched_param = cell[2]
                                 matched_param_syn = v
                                 best_param_score = score
-        # If both matched, return the value from the table
         if matched_age and matched_param:
             for cell in table_cell_lookup:
                 if normalize(cell[1]) == normalize(matched_age) and normalize(cell[2]) == normalize(matched_param):
@@ -410,9 +441,21 @@ async def search(request: QueryRequest):
                     age_label = cell[1]
                     value = cell[3]
                     return {"answer": f"For {age_label}, the normal {param_label.lower()} is {value}."}
-        # Fallback: semantic search and QA pairs as before
-        threshold = 0.45
+        # --- Row-level Semantic Search for Generic Queries ---
+        threshold = 0.42
         q_emb = model.encode(q, convert_to_tensor=True, dtype=torch.float32)
+        row_cos_scores = util.pytorch_cos_sim(q_emb, row_embeddings)[0]
+        best_row_idx = int(torch.argmax(row_cos_scores))
+        best_row_score = float(row_cos_scores[best_row_idx])
+        if best_row_score > threshold:
+            table_title, row = row_lookup[best_row_idx]
+            # Compose a readable summary of the row
+            summary = []
+            for k, v in row.items():
+                if k.lower() not in ["", "nan", "none"] and v and v.lower() not in ["", "nan", "none"]:
+                    summary.append(f"{k.strip()} is {v.strip()}")
+            return {"answer": f"From {table_title}: " + ", ".join(summary) + "."}
+        # --- Fallback: Table Cell Semantic Search ---
         cos_scores = util.pytorch_cos_sim(q_emb, table_cell_embeddings)[0]
         best_idx = int(torch.argmax(cos_scores))
         best_score = float(cos_scores[best_idx])
@@ -421,6 +464,7 @@ async def search(request: QueryRequest):
             param_label = col.replace("(mmHg)", "").replace(":", "").strip()
             age_label = row_label
             return {"answer": f"For {age_label}, the normal {param_label.lower()} is {value}."}
+        # --- Fallback: QA Pairs ---
         if qa_embeddings is not None:
             qa_scores = util.pytorch_cos_sim(q_emb, qa_embeddings)[0]
             qa_best_idx = int(torch.argmax(qa_scores))
