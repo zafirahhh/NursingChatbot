@@ -145,24 +145,6 @@ class QueryRequest(BaseModel):
     query: str
 
 # --- Structured Table Extraction ---
-def extract_vital_signs_table():
-    table_path = os.path.join('data', 'nursing_guide.txt')
-    with open(table_path, encoding='utf-8') as f:
-        lines = f.readlines()
-    table = []
-    header = None
-    for line in lines:
-        if line.strip().startswith('# Age Group|'):
-            header = [h.strip('# ').strip() for h in line.strip().split('|')]
-            continue
-        if header and '|' in line:
-            row = [col.strip() for col in line.strip().split('|')]
-            if len(row) == len(header):
-                table.append(dict(zip(header, row)))
-        elif header and not line.strip():
-            break  # Stop at first blank line after table
-    return table
-
 def extract_all_pipe_tables():
     table_path = os.path.join('data', 'nursing_guide.txt')
     with open(table_path, encoding='utf-8') as f:
@@ -185,47 +167,66 @@ def extract_all_pipe_tables():
             i += 1
     return tables
 
-vital_signs_table = extract_vital_signs_table()
 all_tables = extract_all_pipe_tables()
+
+# --- Table Row Embedding Preparation ---
+table_row_texts = []  # List of (table_title, row_dict, row_text)
+table_row_lookup = []
+for table in all_tables:
+    for row in table['rows']:
+        # Join all values for semantic search, include table title for context
+        row_text = f"{table['title']} | " + ' | '.join([str(v) for v in row.values()])
+        table_row_texts.append(row_text)
+        table_row_lookup.append((table['title'], row))
+
+# Precompute or load embeddings for all table rows
+TABLE_ROW_EMB_PATH = os.path.join('data', 'embeddings', 'table_row_embeddings.pt')
+def safe_load_table_row_embeddings():
+    try:
+        if os.path.exists(TABLE_ROW_EMB_PATH):
+            emb = torch.load(TABLE_ROW_EMB_PATH, map_location='cpu')
+            if emb.dtype != torch.float32:
+                emb = emb.float()
+            print(f'Loaded table row embeddings from disk. (dtype: {emb.dtype})')
+            return emb
+        else:
+            emb = model.encode(table_row_texts, convert_to_tensor=True, dtype=torch.float32)
+            torch.save(emb, TABLE_ROW_EMB_PATH)
+            print(f'Encoded and saved table row embeddings. (dtype: {emb.dtype})')
+            return emb
+    except Exception as e:
+        print(f'Error loading table row embeddings: {e}. Regenerating...')
+        emb = model.encode(table_row_texts, convert_to_tensor=True, dtype=torch.float32)
+        torch.save(emb, TABLE_ROW_EMB_PATH)
+        print(f'Regenerated and saved table row embeddings. (dtype: {emb.dtype})')
+        return emb
+
+table_row_embeddings = safe_load_table_row_embeddings()
 
 @app.post('/search')
 async def search(request: QueryRequest):
     try:
-        q = request.query.lower()
-        # Table selection logic
-        table_map = {
-            'vital': 'age group',
-            'heart rate': 'age group',
-            'respiratory rate': 'age group',
-            'bp': 'age group',
-            'blood pressure': 'age group',
-            'systolic': 'age group',
-            'urine': 'normal urine output',
-            'fluid': 'fluids calculator',
-            'holliday': 'fluids calculator',
-            'output': 'normal urine output',
-            'expected systolic': 'expected systolic blood pressure',
-        }
-        # Find the best matching table
-        selected_table = None
-        for k, v in table_map.items():
-            if k in q:
-                for table in all_tables:
-                    if v.lower() in table['title'].lower():
-                        selected_table = table
-                        break
-            if selected_table:
-                break
-        if not selected_table:
-            return {"answer": "Sorry, I couldn't find relevant data for your query."}
-        # Try to match a row based on age/weight/description
-        for row in selected_table['rows']:
-            for value in row.values():
-                if value.lower() in q:
-                    return {"answer": str(row)}
-        # If no row match, return the whole table as a string
-        table_str = '\n'.join([' | '.join(selected_table['header'])] + [' | '.join(row.values()) for row in selected_table['rows']])
-        return {"answer": table_str}
+        q = request.query.strip()
+        # 1. Semantic search over table rows
+        q_emb = model.encode(q, convert_to_tensor=True, dtype=torch.float32)
+        cos_scores = util.pytorch_cos_sim(q_emb, table_row_embeddings)[0]
+        best_idx = int(torch.argmax(cos_scores))
+        best_score = float(cos_scores[best_idx])
+        # Threshold for a confident match (tune as needed)
+        threshold = 0.45
+        if best_score > threshold:
+            table_title, row = table_row_lookup[best_idx]
+            return {"answer": f"Table: {table_title}\nRow: {row}"}
+        # 2. Fallback: semantic search over QA pairs
+        if qa_embeddings is not None:
+            qa_scores = util.pytorch_cos_sim(q_emb, qa_embeddings)[0]
+            qa_best_idx = int(torch.argmax(qa_scores))
+            qa_best_score = float(qa_scores[qa_best_idx])
+            if qa_best_score > threshold:
+                return {"answer": qa_answers[qa_best_idx]}
+        # 3. Fallback: return all table titles
+        all_titles = '\n'.join([t['title'] for t in all_tables])
+        return {"answer": f"Sorry, I couldn't find a specific answer. Available tables are:\n{all_titles}"}
     except Exception as e:
         import traceback
         print(f"Error in /search: {e}")
