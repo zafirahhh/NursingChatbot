@@ -1,5 +1,6 @@
+# Vital Signs Reference Table
 # Age Group|Heart Rate Min|Heart Rate Max|Respiratory Rate Min|Respiratory Rate Max
-Birth - < 3 months|90|180|30|60
+Birth - < 3 months (Neonate)|90|180|30|60
 3 months - < 6 months|80|160|30|60
 6 months - <1 year|80|140|25|45
 1 year - < 6 years|75|130|20|30
