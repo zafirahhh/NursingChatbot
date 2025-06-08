@@ -451,6 +451,78 @@ async def search(request: QueryRequest):
                 else:
                     age_phrase = f"children in the '{age_label}' group"
                 return {"answer": f"For {age_phrase}, the normal {param_label.lower()} is {value}."}
+        # --- Direct Table Cell Answer for Specific Parameter with Robust Age/Parameter Matching ---
+        def extract_age_from_query(query):
+            # Try to extract age in years/months from the query
+            match = re.search(r'(\\d+)\\s*(year|yr|month|mo)', query)
+            if match:
+                num = int(match.group(1))
+                unit = match.group(2)
+                if 'month' in unit:
+                    return num / 12  # Convert months to years
+                return num
+            return None
+
+        def find_best_age_group(age, all_age_labels):
+            # Try to map a numeric age to the closest age group label
+            for label in all_age_labels:
+                # e.g., '6-12 years', '1-2 years', '15 years and above'
+                m = re.match(r'(\\d+)[-–<]+(\\d+)', label)
+                if m:
+                    start = int(m.group(1))
+                    end = int(m.group(2))
+                    if start <= age < end:
+                        return label
+                elif 'above' in label or '>' in label:
+                    m = re.match(r'(\\d+)', label)
+                    if m and age >= int(m.group(1)):
+                        return label
+            return None
+
+        # Extract age and parameter from query
+        age_in_query = extract_age_from_query(ql)
+        all_age_labels = [cell[1] for cell in table_cell_lookup]
+        best_age_label = None
+        if age_in_query is not None:
+            best_age_label = find_best_age_group(age_in_query, all_age_labels)
+        # Fallback to synonym match if no numeric age
+        if not best_age_label:
+            for key, vals in age_synonyms.items():
+                for v in vals:
+                    v_norm = normalize(v)
+                    if v_norm in normalize(ql) or normalize(ql) in v_norm:
+                        for cell in table_cell_lookup:
+                            row_norm = normalize(cell[1])
+                            if v_norm in row_norm or row_norm in v_norm:
+                                best_age_label = cell[1]
+                                break
+                if best_age_label:
+                    break
+        # Parameter matching (robust)
+        best_param_label = None
+        for key, vals in param_synonyms.items():
+            for v in vals:
+                v_norm = normalize(v)
+                if v_norm in normalize(ql) or normalize(ql) in v_norm:
+                    for cell in table_cell_lookup:
+                        col_norm = normalize(cell[2])
+                        if v_norm in col_norm or col_norm in v_norm:
+                            best_param_label = cell[2]
+                            break
+            if best_param_label:
+                break
+        # Only answer if both age and parameter are matched
+        if best_age_label and best_param_label:
+            for cell in table_cell_lookup:
+                if normalize(cell[1]) == normalize(best_age_label) and normalize(cell[2]) == normalize(best_param_label):
+                    param_label = cell[2].replace("(mmHg)", "").replace(":", "").strip()
+                    age_label = cell[1]
+                    value = cell[3]
+                    if re.match(r"\\d+", age_label):
+                        age_phrase = f"a {age_label} old"
+                    else:
+                        age_phrase = f"children in the '{age_label}' group"
+                    return {"answer": f"For {age_phrase}, the normal {param_label.lower()} is {value}."}
         # --- Row-level Semantic Search for Generic Queries ---
         threshold = 0.38  # Lowered threshold for row-level semantic search
         q_emb = model.encode(q, convert_to_tensor=True, dtype=torch.float32)
@@ -501,8 +573,8 @@ async def search(request: QueryRequest):
             qa_best_score = float(qa_scores[qa_best_idx])
             if qa_best_score > threshold:
                 return {"answer": qa_answers[qa_best_idx]}
-        fallback_age = matched_age if matched_age else "the specified age group"
-        fallback_param = matched_param if matched_param else "the specific parameter"
+        fallback_age = best_age_label if best_age_label else "the specified age group"
+        fallback_param = best_param_label if best_param_label else "the specific parameter"
         return {"answer": f"Sorry, the specific range for {fallback_age} and {fallback_param} is not available."}
     except Exception as e:
         import traceback
