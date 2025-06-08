@@ -273,51 +273,64 @@ async def search(request: QueryRequest):
     try:
         q = request.query.strip()
         threshold = 0.3
-        # --- Improved robust matching logic ---
+        # --- Improved robust matching logic with normalization ---
+        import re
+        def normalize(s):
+            s = s.lower()
+            s = re.sub(r'\([^)]*\)', '', s)  # remove parentheses and contents
+            s = s.replace('-', ' ').replace('<', '').replace('>', '').replace(':', '').replace('/', ' ')
+            s = re.sub(r'[^a-z0-9 ]', '', s)
+            s = re.sub(r'\s+', ' ', s).strip()
+            return s
         ql = q.lower()
-        # 1. Try to match age group and parameter using synonym maps
         matched_age = None
         matched_param = None
+        # 1. Age group matching
         for key, vals in age_synonyms.items():
             if key in ql:
                 for v in vals:
+                    v_norm = normalize(v)
                     for cell in table_cell_lookup:
-                        if v in cell[1].lower():
+                        row_norm = normalize(cell[1])
+                        if v_norm in row_norm or row_norm in v_norm:
                             matched_age = cell[1]
                             break
                     if matched_age:
                         break
             if matched_age:
                 break
+        # 2. Parameter matching
         for key, vals in param_synonyms.items():
             if key in ql:
                 for v in vals:
+                    v_norm = normalize(v)
                     for cell in table_cell_lookup:
-                        if v in cell[2].lower():
+                        col_norm = normalize(cell[2])
+                        if v_norm in col_norm or col_norm in v_norm:
                             matched_param = cell[2]
                             break
                     if matched_param:
                         break
             if matched_param:
                 break
-        # 2. If query is for vital signs and age group is matched, return all vital sign values for that row
+        # 3. If query is for vital signs and age group is matched, return all vital sign values for that row
         if any(term in ql for term in ["vital sign", "vitals", "all vital", "normal vital"]) and matched_age:
-            vital_cols = [c for c in set([cell[2] for cell in table_cell_lookup]) if any(x in c.lower() for x in ["heart rate", "respiratory rate", "bp", "blood pressure"])]
+            vital_cols = [c for c in set([cell[2] for cell in table_cell_lookup]) if any(x in normalize(c) for x in ["heart rate", "respiratory rate", "bp", "blood pressure"])]
             vital_answers = []
             for cell in table_cell_lookup:
-                if cell[1].lower() == matched_age.lower() and cell[2] in vital_cols:
+                if normalize(cell[1]) == normalize(matched_age) and cell[2] in vital_cols:
                     label = cell[2].replace("(mmHg)", "").replace("Min", "").replace("Max", "").replace(":", "").strip()
                     vital_answers.append(f"{label} {cell[3]}")
             if vital_answers:
                 return {"answer": f"For {matched_age}: " + ", ".join(vital_answers)}
-        # 3. If both age group and parameter are matched, return that cell value
+        # 4. If both age group and parameter are matched, return that cell value
         if matched_age and matched_param:
             for cell in table_cell_lookup:
-                if cell[1].lower() == matched_age.lower() and cell[2].lower() == matched_param.lower():
+                if normalize(cell[1]) == normalize(matched_age) and normalize(cell[2]) == normalize(matched_param):
                     param_label = cell[2].replace("(mmHg)", "").replace(":", "").strip()
                     age_label = cell[1]
                     return {"answer": f"The {param_label.lower()} for {age_label} is {cell[3]}."}
-        # 4. Fallback to previous logic (semantic search)
+        # 5. Fallback to previous logic (semantic search)
         threshold = 0.3
         q_emb = model.encode(q, convert_to_tensor=True, dtype=torch.float32)
         cos_scores = util.pytorch_cos_sim(q_emb, table_cell_embeddings)[0]
@@ -328,14 +341,14 @@ async def search(request: QueryRequest):
             param_label = col.replace("(mmHg)", "").replace(":", "").strip()
             age_label = row_label
             return {"answer": f"The {param_label.lower()} for {age_label} is {value}."}
-        # 5. Fallback: semantic search over QA pairs
+        # 6. Fallback: semantic search over QA pairs
         if qa_embeddings is not None:
             qa_scores = util.pytorch_cos_sim(q_emb, qa_embeddings)[0]
             qa_best_idx = int(torch.argmax(qa_scores))
             qa_best_score = float(qa_scores[qa_best_idx])
             if qa_best_score > threshold:
                 return {"answer": qa_answers[qa_best_idx]}
-        # 6. Fallback: return all table titles
+        # 7. Fallback: return all table titles
         all_titles = '\n'.join([t['title'] for t in all_tables])
         return {"answer": f"Sorry, I couldn't find a specific answer. Available tables are:\n{all_titles}"}
     except Exception as e:
