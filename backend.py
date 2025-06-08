@@ -442,19 +442,20 @@ async def search(request: QueryRequest):
                     value = cell[3]
                     return {"answer": f"For {age_label}, the normal {param_label.lower()} is {value}."}
         # --- Row-level Semantic Search for Generic Queries ---
-        threshold = 0.42
+        threshold = 0.38  # Lowered threshold for row-level semantic search
         q_emb = model.encode(q, convert_to_tensor=True, dtype=torch.float32)
         row_cos_scores = util.pytorch_cos_sim(q_emb, row_embeddings)[0]
         best_row_idx = int(torch.argmax(row_cos_scores))
         best_row_score = float(row_cos_scores[best_row_idx])
         if best_row_score > threshold:
             table_title, row = row_lookup[best_row_idx]
-            # Compose a readable summary of the row
+            # Compose a readable summary of the row, but only include non-empty, non-NaN values
             summary = []
             for k, v in row.items():
-                if k.lower() not in ["", "nan", "none"] and v and v.lower() not in ["", "nan", "none"]:
+                if k and v and str(v).strip().lower() not in ["", "nan", "none"]:
                     summary.append(f"{k.strip()} is {v.strip()}")
-            return {"answer": f"From {table_title}: " + ", ".join(summary) + "."}
+            if summary:
+                return {"answer": f"From {table_title}: " + ", ".join(summary) + "."}
         # --- Fallback: Table Cell Semantic Search ---
         cos_scores = util.pytorch_cos_sim(q_emb, table_cell_embeddings)[0]
         best_idx = int(torch.argmax(cos_scores))
