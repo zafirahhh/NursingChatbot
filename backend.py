@@ -211,25 +211,29 @@ async def search(request: QueryRequest):
         # 1. Semantic search over table rows
         q_emb = model.encode(q, convert_to_tensor=True, dtype=torch.float32)
         cos_scores = util.pytorch_cos_sim(q_emb, table_row_embeddings)[0]
-        # Get top 3 indices
-        topk = min(3, len(cos_scores))
+        # Get top 5 indices for more flexibility
+        topk = min(5, len(cos_scores))
         top_indices = torch.topk(cos_scores, k=topk).indices.tolist()
         top_scores = [float(cos_scores[i]) for i in top_indices]
         threshold = 0.3
-        # Table preference logic
-        vital_keywords = ["vital", "heart rate", "respiratory", "bp", "blood pressure"]
+        # Table/column preference logic
+        vital_keywords = ["vital", "heart rate", "respiratory", "bp", "blood pressure", "age group"]
+        def is_vital_row(table_title, row):
+            title_match = any(kw in table_title.lower() for kw in vital_keywords)
+            col_match = any(any(kw in col.lower() for kw in vital_keywords) for col in row.keys())
+            return title_match or col_match
         prefer_vital = any(kw in q_lower for kw in vital_keywords)
         vital_rows = []
         other_rows = []
         for idx, score in zip(top_indices, top_scores):
             if score > threshold:
                 table_title, row = table_row_lookup[idx]
-                if prefer_vital and "vital" in table_title.lower():
+                if prefer_vital and is_vital_row(table_title, row):
                     vital_rows.append((table_title, row, score))
-                else:
+                elif not prefer_vital:
                     other_rows.append((table_title, row, score))
-        # Prefer vital rows if any
-        answer_rows = vital_rows if vital_rows else (vital_rows + other_rows if prefer_vital else vital_rows + other_rows)
+        # Prefer vital rows if any, otherwise show other top rows
+        answer_rows = vital_rows if vital_rows else other_rows
         if answer_rows:
             # Format all matched rows
             formatted = []
