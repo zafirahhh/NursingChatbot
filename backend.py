@@ -47,7 +47,7 @@ def extract_qa_pairs(chunks):
     return qa_pairs, questions, answers
 
 # Path to your knowledge base text file
-KNOWLEDGE_PATH = os.path.join('data', 'nursing_guide.txt')
+KNOWLEDGE_PATH = os.path.join('data', 'nursing_guide_cleaned.txt')
 
 # Load the knowledge base as chunks (paragraphs separated by blank lines)
 def load_chunks_from_text(text):
