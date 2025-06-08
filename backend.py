@@ -146,8 +146,31 @@ class QueryRequest(BaseModel):
     query: str
 
 # --- Structured Table Extraction ---
+# DISABLE extract_all_pipe_tables and all_tables since we now use nursing_guide_cleaned.txt and vitals_df
+# def extract_all_pipe_tables():
+#     table_path = os.path.join('data', 'nursing_guide.txt')
+#     with open(table_path, encoding='utf-8') as f:
+#         lines = f.readlines()
+#     tables = []
+#     i = 0
+#     while i < len(lines):
+#         line = lines[i]
+#         if line.strip().startswith('#') and '|' in line:
+#             header = [h.strip('# ').strip() for h in line.strip().split('|')]
+#             table_rows = []
+#             i += 1
+#             while i < len(lines) and '|' in lines[i]:
+#                 row = [col.strip() for col in lines[i].strip().split('|')]
+#                 if len(row) == len(header):
+#                     table_rows.append(dict(zip(header, row)))
+#                 i += 1
+#             tables.append({'header': header, 'rows': table_rows, 'title': line.strip('#').strip()})
+#         else:
+#             i += 1
+#     return tables
+
 def extract_all_pipe_tables():
-    table_path = os.path.join('data', 'nursing_guide.txt')
+    table_path = os.path.join('data', 'nursing_guide_cleaned.txt')
     with open(table_path, encoding='utf-8') as f:
         lines = f.readlines()
     tables = []
@@ -382,60 +405,60 @@ async def search(request: QueryRequest):
         # Debug print for matching
         print(f"[DEBUG] Query: {q}\nMatched age: {matched_age} (via '{matched_age_syn}')\nMatched param: {matched_param} (via '{matched_param_syn}')")
         # --- Improved Table Parsing with pandas ---
-        vital_terms = ["vital sign", "vitals", "all vital", "normal vital"]
-        if any(term in ql for term in vital_terms):
-            vital_table = None
-            for table in all_tables:
-                if any(x in normalize(table['title']) for x in ["vital", "sign"]):
-                    vital_table = table
-                    break
-            if vital_table and matched_age:
-                df = pd.DataFrame(vital_table['rows'])
-                # Try exact, then partial match for row
-                row = None
-                for idx, r in df.iterrows():
-                    if normalize(r[df.columns[0]]) == normalize(matched_age):
-                        row = r
-                        break
-                if row is None:
-                    for idx, r in df.iterrows():
-                        if normalize(matched_age_syn or "") in normalize(r[df.columns[0]]):
-                            row = r
-                            break
-                if row is not None:
-                    vital_cols = [c for c in df.columns if any(x in normalize(c) for x in ["heart rate", "respiratory rate", "bp", "blood pressure"])]
-                    vital_answers = []
-                    for col in vital_cols:
-                        label = col.replace("(mmHg)", "").replace(":", "").strip()
-                        value = row[col]
-                        vital_answers.append(f"{label} {value}")
-                    if vital_answers:
-                        age_label = row[df.columns[0]]
-                        return {"answer": f"For {age_label}, the normal vital signs are: " + ", ".join(vital_answers) + "."}
+        # vital_terms = ["vital sign", "vitals", "all vital", "normal vital"]
+        # if any(term in ql for term in vital_terms):
+        #     vital_table = None
+        #     for table in all_tables:
+        #         if any(x in normalize(table['title']) for x in ["vital", "sign"]):
+        #             vital_table = table
+        #             break
+        #     if vital_table and matched_age:
+        #         df = pd.DataFrame(vital_table['rows'])
+        #         # Try exact, then partial match for row
+        #         row = None
+        #         for idx, r in df.iterrows():
+        #             if normalize(r[df.columns[0]]) == normalize(matched_age):
+        #                 row = r
+        #                 break
+        #         if row is None:
+        #             for idx, r in df.iterrows():
+        #                 if normalize(matched_age_syn or "") in normalize(r[df.columns[0]]):
+        #                     row = r
+        #                     break
+        #         if row is not None:
+        #             vital_cols = [c for c in df.columns if any(x in normalize(c) for x in ["heart rate", "respiratory rate", "bp", "blood pressure"])]
+        #             vital_answers = []
+        #             for col in vital_cols:
+        #                 label = col.replace("(mmHg)", "").replace(":", "").strip()
+        #                 value = row[col]
+        #                 vital_answers.append(f"{label} {value}")
+        #             if vital_answers:
+        #                 age_label = row[df.columns[0]]
+        #                 return {"answer": f"For {age_label}, the normal vital signs are: " + ", ".join(vital_answers) + "."}
         # 4. For all other queries, only answer if BOTH age and parameter are matched
-        if matched_age and matched_param:
-            best_table = None
-            for table in all_tables:
-                if any(normalize(matched_param) in normalize(h) for h in table['header']):
-                    best_table = table
-                    break
-            if best_table:
-                df = pd.DataFrame(best_table['rows'])
-                row = None
-                for idx, r in df.iterrows():
-                    if normalize(r[df.columns[0]]) == normalize(matched_age):
-                        row = r
-                        break
-                if row is None:
-                    for idx, r in df.iterrows():
-                        if normalize(matched_age_syn or "") in normalize(r[df.columns[0]]):
-                            row = r
-                            break
-                if row is not None:
-                    value = row[matched_param]
-                    param_label = matched_param.replace("(mmHg)", "").replace(":", "").strip()
-                    age_label = row[df.columns[0]]
-                    return {"answer": f"For {age_label}, the normal {param_label.lower()} is {value}."}
+        # if matched_age and matched_param:
+        #     best_table = None
+        #     for table in all_tables:
+        #         if any(normalize(matched_param) in normalize(h) for h in table['header']):
+        #             best_table = table
+        #             break
+        #     if best_table:
+        #         df = pd.DataFrame(best_table['rows'])
+        #         row = None
+        #         for idx, r in df.iterrows():
+        #             if normalize(r[df.columns[0]]) == normalize(matched_age):
+        #                 row = r
+        #                 break
+        #         if row is None:
+        #             for idx, r in df.iterrows():
+        #                 if normalize(matched_age_syn or "") in normalize(r[df.columns[0]]):
+        #                     row = r
+        #                     break
+        #         if row is not None:
+        #             value = row[matched_param]
+        #             param_label = matched_param.replace("(mmHg)", "").replace(":", "").strip()
+        #             age_label = row[df.columns[0]]
+        #             return {"answer": f"For {age_label}, the normal {param_label.lower()} is {value}."}
         # 5. Fallback: semantic search ONLY if not both matched
         threshold = 0.45  # Stricter threshold for semantic search
         q_emb = model.encode(q, convert_to_tensor=True, dtype=torch.float32)
