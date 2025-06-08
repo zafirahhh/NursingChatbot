@@ -273,54 +273,52 @@ async def search(request: QueryRequest):
     try:
         q = request.query.strip()
         threshold = 0.3
-        # Try to match age group synonym
-        row_labels = [cell[1] for cell in table_cell_lookup]
-        col_names = [cell[2] for cell in table_cell_lookup]
-        age_idx = find_synonym_matches(q, row_labels, age_synonyms)
-        param_idx = find_synonym_matches(q, col_names, param_synonyms)
-        filtered_indices = []
-        if age_idx is not None or param_idx is not None:
-            for idx, cell in enumerate(table_cell_lookup):
-                age_match = (age_idx is None or cell[1].lower() == row_labels[age_idx].lower())
-                param_match = (param_idx is None or cell[2].lower() == col_names[param_idx].lower())
-                if age_match and param_match:
-                    filtered_indices.append(idx)
-        # If filtered, do semantic search only on those
-        if filtered_indices:
-            q_emb = model.encode(q, convert_to_tensor=True, dtype=torch.float32)
-            filtered_embs = table_cell_embeddings[filtered_indices]
-            cos_scores = util.pytorch_cos_sim(q_emb, filtered_embs)[0]
-            best_idx = int(torch.argmax(cos_scores))
-            best_score = float(cos_scores[best_idx])
-            if best_score > threshold:
-                real_idx = filtered_indices[best_idx]
-                table_title, row_label, col, value = table_cell_lookup[real_idx]
-                # --- Natural language answer formatting ---
-                # 1. If query is for vital signs (all for age group)
-                if any(term in q.lower() for term in ["vital sign", "vitals", "all vital", "normal vital"]):
-                    # 1. Find best matching age group (row label) using semantic search
-                    age_row_labels = list({cell[1] for cell in table_cell_lookup})
-                    q_emb = model.encode(q, convert_to_tensor=True, dtype=torch.float32)
-                    age_row_embs = model.encode(age_row_labels, convert_to_tensor=True, dtype=torch.float32)
-                    age_scores = util.pytorch_cos_sim(q_emb, age_row_embs)[0]
-                    best_age_idx = int(torch.argmax(age_scores))
-                    best_age_score = float(age_scores[best_age_idx])
-                    matched_age = age_row_labels[best_age_idx] if best_age_score > 0.3 else None
+        # --- Improved robust matching logic ---
+        ql = q.lower()
+        # 1. Try to match age group and parameter using synonym maps
+        matched_age = None
+        matched_param = None
+        for key, vals in age_synonyms.items():
+            if key in ql:
+                for v in vals:
+                    for cell in table_cell_lookup:
+                        if v in cell[1].lower():
+                            matched_age = cell[1]
+                            break
                     if matched_age:
-                        # 2. Get all vital sign columns for this age group
-                        vital_cols = [c for c in set([cell[2] for cell in table_cell_lookup]) if any(x in c.lower() for x in ["heart rate", "respiratory rate", "bp", "blood pressure"])]
-                        vital_answers = []
-                        for cell in table_cell_lookup:
-                            if cell[1].lower() == matched_age.lower() and cell[2] in vital_cols:
-                                label = cell[2].replace("(mmHg)", "").replace("Min", "").replace("Max", "").replace(":", "").strip()
-                                vital_answers.append(f"{label} {cell[3]}")
-                        if vital_answers:
-                            return {"answer": f"For {matched_age}: " + ", ".join(vital_answers)}
-                # 2. Otherwise, single parameter answer
-                param_label = col.replace("(mmHg)", "").replace(":", "").strip()
-                age_label = row_label
-                return {"answer": f"The {param_label.lower()} for {age_label} is {value}."}
-        # Otherwise, fallback to full semantic search
+                        break
+            if matched_age:
+                break
+        for key, vals in param_synonyms.items():
+            if key in ql:
+                for v in vals:
+                    for cell in table_cell_lookup:
+                        if v in cell[2].lower():
+                            matched_param = cell[2]
+                            break
+                    if matched_param:
+                        break
+            if matched_param:
+                break
+        # 2. If query is for vital signs and age group is matched, return all vital sign values for that row
+        if any(term in ql for term in ["vital sign", "vitals", "all vital", "normal vital"]) and matched_age:
+            vital_cols = [c for c in set([cell[2] for cell in table_cell_lookup]) if any(x in c.lower() for x in ["heart rate", "respiratory rate", "bp", "blood pressure"])]
+            vital_answers = []
+            for cell in table_cell_lookup:
+                if cell[1].lower() == matched_age.lower() and cell[2] in vital_cols:
+                    label = cell[2].replace("(mmHg)", "").replace("Min", "").replace("Max", "").replace(":", "").strip()
+                    vital_answers.append(f"{label} {cell[3]}")
+            if vital_answers:
+                return {"answer": f"For {matched_age}: " + ", ".join(vital_answers)}
+        # 3. If both age group and parameter are matched, return that cell value
+        if matched_age and matched_param:
+            for cell in table_cell_lookup:
+                if cell[1].lower() == matched_age.lower() and cell[2].lower() == matched_param.lower():
+                    param_label = cell[2].replace("(mmHg)", "").replace(":", "").strip()
+                    age_label = cell[1]
+                    return {"answer": f"The {param_label.lower()} for {age_label} is {cell[3]}."}
+        # 4. Fallback to previous logic (semantic search)
+        threshold = 0.3
         q_emb = model.encode(q, convert_to_tensor=True, dtype=torch.float32)
         cos_scores = util.pytorch_cos_sim(q_emb, table_cell_embeddings)[0]
         best_idx = int(torch.argmax(cos_scores))
@@ -330,14 +328,14 @@ async def search(request: QueryRequest):
             param_label = col.replace("(mmHg)", "").replace(":", "").strip()
             age_label = row_label
             return {"answer": f"The {param_label.lower()} for {age_label} is {value}."}
-        # 2. Fallback: semantic search over QA pairs
+        # 5. Fallback: semantic search over QA pairs
         if qa_embeddings is not None:
             qa_scores = util.pytorch_cos_sim(q_emb, qa_embeddings)[0]
             qa_best_idx = int(torch.argmax(qa_scores))
             qa_best_score = float(qa_scores[qa_best_idx])
             if qa_best_score > threshold:
                 return {"answer": qa_answers[qa_best_idx]}
-        # 3. Fallback: return all table titles
+        # 6. Fallback: return all table titles
         all_titles = '\n'.join([t['title'] for t in all_tables])
         return {"answer": f"Sorry, I couldn't find a specific answer. Available tables are:\n{all_titles}"}
     except Exception as e:
