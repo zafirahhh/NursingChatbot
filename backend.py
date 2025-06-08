@@ -435,12 +435,22 @@ async def search(request: QueryRequest):
                                 matched_param_syn = v
                                 best_param_score = score
         if matched_age and matched_param:
+            # Find the most contextually appropriate cell (avoid repeated/irrelevant age groups)
+            best_cell = None
             for cell in table_cell_lookup:
                 if normalize(cell[1]) == normalize(matched_age) and normalize(cell[2]) == normalize(matched_param):
-                    param_label = cell[2].replace("(mmHg)", "").replace(":", "").strip()
-                    age_label = cell[1]
-                    value = cell[3]
-                    return {"answer": f"For {age_label}, the normal {param_label.lower()} is {value}."}
+                    best_cell = cell
+                    break
+            if best_cell:
+                param_label = best_cell[2].replace("(mmHg)", "").replace(":", "").strip()
+                age_label = best_cell[1]
+                value = best_cell[3]
+                # Format answer naturally
+                if re.match(r"\\d+", age_label):
+                    age_phrase = f"a {age_label} old"
+                else:
+                    age_phrase = f"children in the '{age_label}' group"
+                return {"answer": f"For {age_phrase}, the normal {param_label.lower()} is {value}."}
         # --- Row-level Semantic Search for Generic Queries ---
         threshold = 0.38  # Lowered threshold for row-level semantic search
         q_emb = model.encode(q, convert_to_tensor=True, dtype=torch.float32)
@@ -449,13 +459,28 @@ async def search(request: QueryRequest):
         best_row_score = float(row_cos_scores[best_row_idx])
         if best_row_score > threshold:
             table_title, row = row_lookup[best_row_idx]
-            # Compose a readable summary of the row, but only include non-empty, non-NaN values
+            # Compose a readable, natural summary of the row, only include non-empty, non-NaN values
             summary = []
+            age_label = None
+            param_label = None
+            value = None
             for k, v in row.items():
                 if k and v and str(v).strip().lower() not in ["", "nan", "none"]:
-                    summary.append(f"{k.strip()} is {v.strip()}")
+                    if not age_label and ("age" in k.lower() or "group" in k.lower()):
+                        age_label = v.strip()
+                    elif not param_label and ("fluid" in k.lower() or "bp" in k.lower() or "urine" in k.lower() or "rate" in k.lower()):
+                        param_label = k.strip()
+                        value = v.strip()
+            if age_label and param_label and value:
+                if re.match(r"\\d+", age_label):
+                    age_phrase = f"a {age_label} old"
+                else:
+                    age_phrase = f"children in the '{age_label}' group"
+                return {"answer": f"For {age_phrase}, the normal {param_label.lower()} is {value}."}
+            # Fallback: join all row info naturally
+            summary = [f"{k.strip()}: {v.strip()}" for k, v in row.items() if k and v and str(v).strip().lower() not in ["", "nan", "none"]]
             if summary:
-                return {"answer": f"From {table_title}: " + ", ".join(summary) + "."}
+                return {"answer": f"According to the table '{table_title}', {', '.join(summary)}."}
         # --- Fallback: Table Cell Semantic Search ---
         cos_scores = util.pytorch_cos_sim(q_emb, table_cell_embeddings)[0]
         best_idx = int(torch.argmax(cos_scores))
@@ -464,7 +489,11 @@ async def search(request: QueryRequest):
             table_title, row_label, col, value = table_cell_lookup[best_idx]
             param_label = col.replace("(mmHg)", "").replace(":", "").strip()
             age_label = row_label
-            return {"answer": f"For {age_label}, the normal {param_label.lower()} is {value}."}
+            if re.match(r"\\d+", age_label):
+                age_phrase = f"a {age_label} old"
+            else:
+                age_phrase = f"children in the '{age_label}' group"
+            return {"answer": f"For {age_phrase}, the normal {param_label.lower()} is {value}."}
         # --- Fallback: QA Pairs ---
         if qa_embeddings is not None:
             qa_scores = util.pytorch_cos_sim(q_emb, qa_embeddings)[0]
