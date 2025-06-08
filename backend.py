@@ -269,27 +269,91 @@ def find_synonym_matches(q, lookup_list, synonyms):
                         return idx
     return None
 
+# --- Vitals Table Parsing ---
+def load_vitals_table():
+    vitals_path = os.path.join('data', 'nursing_guide_cleaned.txt')
+    # Read only the first table (assume it's at the top, separated by blank lines)
+    with open(vitals_path, encoding='utf-8') as f:
+        lines = f.readlines()
+    table_lines = []
+    for line in lines:
+        if '|' in line:
+            table_lines.append(line)
+        elif table_lines:
+            break  # Stop at first blank line after table
+    # Write to a temp string and read as CSV
+    import io
+    table_str = ''.join(table_lines)
+    df = pd.read_csv(io.StringIO(table_str), sep='|')
+    # Clean columns and values
+    df.columns = [c.strip().lower() for c in df.columns]
+    for col in df.columns:
+        df[col] = df[col].astype(str).str.strip()
+    return df
+vitals_df = load_vitals_table()
+
+# --- Age alias map for vitals table ---
+vitals_age_aliases = {
+    'neonate': ['0-1 month', 'neonate', 'newborn'],
+    'infant': ['1 month - 1 year', '1 month to 1 year', 'infant'],
+    'toddler': ['1-2 years', 'toddler'],
+    'child': ['2-12 years', 'child'],
+    'adolescent': ['12-18 years', 'adolescent'],
+}
+
+def find_vitals_row_for_age(query):
+    ql = query.lower()
+    for alias, options in vitals_age_aliases.items():
+        for opt in options:
+            if opt in ql or alias in ql:
+                # Try to find row in df
+                for idx, row in vitals_df.iterrows():
+                    age_val = row[vitals_df.columns[0]].lower()
+                    if opt in age_val or alias in age_val:
+                        return alias, row
+    # Fallback: try partial match
+    for idx, row in vitals_df.iterrows():
+        age_val = row[vitals_df.columns[0]].lower()
+        if any(a in ql for a in age_val.split()):
+            return age_val, row
+    return None, None
+
+def normalize(s):
+    import re
+    s = s.lower()
+    s = re.sub(r'\([^)]*\)', '', s)
+    s = s.replace('-', ' ').replace('<', '').replace('>', '').replace(':', '').replace('/', ' ')
+    s = re.sub(r'[^a-z0-9 ]', '', s)
+    s = re.sub(r'\s+', ' ', s).strip()
+    return s
+
 @app.post('/search')
 async def search(request: QueryRequest):
     try:
         q = request.query.strip()
-        threshold = 0.45  # Stricter threshold for semantic search
-        import re
-        def normalize(s):
-            s = s.lower()
-            s = re.sub(r'\([^)]*\)', '', s)
-            s = s.replace('-', ' ').replace('<', '').replace('>', '').replace(':', '').replace('/', ' ')
-            s = re.sub(r'[^a-z0-9 ]', '', s)
-            s = re.sub(r'\s+', ' ', s).strip()
-            return s
         ql = q.lower()
+        # --- Vitals Table Direct Answer ---
+        if any(term in ql for term in ["vital sign", "vitals", "normal vital", "heart rate", "respiratory rate"]):
+            age_label, row = find_vitals_row_for_age(ql)
+            if row is not None:
+                # Compose answer from all columns except age
+                col_map = {c: c for c in vitals_df.columns if c != vitals_df.columns[0]}
+                # Optionally, map to readable names
+                col_map = {c: c.replace('bpm', 'beats per minute').replace('respiratory rate', 'respiratory rate').replace('heart rate', 'heart rate').replace('bp', 'blood pressure') for c in col_map}
+                values = []
+                for c in vitals_df.columns[1:]:
+                    val = row[c]
+                    if val and val.lower() != 'nan':
+                        values.append(f"{col_map[c]} is {val}")
+                age_phrase = age_label if age_label else row[vitals_df.columns[0]]
+                return {"answer": f"For {age_phrase} ({row[vitals_df.columns[0]]}), " + ' and '.join(values) + "."}
+        # 1. Age group matching: try all synonyms, prefer longest match, allow partials
         matched_age = None
         matched_param = None
         best_age_score = 0
         best_param_score = 0
         matched_age_syn = None
         matched_param_syn = None
-        # 1. Age group matching: try all synonyms, prefer longest match, allow partials
         for key, vals in age_synonyms.items():
             for v in vals:
                 v_norm = normalize(v)
@@ -373,6 +437,7 @@ async def search(request: QueryRequest):
                     age_label = row[df.columns[0]]
                     return {"answer": f"For {age_label}, the normal {param_label.lower()} is {value}."}
         # 5. Fallback: semantic search ONLY if not both matched
+        threshold = 0.45  # Stricter threshold for semantic search
         q_emb = model.encode(q, convert_to_tensor=True, dtype=torch.float32)
         cos_scores = util.pytorch_cos_sim(q_emb, table_cell_embeddings)[0]
         best_idx = int(torch.argmax(cos_scores))

@@ -1,3 +1,13 @@
+[Vitals Table]
+Age Group|Heart Rate (bpm)|Respiratory Rate (breaths/min)|Systolic BP (mmHg)
+Neonate (0-1 month)|120-180|40-60|60-80
+Infant (1 month - 1 year)|110-160|30-40|70-90
+Toddler (1-2 years)|100-150|25-35|80-95
+Young Child (2-7 years)|95-140|25-30|90-110
+Older Child (7-12 years)|80-120|20-25|100-120
+Adolescent (12-15 years)|60-100|12-20|110-130
+
+
 # Vital Signs Reference Table
 # Age Group|Heart Rate Min|Heart Rate Max|Respiratory Rate Min|Respiratory Rate Max
 Birth - < 3 months (Neonate)|90|180|30|60
