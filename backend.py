@@ -174,8 +174,8 @@ table_row_texts = []  # List of (table_title, row_dict, row_text)
 table_row_lookup = []
 for table in all_tables:
     for row in table['rows']:
-        # Join all values for semantic search, include table title for context
-        row_text = f"{table['title']} | " + ' | '.join([str(v) for v in row.values()])
+        # Join all values for semantic search, include table title and column names for context
+        row_text = f"Table: {table['title']} | " + ' | '.join([f"{col}: {row[col]}" for col in table['header']])
         table_row_texts.append(row_text)
         table_row_lookup.append((table['title'], row))
 
