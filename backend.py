@@ -208,47 +208,71 @@ async def search(request: QueryRequest):
     try:
         q = request.query.strip()
         q_lower = q.lower()
-        # 1. Semantic search over table rows
-        q_emb = model.encode(q, convert_to_tensor=True, dtype=torch.float32)
-        cos_scores = util.pytorch_cos_sim(q_emb, table_row_embeddings)[0]
-        # Get top 5 indices for more flexibility
-        topk = min(5, len(cos_scores))
-        top_indices = torch.topk(cos_scores, k=topk).indices.tolist()
-        top_scores = [float(cos_scores[i]) for i in top_indices]
         threshold = 0.3
-        # Table/column preference logic
-        vital_keywords = ["vital", "heart rate", "respiratory", "bp", "blood pressure", "age group"]
-        def is_vital_row(table_title, row):
-            title_match = any(kw in table_title.lower() for kw in vital_keywords)
-            col_match = any(any(kw in col.lower() for kw in vital_keywords) for col in row.keys())
-            return title_match or col_match
-        prefer_vital = any(kw in q_lower for kw in vital_keywords)
-        vital_rows = []
-        other_rows = []
-        for idx, score in zip(top_indices, top_scores):
-            if score > threshold:
-                table_title, row = table_row_lookup[idx]
-                if prefer_vital and is_vital_row(table_title, row):
-                    vital_rows.append((table_title, row, score))
-                elif not prefer_vital:
-                    other_rows.append((table_title, row, score))
-        # Prefer vital rows if any, otherwise show other top rows
-        answer_rows = vital_rows if vital_rows else other_rows
-        if answer_rows:
-            # Format all matched rows
-            formatted = []
-            for table_title, row, score in answer_rows:
-                row_str = '\n'.join([f"{k}: {v}" for k, v in row.items()])
-                formatted.append(f"Table: {table_title}\n{row_str}")
-            return {"answer": '\n\n'.join(formatted)}
-        # 2. Fallback: semantic search over QA pairs
+        # 1. Table selection by intent keywords
+        table_intent_keywords = {
+            'vital': ['vital', 'heart rate', 'respiratory', 'bp', 'blood pressure', 'age group'],
+            'urine': ['urine', 'urine output'],
+            'fluid': ['fluid', 'fluids', 'holliday', 'maintenance'],
+            'systolic': ['systolic', 'bp', 'blood pressure'],
+        }
+        # Map intent to table title substrings
+        table_title_map = {
+            'vital': 'age group',
+            'urine': 'urine output',
+            'fluid': 'fluids',
+            'systolic': 'systolic',
+        }
+        # Find intent
+        intent = None
+        for k, keywords in table_intent_keywords.items():
+            if any(kw in q_lower for kw in keywords):
+                intent = k
+                break
+        # Find best matching table
+        selected_table = None
+        if intent:
+            for table in all_tables:
+                if table_title_map[intent] in table['title'].lower():
+                    selected_table = table
+                    break
+        # If no intent match, fallback to best semantic table title match
+        if not selected_table:
+            table_titles = [t['title'] for t in all_tables]
+            q_emb = model.encode(q, convert_to_tensor=True, dtype=torch.float32)
+            table_title_embs = model.encode(table_titles, convert_to_tensor=True, dtype=torch.float32)
+            title_scores = util.pytorch_cos_sim(q_emb, table_title_embs)[0]
+            best_idx = int(torch.argmax(title_scores))
+            if float(title_scores[best_idx]) > 0.3:
+                selected_table = all_tables[best_idx]
+        # If still no table, fallback
+        if not selected_table:
+            all_titles = '\n'.join([t['title'] for t in all_tables])
+            return {"answer": f"Sorry, I couldn't find a relevant table. Available tables are:\n{all_titles}"}
+        # 2. Row selection within selected table
+        row_texts = [
+            ' | '.join([f"{col}: {row[col]}" for col in selected_table['header']])
+            for row in selected_table['rows']
+        ]
+        if not row_texts:
+            return {"answer": f"Sorry, the selected table '{selected_table['title']}' has no data."}
+        row_embs = model.encode(row_texts, convert_to_tensor=True, dtype=torch.float32)
+        q_emb = model.encode(q, convert_to_tensor=True, dtype=torch.float32)
+        row_scores = util.pytorch_cos_sim(q_emb, row_embs)[0]
+        best_row_idx = int(torch.argmax(row_scores))
+        best_row_score = float(row_scores[best_row_idx])
+        if best_row_score > threshold:
+            row = selected_table['rows'][best_row_idx]
+            row_str = '\n'.join([f"{k}: {v}" for k, v in row.items()])
+            return {"answer": f"Table: {selected_table['title']}\n{row_str}"}
+        # 3. Fallback: semantic search over QA pairs
         if qa_embeddings is not None:
             qa_scores = util.pytorch_cos_sim(q_emb, qa_embeddings)[0]
             qa_best_idx = int(torch.argmax(qa_scores))
             qa_best_score = float(qa_scores[qa_best_idx])
             if qa_best_score > threshold:
                 return {"answer": qa_answers[qa_best_idx]}
-        # 3. Fallback: return all table titles
+        # 4. Fallback: return all table titles
         all_titles = '\n'.join([t['title'] for t in all_tables])
         return {"answer": f"Sorry, I couldn't find a specific answer. Available tables are:\n{all_titles}"}
     except Exception as e:
