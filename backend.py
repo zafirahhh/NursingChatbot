@@ -213,7 +213,7 @@ async def search(request: QueryRequest):
         best_idx = int(torch.argmax(cos_scores))
         best_score = float(cos_scores[best_idx])
         # Threshold for a confident match (tune as needed)
-        threshold = 0.45
+        threshold = 0.3
         if best_score > threshold:
             table_title, row = table_row_lookup[best_idx]
             return {"answer": f"Table: {table_title}\nRow: {row}"}
