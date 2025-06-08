@@ -454,37 +454,57 @@ async def search(request: QueryRequest):
         # --- Direct Table Cell Answer for Specific Parameter with Robust Age/Parameter Matching ---
         def extract_age_from_query(query):
             # Try to extract age in years/months from the query
-            match = re.search(r'(\\d+)\\s*(year|yr|month|mo)', query)
+            match = re.search(r'(\d+)\s*(year|yr|month|mo)', query)
             if match:
                 num = int(match.group(1))
                 unit = match.group(2)
                 if 'month' in unit:
-                    return num / 12  # Convert months to years
-                return num
+                    return num, 'month'
+                return num, 'year'
+            return None, None
+
+        def parse_age_label(label):
+            # Returns (start_age, end_age, unit) where unit is 'years' or 'months'
+            label = label.lower().replace('years', 'year').replace('months', 'month')
+            m = re.match(r'(\d+)[-–<]+(\d+)', label)
+            if m:
+                start = int(m.group(1))
+                end = int(m.group(2))
+                unit = 'year' if 'year' in label else 'month'
+                return (start, end, unit)
+            m = re.match(r'(\d+)[^\d]+and above', label)
+            if m:
+                start = int(m.group(1))
+                unit = 'year' if 'year' in label else 'month'
+                return (start, float('inf'), unit)
+            m = re.match(r'(\d+)[^\d]+month', label)
+            if m:
+                start = int(m.group(1))
+                return (start, start+1, 'month')
             return None
 
-        def find_best_age_group(age, all_age_labels):
+        def find_best_age_group(age, age_unit, all_age_labels):
             # Try to map a numeric age to the closest age group label
+            best_label = None
             for label in all_age_labels:
-                # e.g., '6-12 years', '1-2 years', '15 years and above'
-                m = re.match(r'(\\d+)[-–<]+(\\d+)', label)
-                if m:
-                    start = int(m.group(1))
-                    end = int(m.group(2))
-                    if start <= age < end:
+                parsed = parse_age_label(label)
+                if parsed:
+                    start, end, unit = parsed
+                    # Convert age to correct unit
+                    age_cmp = age if unit == age_unit else (age/12 if age_unit=='month' and unit=='year' else age*12)
+                    if start <= age_cmp < end:
                         return label
-                elif 'above' in label or '>' in label:
-                    m = re.match(r'(\\d+)', label)
-                    if m and age >= int(m.group(1)):
+                    # For open-ended ranges
+                    if end == float('inf') and age_cmp >= start:
                         return label
             return None
 
         # Extract age and parameter from query
-        age_in_query = extract_age_from_query(ql)
+        age_in_query, age_unit = extract_age_from_query(ql)
         all_age_labels = [cell[1] for cell in table_cell_lookup]
         best_age_label = None
         if age_in_query is not None:
-            best_age_label = find_best_age_group(age_in_query, all_age_labels)
+            best_age_label = find_best_age_group(age_in_query, age_unit, all_age_labels)
         # Fallback to synonym match if no numeric age
         if not best_age_label:
             for key, vals in age_synonyms.items():
@@ -518,7 +538,7 @@ async def search(request: QueryRequest):
                     param_label = cell[2].replace("(mmHg)", "").replace(":", "").strip()
                     age_label = cell[1]
                     value = cell[3]
-                    if re.match(r"\\d+", age_label):
+                    if re.match(r"\d+", age_label):
                         age_phrase = f"a {age_label} old"
                     else:
                         age_phrase = f"children in the '{age_label}' group"
