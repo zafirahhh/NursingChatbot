@@ -203,76 +203,64 @@ def safe_load_table_row_embeddings():
 
 table_row_embeddings = safe_load_table_row_embeddings()
 
+# --- Table Cell Embedding Preparation ---
+table_cell_texts = []  # List of (table_title, row_label, column_name, value, full_context)
+table_cell_lookup = []
+for table in all_tables:
+    for row in table['rows']:
+        row_label = row.get(table['header'][0], '')  # Assume first column is the row label (e.g., Age Group)
+        for col in table['header']:
+            value = row[col]
+            # Compose a context string for semantic search
+            cell_text = f"Table: {table['title']} | Row: {row_label} | Column: {col} | Value: {value}"
+            table_cell_texts.append(cell_text)
+            table_cell_lookup.append((table['title'], row_label, col, value))
+
+# Precompute or load embeddings for all table cells
+TABLE_CELL_EMB_PATH = os.path.join('data', 'embeddings', 'table_cell_embeddings.pt')
+def safe_load_table_cell_embeddings():
+    try:
+        if os.path.exists(TABLE_CELL_EMB_PATH):
+            emb = torch.load(TABLE_CELL_EMB_PATH, map_location='cpu')
+            if emb.dtype != torch.float32:
+                emb = emb.float()
+            print(f'Loaded table cell embeddings from disk. (dtype: {emb.dtype})')
+            return emb
+        else:
+            emb = model.encode(table_cell_texts, convert_to_tensor=True, dtype=torch.float32)
+            torch.save(emb, TABLE_CELL_EMB_PATH)
+            print(f'Encoded and saved table cell embeddings. (dtype: {emb.dtype})')
+            return emb
+    except Exception as e:
+        print(f'Error loading table cell embeddings: {e}. Regenerating...')
+        emb = model.encode(table_cell_texts, convert_to_tensor=True, dtype=torch.float32)
+        torch.save(emb, TABLE_CELL_EMB_PATH)
+        print(f'Regenerated and saved table cell embeddings. (dtype: {emb.dtype})')
+        return emb
+
+table_cell_embeddings = safe_load_table_cell_embeddings()
+
 @app.post('/search')
 async def search(request: QueryRequest):
     try:
         q = request.query.strip()
-        q_lower = q.lower()
         threshold = 0.3
-        # 1. Table selection by intent keywords
-        table_intent_keywords = {
-            'vital': ['vital', 'heart rate', 'respiratory', 'bp', 'blood pressure', 'age group'],
-            'urine': ['urine', 'urine output'],
-            'fluid': ['fluid', 'fluids', 'holliday', 'maintenance'],
-            'systolic': ['systolic', 'bp', 'blood pressure'],
-        }
-        # Map intent to table title substrings
-        table_title_map = {
-            'vital': 'age group',
-            'urine': 'urine output',
-            'fluid': 'fluids',
-            'systolic': 'systolic',
-        }
-        # Find intent
-        intent = None
-        for k, keywords in table_intent_keywords.items():
-            if any(kw in q_lower for kw in keywords):
-                intent = k
-                break
-        # Find best matching table
-        selected_table = None
-        if intent:
-            for table in all_tables:
-                if table_title_map[intent] in table['title'].lower():
-                    selected_table = table
-                    break
-        # If no intent match, fallback to best semantic table title match
-        if not selected_table:
-            table_titles = [t['title'] for t in all_tables]
-            q_emb = model.encode(q, convert_to_tensor=True, dtype=torch.float32)
-            table_title_embs = model.encode(table_titles, convert_to_tensor=True, dtype=torch.float32)
-            title_scores = util.pytorch_cos_sim(q_emb, table_title_embs)[0]
-            best_idx = int(torch.argmax(title_scores))
-            if float(title_scores[best_idx]) > 0.3:
-                selected_table = all_tables[best_idx]
-        # If still no table, fallback
-        if not selected_table:
-            all_titles = '\n'.join([t['title'] for t in all_tables])
-            return {"answer": f"Sorry, I couldn't find a relevant table. Available tables are:\n{all_titles}"}
-        # 2. Row selection within selected table
-        row_texts = [
-            ' | '.join([f"{col}: {row[col]}" for col in selected_table['header']])
-            for row in selected_table['rows']
-        ]
-        if not row_texts:
-            return {"answer": f"Sorry, the selected table '{selected_table['title']}' has no data."}
-        row_embs = model.encode(row_texts, convert_to_tensor=True, dtype=torch.float32)
+        # 1. Semantic search over all table cells
         q_emb = model.encode(q, convert_to_tensor=True, dtype=torch.float32)
-        row_scores = util.pytorch_cos_sim(q_emb, row_embs)[0]
-        best_row_idx = int(torch.argmax(row_scores))
-        best_row_score = float(row_scores[best_row_idx])
-        if best_row_score > threshold:
-            row = selected_table['rows'][best_row_idx]
-            row_str = '\n'.join([f"{k}: {v}" for k, v in row.items()])
-            return {"answer": f"Table: {selected_table['title']}\n{row_str}"}
-        # 3. Fallback: semantic search over QA pairs
+        cos_scores = util.pytorch_cos_sim(q_emb, table_cell_embeddings)[0]
+        best_idx = int(torch.argmax(cos_scores))
+        best_score = float(cos_scores[best_idx])
+        if best_score > threshold:
+            table_title, row_label, col, value = table_cell_lookup[best_idx]
+            return {"answer": f"Table: {table_title}\nRow: {row_label}\nColumn: {col}\nValue: {value}"}
+        # 2. Fallback: semantic search over QA pairs
         if qa_embeddings is not None:
             qa_scores = util.pytorch_cos_sim(q_emb, qa_embeddings)[0]
             qa_best_idx = int(torch.argmax(qa_scores))
             qa_best_score = float(qa_scores[qa_best_idx])
             if qa_best_score > threshold:
                 return {"answer": qa_answers[qa_best_idx]}
-        # 4. Fallback: return all table titles
+        # 3. Fallback: return all table titles
         all_titles = '\n'.join([t['title'] for t in all_tables])
         return {"answer": f"Sorry, I couldn't find a specific answer. Available tables are:\n{all_titles}"}
     except Exception as e:
