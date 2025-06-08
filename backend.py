@@ -298,15 +298,24 @@ async def search(request: QueryRequest):
                 # --- Natural language answer formatting ---
                 # 1. If query is for vital signs (all for age group)
                 if any(term in q.lower() for term in ["vital sign", "vitals", "all vital", "normal vital"]):
-                    # Find all vital sign columns for this age group
-                    vital_cols = [c for c in col_names if any(x in c.lower() for x in ["heart rate", "respiratory rate", "bp", "blood pressure"])]
-                    vital_answers = []
-                    for idx, cell in enumerate(table_cell_lookup):
-                        if cell[1].lower() == row_label.lower() and cell[2] in vital_cols:
-                            label = cell[2].replace("(mmHg)", "").replace("Min", "").replace("Max", "").replace(":", "").strip()
-                            vital_answers.append(f"{label}: {cell[3]}")
-                    if vital_answers:
-                        return {"answer": ", ".join(vital_answers)}
+                    # 1. Find best matching age group (row label) using semantic search
+                    age_row_labels = list({cell[1] for cell in table_cell_lookup})
+                    q_emb = model.encode(q, convert_to_tensor=True, dtype=torch.float32)
+                    age_row_embs = model.encode(age_row_labels, convert_to_tensor=True, dtype=torch.float32)
+                    age_scores = util.pytorch_cos_sim(q_emb, age_row_embs)[0]
+                    best_age_idx = int(torch.argmax(age_scores))
+                    best_age_score = float(age_scores[best_age_idx])
+                    matched_age = age_row_labels[best_age_idx] if best_age_score > 0.3 else None
+                    if matched_age:
+                        # 2. Get all vital sign columns for this age group
+                        vital_cols = [c for c in set([cell[2] for cell in table_cell_lookup]) if any(x in c.lower() for x in ["heart rate", "respiratory rate", "bp", "blood pressure"])]
+                        vital_answers = []
+                        for cell in table_cell_lookup:
+                            if cell[1].lower() == matched_age.lower() and cell[2] in vital_cols:
+                                label = cell[2].replace("(mmHg)", "").replace("Min", "").replace("Max", "").replace(":", "").strip()
+                                vital_answers.append(f"{label} {cell[3]}")
+                        if vital_answers:
+                            return {"answer": f"For {matched_age}: " + ", ".join(vital_answers)}
                 # 2. Otherwise, single parameter answer
                 param_label = col.replace("(mmHg)", "").replace(":", "").strip()
                 age_label = row_label
