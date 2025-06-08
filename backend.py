@@ -240,12 +240,64 @@ def safe_load_table_cell_embeddings():
 
 table_cell_embeddings = safe_load_table_cell_embeddings()
 
+# --- Clinical Synonym Map ---
+age_synonyms = {
+    'neonate': ['birth - < 3 months', '<1 month', '0-1 month', 'neonate'],
+    'infant': ['1 month to 1 year', '1 month - < 1 year', 'infant', '1 mth to 1 yr', '6 months - <1 year'],
+    'toddler': ['1 year - < 6 years', 'toddler', '1-2 yr'],
+    'child': ['6 years - < 10 years', 'child', '10 years - < 15 years', '1 year - < 6 years'],
+    'adolescent': ['15 years and above', 'adolescent', '10 years - < 15 years'],
+    '6 year old': ['6 years - < 10 years', '6-10 years', '6 yr', '6 years'],
+    '1 year old': ['1 year - < 6 years', '1 year', '1 yr'],
+    'newborn': ['birth - < 3 months', 'neonate', '0-1 month'],
+}
+param_synonyms = {
+    'bp': ['bp', 'blood pressure', 'systolic', 'expected systolic bp (mmhg)', 'minimum systolic bp (mmhg)'],
+    'heart rate': ['heart rate', 'pulse'],
+    'respiratory rate': ['respiratory rate', 'rr'],
+    'urine': ['urine output', 'urine'],
+}
+
+def find_synonym_matches(q, lookup_list, synonyms):
+    ql = q.lower()
+    for key, vals in synonyms.items():
+        if key in ql:
+            for v in vals:
+                for idx, item in enumerate(lookup_list):
+                    if v in item.lower():
+                        return idx
+    return None
+
 @app.post('/search')
 async def search(request: QueryRequest):
     try:
         q = request.query.strip()
         threshold = 0.3
-        # 1. Semantic search over all table cells
+        # Try to match age group synonym
+        row_labels = [cell[1] for cell in table_cell_lookup]
+        age_idx = find_synonym_matches(q, row_labels, age_synonyms)
+        col_names = [cell[2] for cell in table_cell_lookup]
+        param_idx = find_synonym_matches(q, col_names, param_synonyms)
+        # If both found, filter to those cells
+        filtered_indices = []
+        if age_idx is not None or param_idx is not None:
+            for idx, cell in enumerate(table_cell_lookup):
+                age_match = (age_idx is None or cell[1].lower() == row_labels[age_idx].lower())
+                param_match = (param_idx is None or cell[2].lower() == col_names[param_idx].lower())
+                if age_match and param_match:
+                    filtered_indices.append(idx)
+        # If filtered, do semantic search only on those
+        if filtered_indices:
+            q_emb = model.encode(q, convert_to_tensor=True, dtype=torch.float32)
+            filtered_embs = table_cell_embeddings[filtered_indices]
+            cos_scores = util.pytorch_cos_sim(q_emb, filtered_embs)[0]
+            best_idx = int(torch.argmax(cos_scores))
+            best_score = float(cos_scores[best_idx])
+            if best_score > threshold:
+                real_idx = filtered_indices[best_idx]
+                table_title, row_label, col, value = table_cell_lookup[real_idx]
+                return {"answer": f"Table: {table_title}\nRow: {row_label}\nColumn: {col}\nValue: {value}"}
+        # Otherwise, fallback to full semantic search
         q_emb = model.encode(q, convert_to_tensor=True, dtype=torch.float32)
         cos_scores = util.pytorch_cos_sim(q_emb, table_cell_embeddings)[0]
         best_idx = int(torch.argmax(cos_scores))
