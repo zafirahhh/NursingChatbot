@@ -173,7 +173,14 @@ async def search(request: QueryRequest):
                 best_sent_idx = int(torch.argmax(sent_scores))
                 best_sentence = sentences[best_sent_idx]
                 print(f"[DEBUG] Best sentence: {best_sentence}")
-                if len(best_sentence) < 30 and len(sentences) > 1:
+                # If the best sentence looks like a table header, return the next 8 lines as well
+                if ("table" in best_sentence.lower() or "table of" in best_sentence.lower()) and len(sentences) > best_sent_idx + 1:
+                    # Skip the header and return the next 8 lines (or as many as available)
+                    answer = '\n'.join(sentences[best_sent_idx+1:best_sent_idx+9])
+                    # If the answer is empty, fallback to the next best sentence
+                    if not answer.strip() and len(sentences) > best_sent_idx + 1:
+                        answer = sentences[best_sent_idx+1]
+                elif len(best_sentence) < 30 and len(sentences) > 1:
                     top2_idx = torch.topk(sent_scores, 2).indices.tolist()
                     answer = ' '.join([sentences[i] for i in top2_idx])
                 else:
