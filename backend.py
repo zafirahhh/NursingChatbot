@@ -9,6 +9,7 @@ import re
 import torch
 import time
 import nltk
+import pandas as pd
 nltk.download('punkt')
 nltk.download('punkt_tab')
 from nltk.tokenize import sent_tokenize
@@ -272,12 +273,11 @@ def find_synonym_matches(q, lookup_list, synonyms):
 async def search(request: QueryRequest):
     try:
         q = request.query.strip()
-        threshold = 0.3
-        # --- Improved robust matching logic with best-match selection and table context ---
+        threshold = 0.45  # Stricter threshold for semantic search
         import re
         def normalize(s):
             s = s.lower()
-            s = re.sub(r'\([^)]*\)', '', s)  # remove parentheses and contents
+            s = re.sub(r'\([^)]*\)', '', s)
             s = s.replace('-', ' ').replace('<', '').replace('>', '').replace(':', '').replace('/', ' ')
             s = re.sub(r'[^a-z0-9 ]', '', s)
             s = re.sub(r'\s+', ' ', s).strip()
@@ -311,38 +311,58 @@ async def search(request: QueryRequest):
                             if score > best_param_score:
                                 matched_param = cell[2]
                                 best_param_score = score
-        # 3. If query is for vital signs, use vital sign logic
-        if any(term in ql for term in ["vital sign", "vitals", "all vital", "normal vital"]):
-            # Find best matching age group (row label) using above logic
-            if matched_age:
-                vital_cols = [c for c in set([cell[2] for cell in table_cell_lookup]) if any(x in normalize(c) for x in ["heart rate", "respiratory rate", "bp", "blood pressure"])]
-                vital_answers = []
-                for col in vital_cols:
-                    for cell in table_cell_lookup:
-                        if normalize(cell[1]) == normalize(matched_age) and normalize(cell[2]) == normalize(col):
-                            label = cell[2].replace("(mmHg)", "").replace("Min", "").replace("Max", "").replace(":", "").strip()
-                            vital_answers.append(f"{label} {cell[3]}")
-                            break
-                if vital_answers:
-                    return {"answer": f"For {matched_age}: " + ", ".join(vital_answers)}
+        # --- Improved Table Parsing with pandas ---
+        # Try to find a table with vital signs or relevant parameters
+        vital_terms = ["vital sign", "vitals", "all vital", "normal vital"]
+        if any(term in ql for term in vital_terms):
+            # Find the best matching table (by title)
+            vital_table = None
+            for table in all_tables:
+                if any(x in normalize(table['title']) for x in ["vital", "sign"]):
+                    vital_table = table
+                    break
+            if vital_table and matched_age:
+                df = pd.DataFrame(vital_table['rows'])
+                # Find the row for the matched age group
+                row = None
+                for idx, r in df.iterrows():
+                    if normalize(r[df.columns[0]]) == normalize(matched_age):
+                        row = r
+                        break
+                if row is not None:
+                    # Compose a natural sentence for all vital columns
+                    vital_cols = [c for c in df.columns if any(x in normalize(c) for x in ["heart rate", "respiratory rate", "bp", "blood pressure"])]
+                    vital_answers = []
+                    for col in vital_cols:
+                        label = col.replace("(mmHg)", "").replace(":", "").strip()
+                        value = row[col]
+                        vital_answers.append(f"{label} {value}")
+                    if vital_answers:
+                        age_label = row[df.columns[0]]
+                        return {"answer": f"For {age_label}, the normal vital signs are: " + ", ".join(vital_answers) + "."}
             # If no age group matched, fallback to semantic search
         # 4. For all other queries, only answer if BOTH age and parameter are matched
         if matched_age and matched_param:
-            prefer_min = 'min' in ql
-            prefer_max = 'max' in ql
-            best_cell = None
-            for cell in table_cell_lookup:
-                if normalize(cell[1]) == normalize(matched_age) and normalize(cell[2]) == normalize(matched_param):
-                    if (prefer_min and 'min' in cell[2].lower()) or (prefer_max and 'max' in cell[2].lower()) or (not prefer_min and not prefer_max and 'min' not in cell[2].lower() and 'max' not in cell[2].lower()):
-                        best_cell = cell
+            # Find the best matching table for the parameter
+            best_table = None
+            for table in all_tables:
+                if any(normalize(matched_param) in normalize(h) for h in table['header']):
+                    best_table = table
+                    break
+            if best_table:
+                df = pd.DataFrame(best_table['rows'])
+                # Find the row for the matched age group
+                row = None
+                for idx, r in df.iterrows():
+                    if normalize(r[df.columns[0]]) == normalize(matched_age):
+                        row = r
                         break
-            if best_cell:
-                param_label = best_cell[2].replace("(mmHg)", "").replace(":", "").strip()
-                age_label = best_cell[1]
-                return {"answer": f"The {param_label.lower()} for {age_label} is {best_cell[3]}."}
-            # If both matched but no cell found, fallback
+                if row is not None:
+                    value = row[matched_param]
+                    param_label = matched_param.replace("(mmHg)", "").replace(":", "").strip()
+                    age_label = row[df.columns[0]]
+                    return {"answer": f"For {age_label}, the normal {param_label.lower()} is {value}."}
         # 5. Fallback: semantic search ONLY if not both matched
-        threshold = 0.3
         q_emb = model.encode(q, convert_to_tensor=True, dtype=torch.float32)
         cos_scores = util.pytorch_cos_sim(q_emb, table_cell_embeddings)[0]
         best_idx = int(torch.argmax(cos_scores))
@@ -351,7 +371,8 @@ async def search(request: QueryRequest):
             table_title, row_label, col, value = table_cell_lookup[best_idx]
             param_label = col.replace("(mmHg)", "").replace(":", "").strip()
             age_label = row_label
-            return {"answer": f"The {param_label.lower()} for {age_label} is {value}."}
+            # Compose a natural sentence
+            return {"answer": f"For {age_label}, the normal {param_label.lower()} is {value}."}
         # 6. Fallback: semantic search over QA pairs
         if qa_embeddings is not None:
             qa_scores = util.pytorch_cos_sim(q_emb, qa_embeddings)[0]
@@ -359,9 +380,11 @@ async def search(request: QueryRequest):
             qa_best_score = float(qa_scores[qa_best_idx])
             if qa_best_score > threshold:
                 return {"answer": qa_answers[qa_best_idx]}
-        # 7. Fallback: return all table titles
-        all_titles = '\n'.join([t['title'] for t in all_tables])
-        return {"answer": f"Sorry, I couldn't find a specific answer. Available tables are:\n{all_titles}"}
+        # 7. Fallback: return a clear message
+        # Try to mention the age/param if possible
+        fallback_age = matched_age if matched_age else "the specified age group"
+        fallback_param = matched_param if matched_param else "the specific parameter"
+        return {"answer": f"Sorry, the specific range for {fallback_age} and {fallback_param} is not available."}
     except Exception as e:
         import traceback
         print(f"Error in /search: {e}")
