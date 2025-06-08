@@ -9,6 +9,7 @@ import re
 import torch
 import time
 import nltk
+nltk.download('punkt')
 from nltk.tokenize import sent_tokenize
 
 start_time = time.time()
