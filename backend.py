@@ -168,7 +168,7 @@ vital_signs_table = extract_vital_signs_table()
 @app.post('/search')
 async def search(request: QueryRequest):
     try:
-        # 0. Improved vital signs table lookup with fuzzy/keyword matching
+        # 0. Improved vital signs table lookup with robust matching
         if vital_signs_table:
             q = request.query.lower()
             # Map keywords to age groups
@@ -179,28 +179,44 @@ async def search(request: QueryRequest):
                 'young child': 'young child',
                 'older child': 'older child',
             }
+            vital_keywords = {
+                'heart rate': ['heart rate', 'pulse', 'hr'],
+                'respiratory rate': ['respiratory rate', 'resp rate', 'rr', 'breathing rate'],
+                'systolic bp': ['systolic bp', 'bp', 'blood pressure', 'systolic', 'sbp'],
+            }
             matched_row = None
+            matched_age = None
             for keyword, label in age_keywords.items():
                 if keyword in q:
                     for row in vital_signs_table:
                         if label in row['Age Group'].lower():
                             matched_row = row
+                            matched_age = label
                             break
                 if matched_row:
                     break
             if matched_row:
-                # Check for specific vital sign in query
-                if 'heart rate' in q:
-                    answer = f"{matched_row['Age Group']} Heart Rate: {matched_row['Heart Rate (beats/min)']}"
-                elif 'respiratory rate' in q or 'resp rate' in q:
-                    answer = f"{matched_row['Age Group']} Respiratory Rate: {matched_row['Respiratory Rate (breaths/min)']}"
-                elif 'systolic' in q or 'bp' in q or 'blood pressure' in q:
-                    answer = f"{matched_row['Age Group']} Systolic BP: {matched_row['Systolic BP (mmHg)']}"
-                else:
-                    answer = (f"Age Group: {matched_row['Age Group']}\n"
-                              f"Heart Rate: {matched_row['Heart Rate (beats/min)']}\n"
-                              f"Respiratory Rate: {matched_row['Respiratory Rate (breaths/min)']}\n"
-                              f"Systolic BP: {matched_row['Systolic BP (mmHg)']}")
+                # Check for specific vital sign in query (robust matching)
+                for vital_col, synonyms in vital_keywords.items():
+                    if any(s in q for s in synonyms):
+                        # Map vital_col to actual table column
+                        if vital_col == 'heart rate':
+                            col = 'Heart Rate (beats/min)'
+                        elif vital_col == 'respiratory rate':
+                            col = 'Respiratory Rate (breaths/min)'
+                        elif vital_col == 'systolic bp':
+                            col = 'Systolic BP (mmHg)'
+                        else:
+                            continue
+                        value = matched_row.get(col, None)
+                        if value:
+                            return {"answer": value}
+                        else:
+                            return {"answer": f"No data for {vital_col} in {matched_row['Age Group']}"}
+                # If only age group is matched, return all vital signs for that group
+                answer = (f"Heart Rate: {matched_row['Heart Rate (beats/min)']}, "
+                          f"Respiratory Rate: {matched_row['Respiratory Rate (breaths/min)']}, "
+                          f"Systolic BP: {matched_row['Systolic BP (mmHg)']}")
                 return {"answer": answer}
         query_embedding = model.encode(request.query, convert_to_tensor=True, dtype=torch.float32)
         # 1. Try Q&A semantic search first (medical/nursing domain)
