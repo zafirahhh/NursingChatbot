@@ -134,54 +134,11 @@ document.addEventListener('DOMContentLoaded', () => {
             li.appendChild(nameSpan);
             li.tabIndex = 0;
             li.onclick = () => { activePromptIdx = idx; renderPrompts(); };
-            // Add 3-dot menu for delete (not for default)
-            if (idx !== 0) {
-                const menuBtn = document.createElement('button');
-                menuBtn.textContent = '⋮';
-                menuBtn.title = 'More actions';
-                menuBtn.className = 'prompt-action-btn menu-btn';
-                menuBtn.onclick = (e) => {
-                    e.stopPropagation();
-                    document.querySelectorAll('.prompt-menu').forEach(m => m.remove());
-                    const menu = document.createElement('div');
-                    menu.className = 'prompt-menu';
-                    menu.innerHTML = `
-                        <div class="prompt-menu-item delete">Delete</div>
-                    `;
-                    menu.style.position = 'absolute';
-                    menu.style.background = '#fff';
-                    menu.style.border = '1px solid #e0e0e0';
-                    menu.style.boxShadow = '0 4px 16px rgba(0,0,0,0.12)';
-                    menu.style.zIndex = 1000;
-                    menu.style.right = '0px';
-                    menu.style.top = '36px';
-                    menu.style.minWidth = '120px';
-                    menu.style.borderRadius = '10px';
-                    menu.style.padding = '8px 0';
-                    // Delete
-                    menu.querySelector('.delete').onclick = (ev) => {
-                        ev.stopPropagation();
-                        prompts.splice(idx, 1);
-                        if (activePromptIdx >= prompts.length) activePromptIdx = 0;
-                        savePrompts();
-                        renderPrompts();
-                        menu.remove();
-                    };
-                    document.addEventListener('click', function closeMenu(e) {
-                        if (!menu.contains(e.target) && e.target !== menuBtn) {
-                            menu.remove();
-                            document.removeEventListener('click', closeMenu);
-                        }
-                    });
-                    li.appendChild(menu);
-                };
-                li.appendChild(menuBtn);
-                li.style.position = 'relative';
-                li.style.display = 'flex';
-                li.style.alignItems = 'center';
-                li.style.justifyContent = 'space-between';
-                li.style.gap = '8px';
-            }
+            li.style.position = 'relative';
+            li.style.display = 'flex';
+            li.style.alignItems = 'center';
+            li.style.justifyContent = 'flex-start';
+            li.style.gap = '8px';
             promptList.appendChild(li);
         });
         // Add "+ new prompt" button at the end
@@ -267,8 +224,10 @@ document.addEventListener('DOMContentLoaded', () => {
         chatWindow.innerHTML = '';
         const history = JSON.parse(localStorage.getItem('kkh-chat-history-' + activeSessionId) || '[]');
         if (history.length === 0) {
-            // Show welcome message if no history
-            appendMessage('bot', 'Hello! I am your KKH Nursing Chatbot. How can I assist you today?');
+            // Only show welcome message if not already present
+            if (!chatWindow.querySelector('.message.bot')) {
+                appendMessage('bot', 'Hello! I am your KKH Nursing Chatbot. How can I assist you today?');
+            }
         } else {
             history.forEach(msg => appendMessage(msg.sender, msg.text, false));
         }
