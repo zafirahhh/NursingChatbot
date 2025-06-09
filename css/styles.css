@@ -49,8 +49,9 @@ header {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 2.5rem 0 1.5rem 0 !important;
+    padding: 2.5rem 0 2rem 0 !important;
     background: var(--primary-blue);
+    min-height: 120px;
 }
 
 .logo-title {
@@ -62,12 +63,13 @@ header {
 }
 
 .kkh-logo {
-    height: 48px;
+    height: 64px;
     width: auto;
-    margin-top: 0.7rem;
+    margin: 0.5rem auto;
+    display: block;
     background: #fff;
     border-radius: 12px;
-    padding: 0.2rem;
+    padding: 0.3rem;
     box-shadow: 0 2px 8px rgba(35,64,110,0.08);
 }
 
@@ -173,16 +175,14 @@ header {
     height: 100%;
     display: flex;
     flex-direction: column;
-    border-radius: 0;
-    box-shadow: none;
-    position: relative;
-    overflow: hidden;
+    justify-content: space-between;
     border-left: 1px solid #e0e0e0;
     border-right: 1px solid #e0e0e0;
+    overflow: hidden;
 }
 
 .chat-window {
-    flex: 1;
+    flex-grow: 1;
     overflow-y: auto;
     padding: 1.5rem 1rem 1rem;
     scroll-behavior: smooth;
@@ -218,8 +218,6 @@ header {
     padding: 1rem;
     background-color: var(--white);
     border-top: 1px solid #e0e0e0;
-    position: sticky;
-    bottom: 0;
     z-index: 10;
 }
 
