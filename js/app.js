@@ -249,14 +249,8 @@ document.addEventListener('DOMContentLoaded', () => {
     function savePrompts() {
         localStorage.setItem('kkh-prompts', JSON.stringify(prompts));
     }
-    addSessionBtn.onclick = () => {
-        const name = prompt('Session name?');
-        if (!name) return;
-        const id = name.toLowerCase().replace(/\s+/g, '-') + '-' + Date.now();
-        sessions.push({ name, id });
-        saveSessions();
-        renderSessions();
-    };
+    addSessionBtn.onclick = null;
+    addSessionBtn.style.display = 'none';
     addPromptBtn.onclick = () => {
         // Instead of manual prompt, use last user message as prompt name and last bot reply as prompt text
         const key = 'kkh-chat-history-' + activeSessionId;
