@@ -391,18 +391,38 @@ async def search(request: QueryRequest):
         # --- Vitals Table Direct Answer ---
         vitals_keywords = ["vital sign", "vitals", "normal vital"]
         specific_vital_params = ["heart rate", "respiratory rate", "systolic bp", "blood pressure", "bp"]
+        min_synonyms = ["minimum", "min", "lowest", "lower"]
+        max_synonyms = ["maximum", "max", "highest", "upper"]
         if any(term in ql for term in vitals_keywords + specific_vital_params):
             age_label, row = find_vitals_row_for_age(ql)
             if row is not None:
                 # If the query is for a specific vital parameter, only return that value
                 for param in specific_vital_params:
                     if param in ql:
-                        # Find the best matching column
-                        for c in vitals_df.columns[1:]:
-                            if param.replace("bp", "blood pressure") in c or c in param:
-                                val = row[c]
-                                if val and val.lower() != 'nan':
-                                    return {"answer": f"For {age_label if age_label else row[vitals_df.columns[0]]}, the normal {c} is {val}."}
+                        # Determine if min/max is requested
+                        is_min = any(word in ql for word in min_synonyms)
+                        is_max = any(word in ql for word in max_synonyms)
+                        # Find all matching columns for the parameter
+                        matching_cols = [c for c in vitals_df.columns[1:] if param.replace("bp", "blood pressure") in c or c in param]
+                        if matching_cols:
+                            answers = []
+                            for c in matching_cols:
+                                c_norm = c.lower()
+                                if is_min and "min" in c_norm:
+                                    val = row[c]
+                                    if val and val.lower() != 'nan':
+                                        answers.append(f"the minimum {param} is {val}")
+                                elif is_max and "max" in c_norm:
+                                    val = row[c]
+                                    if val and val.lower() != 'nan':
+                                        answers.append(f"the maximum {param} is {val}")
+                                elif not is_min and not is_max:
+                                    # If neither min nor max specified, return both if available
+                                    val = row[c]
+                                    if val and val.lower() != 'nan':
+                                        answers.append(f"{c} is {val}")
+                            if answers:
+                                return {"answer": f"For {age_label if age_label else row[vitals_df.columns[0]]}, " + ' and '.join(answers) + "."}
                 # Otherwise, return the full row summary
                 col_map = {c: c for c in vitals_df.columns if c != vitals_df.columns[0]}
                 col_map = {c: c.replace('bpm', 'beats per minute').replace('respiratory rate', 'respiratory rate').replace('heart rate', 'heart rate').replace('bp', 'blood pressure') for c in col_map}
