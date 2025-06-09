@@ -27,19 +27,28 @@
 
             <div class="sidebar-nav">
                 <label class="nav-label">NAVIGATION</label>
-                <div class="nav-static">General</div>
             </div>
 
-            <details class="sidebar-section">
+            <details class="sidebar-section" open>
                 <summary>Chat Sessions</summary>
                 <ul class="sidebar-list" id="chat-sessions">
-                    <li>No sessions yet</li>
+                    <li class="chat-session active">General</li>
+                    <li class="chat-session">Session 1</li>
+                    <li class="chat-session">Session 2</li>
+                    <!-- More sessions can be added dynamically -->
                 </ul>
+                <button id="add-session" class="sidebar-btn" style="width:100%;margin-top:0.3rem;">+ New Session</button>
             </details>
 
-            <details class="sidebar-section">
-                <summary>Prompt</summary>
-                <div class="sidebar-prompt" id="sidebar-prompt">No prompt loaded</div>
+            <details class="sidebar-section" open>
+                <summary>Prompts</summary>
+                <ul class="sidebar-list" id="prompt-list">
+                    <li class="prompt-item">Default Prompt</li>
+                    <li class="prompt-item">Triage Prompt</li>
+                    <li class="prompt-item">FAQ Prompt</li>
+                    <!-- More prompts can be added dynamically -->
+                </ul>
+                <button id="add-prompt" class="sidebar-btn" style="width:100%;margin-top:0.3rem;">+ New Prompt</button>
             </details>
         </aside>
 
