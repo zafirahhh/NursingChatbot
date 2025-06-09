@@ -389,12 +389,22 @@ async def search(request: QueryRequest):
         q = request.query.strip()
         ql = q.lower()
         # --- Vitals Table Direct Answer ---
-        if any(term in ql for term in ["vital sign", "vitals", "normal vital", "heart rate", "respiratory rate"]):
+        vitals_keywords = ["vital sign", "vitals", "normal vital"]
+        specific_vital_params = ["heart rate", "respiratory rate", "systolic bp", "blood pressure", "bp"]
+        if any(term in ql for term in vitals_keywords + specific_vital_params):
             age_label, row = find_vitals_row_for_age(ql)
             if row is not None:
-                # Compose answer from all columns except age
+                # If the query is for a specific vital parameter, only return that value
+                for param in specific_vital_params:
+                    if param in ql:
+                        # Find the best matching column
+                        for c in vitals_df.columns[1:]:
+                            if param.replace("bp", "blood pressure") in c or c in param:
+                                val = row[c]
+                                if val and val.lower() != 'nan':
+                                    return {"answer": f"For {age_label if age_label else row[vitals_df.columns[0]]}, the normal {c} is {val}."}
+                # Otherwise, return the full row summary
                 col_map = {c: c for c in vitals_df.columns if c != vitals_df.columns[0]}
-                # Optionally, map to readable names
                 col_map = {c: c.replace('bpm', 'beats per minute').replace('respiratory rate', 'respiratory rate').replace('heart rate', 'heart rate').replace('bp', 'blood pressure') for c in col_map}
                 values = []
                 for c in vitals_df.columns[1:]:
