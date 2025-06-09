@@ -389,7 +389,7 @@ document.addEventListener('DOMContentLoaded', () => {
     clearChatBtn.addEventListener('click', () => {
         localStorage.removeItem('kkh-chat-history-' + activeSessionId);
         chatWindow.innerHTML = '';
-        appendMessage('bot', 'Hello! I am your KKH Nursing Chatbot. How can I assist you today?');
+        appendMessage('bot', 'Hello! I am your KKH Nursing Chatbot. How can I assist you today?', false); // Prevent saving welcome message
         renderPrompts(); // Update prompts after clearing
     });
 
