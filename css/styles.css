@@ -303,6 +303,61 @@ button[type="submit"]:hover {
     gap: 0.1rem;
 }
 
+/* ChatGPT-style sidebar for sessions and prompts */
+.chat-session-row, .prompt-item-row {
+  transition: background 0.15s;
+}
+.chat-session-row.active {
+  background: #f3f3f5 !important;
+  font-weight: bold;
+}
+.session-menu {
+  font-size: 15px;
+  min-width: 170px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+  border: 1px solid #e0e0e0;
+  padding: 8px 0;
+}
+.session-menu-item {
+  padding: 10px 20px;
+  cursor: pointer;
+  transition: background 0.15s;
+  display: flex;
+  align-items: center;
+}
+.session-menu-item:hover {
+  background: #f7f7fa;
+}
+.session-menu-divider {
+  border-top: 1px solid #eee;
+  margin: 4px 0;
+}
+.add-session-btn {
+  width: 100%;
+  margin: 10px 0 0 0;
+  padding: 10px 0;
+  background: #f3f3f5;
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+  font-size: 15px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.add-session-btn:hover {
+  background: #ececf1;
+}
+.session-name, .prompt-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1 1 auto;
+  font-size: 15px;
+  line-height: 22px;
+}
+
 @media (max-width: 900px) {
     .container.center-chat {
         flex-direction: column;

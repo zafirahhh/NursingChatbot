@@ -26,45 +26,76 @@ document.addEventListener('DOMContentLoaded', () => {
     function renderSessions() {
         chatSessionsList.innerHTML = '';
         sessions.forEach((session, idx) => {
-            const li = document.createElement('li');
-            li.className = 'chat-session' + (session.id === activeSessionId ? ' active' : '');
-            // Truncate and wrap session names for sidebar fit
-            let displayName = session.name.length > 22 ? session.name.slice(0, 20) + '...' : session.name;
+            const li = document.createElement('div');
+            li.className = 'chat-session-row' + (session.id === activeSessionId ? ' active' : '');
+            li.style.display = 'flex';
+            li.style.alignItems = 'center';
+            li.style.justifyContent = 'space-between';
+            li.style.padding = '6px 14px';
+            li.style.cursor = 'pointer';
+            li.style.borderRadius = '8px';
+            li.style.marginBottom = '2px';
+            li.style.position = 'relative';
+            if (session.id === activeSessionId) {
+                li.style.background = '#f3f3f5';
+                li.style.fontWeight = 'bold';
+            } else {
+                li.onmouseover = () => li.style.background = '#f7f7fa';
+                li.onmouseout = () => li.style.background = '';
+            }
+            // Session name
             const nameSpan = document.createElement('span');
             nameSpan.className = 'session-name';
-            nameSpan.textContent = displayName;
+            nameSpan.textContent = session.name.length > 32 ? session.name.slice(0, 30) + '...' : session.name;
             nameSpan.title = session.name;
+            nameSpan.style.overflow = 'hidden';
+            nameSpan.style.textOverflow = 'ellipsis';
+            nameSpan.style.whiteSpace = 'nowrap';
+            nameSpan.style.flex = '1 1 auto';
+            nameSpan.style.fontSize = '15px';
+            nameSpan.style.lineHeight = '22px';
             li.appendChild(nameSpan);
-            li.tabIndex = 0;
-            li.onclick = () => switchSession(session.id);
-            // Add 3-dot menu for rename/delete except for 'General'
+            li.onclick = (e) => {
+                // Only switch if not clicking menu
+                if (!e.target.classList.contains('menu-btn')) switchSession(session.id);
+            };
+            // 3-dot menu for all except 'General'
             if (session.id !== 'general') {
                 const menuBtn = document.createElement('button');
-                menuBtn.textContent = '⋮';
+                menuBtn.innerHTML = '<span style="font-size:18px;">&#8942;</span>';
                 menuBtn.title = 'More actions';
                 menuBtn.className = 'session-action-btn menu-btn';
+                menuBtn.style.background = 'none';
+                menuBtn.style.border = 'none';
+                menuBtn.style.cursor = 'pointer';
+                menuBtn.style.marginLeft = '8px';
+                menuBtn.style.padding = '2px 6px';
                 menuBtn.onclick = (e) => {
                     e.stopPropagation();
                     document.querySelectorAll('.session-menu').forEach(m => m.remove());
                     const menu = document.createElement('div');
                     menu.className = 'session-menu';
-                    menu.innerHTML = `
-                        <div class="session-menu-item rename">Rename</div>
-                        <div class="session-menu-divider"></div>
-                        <div class="session-menu-item delete">Delete</div>
-                    `;
                     menu.style.position = 'absolute';
                     menu.style.background = '#fff';
                     menu.style.border = '1px solid #e0e0e0';
                     menu.style.boxShadow = '0 4px 16px rgba(0,0,0,0.12)';
                     menu.style.zIndex = 1000;
-                    menu.style.right = '0px';
+                    menu.style.right = '8px';
                     menu.style.top = '36px';
-                    menu.style.minWidth = '120px';
-                    menu.style.borderRadius = '10px';
+                    menu.style.minWidth = '170px';
+                    menu.style.borderRadius = '12px';
                     menu.style.padding = '8px 0';
+                    menu.style.display = 'flex';
+                    menu.style.flexDirection = 'column';
                     // Rename
-                    menu.querySelector('.rename').onclick = (ev) => {
+                    const rename = document.createElement('div');
+                    rename.innerHTML = '<span style="margin-right:10px;">✏️</span>Rename';
+                    rename.className = 'session-menu-item';
+                    rename.style.padding = '10px 20px';
+                    rename.style.cursor = 'pointer';
+                    rename.onmouseover = () => rename.style.background = '#f7f7fa';
+                    rename.onmouseout = () => rename.style.background = '';
+                    rename.onclick = (ev) => {
                         ev.stopPropagation();
                         const newName = prompt('Rename session:', session.name);
                         if (newName && newName.trim()) {
@@ -74,8 +105,21 @@ document.addEventListener('DOMContentLoaded', () => {
                         }
                         menu.remove();
                     };
+                    menu.appendChild(rename);
+                    // Divider
+                    const divider = document.createElement('div');
+                    divider.style.borderTop = '1px solid #eee';
+                    divider.style.margin = '4px 0';
+                    menu.appendChild(divider);
                     // Delete
-                    menu.querySelector('.delete').onclick = (ev) => {
+                    const del = document.createElement('div');
+                    del.innerHTML = '<span style="margin-right:10px;color:#e55353;">🗑️</span><span style="color:#e55353;">Delete</span>';
+                    del.className = 'session-menu-item';
+                    del.style.padding = '10px 20px';
+                    del.style.cursor = 'pointer';
+                    del.onmouseover = () => del.style.background = '#f7f7fa';
+                    del.onmouseout = () => del.style.background = '';
+                    del.onclick = (ev) => {
                         ev.stopPropagation();
                         if (confirm('Delete this session?')) {
                             sessions.splice(idx, 1);
@@ -87,6 +131,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         }
                         menu.remove();
                     };
+                    menu.appendChild(del);
                     document.addEventListener('click', function closeMenu(e) {
                         if (!menu.contains(e.target) && e.target !== menuBtn) {
                             menu.remove();
@@ -96,20 +141,25 @@ document.addEventListener('DOMContentLoaded', () => {
                     li.appendChild(menu);
                 };
                 li.appendChild(menuBtn);
-                li.style.position = 'relative';
-                li.style.display = 'flex';
-                li.style.alignItems = 'center';
-                li.style.justifyContent = 'space-between';
-                li.style.gap = '8px';
             }
             chatSessionsList.appendChild(li);
         });
-        // Add "+ new session" button at the end
-        const addLi = document.createElement('li');
-        addLi.className = 'chat-session add-new';
-        addLi.textContent = '+ New Session';
-        addLi.tabIndex = 0;
-        addLi.onclick = () => {
+        // Add new session button at the bottom
+        const addBtn = document.createElement('button');
+        addBtn.className = 'add-session-btn';
+        addBtn.textContent = '+ New Chat';
+        addBtn.style.width = '100%';
+        addBtn.style.margin = '10px 0 0 0';
+        addBtn.style.padding = '10px 0';
+        addBtn.style.background = '#f3f3f5';
+        addBtn.style.border = 'none';
+        addBtn.style.borderRadius = '8px';
+        addBtn.style.fontWeight = 'bold';
+        addBtn.style.fontSize = '15px';
+        addBtn.style.cursor = 'pointer';
+        addBtn.onmouseover = () => addBtn.style.background = '#ececf1';
+        addBtn.onmouseout = () => addBtn.style.background = '#f3f3f5';
+        addBtn.onclick = () => {
             const name = prompt('Session name?');
             if (!name) return;
             const id = name.toLowerCase().replace(/\s+/g, '-') + '-' + Date.now();
@@ -118,7 +168,7 @@ document.addEventListener('DOMContentLoaded', () => {
             renderSessions();
             switchSession(id);
         };
-        chatSessionsList.appendChild(addLi);
+        chatSessionsList.appendChild(addBtn);
     }
     // --- Prompt Gallery as Search History ---
     function getSessionHistoryPrompts() {
@@ -143,29 +193,36 @@ document.addEventListener('DOMContentLoaded', () => {
         promptList.innerHTML = '';
         const sessionPrompts = getSessionHistoryPrompts();
         sessionPrompts.forEach((prompt, idx) => {
-            const li = document.createElement('li');
-            li.className = 'prompt-item';
+            const li = document.createElement('div');
+            li.className = 'prompt-item-row';
+            li.style.display = 'flex';
+            li.style.alignItems = 'center';
+            li.style.padding = '6px 14px';
+            li.style.cursor = 'pointer';
+            li.style.borderRadius = '8px';
+            li.style.marginBottom = '2px';
+            li.onmouseover = () => li.style.background = '#f7f7fa';
+            li.onmouseout = () => li.style.background = '';
             // Truncate and wrap prompt names for sidebar fit
-            let displayName = prompt.name.length > 30 ? prompt.name.slice(0, 28) + '...' : prompt.name;
+            let displayName = prompt.name.length > 32 ? prompt.name.slice(0, 30) + '...' : prompt.name;
             const nameSpan = document.createElement('span');
             nameSpan.className = 'prompt-name';
             nameSpan.textContent = displayName;
             nameSpan.title = prompt.name;
+            nameSpan.style.overflow = 'hidden';
+            nameSpan.style.textOverflow = 'ellipsis';
+            nameSpan.style.whiteSpace = 'nowrap';
+            nameSpan.style.flex = '1 1 auto';
+            nameSpan.style.fontSize = '15px';
+            nameSpan.style.lineHeight = '22px';
             li.appendChild(nameSpan);
             li.tabIndex = 0;
-            // Optional: clicking a prompt puts it in the input box
             li.onclick = () => {
                 userInput.value = prompt.name;
                 userInput.focus();
             };
-            li.style.position = 'relative';
-            li.style.display = 'flex';
-            li.style.alignItems = 'center';
-            li.style.justifyContent = 'flex-start';
-            li.style.gap = '8px';
             promptList.appendChild(li);
         });
-        // No manual add/delete for prompt gallery
     }
     function switchSession(sessionId) {
         activeSessionId = sessionId;
