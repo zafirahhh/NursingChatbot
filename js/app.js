@@ -120,11 +120,31 @@ document.addEventListener('DOMContentLoaded', () => {
         };
         chatSessionsList.appendChild(addLi);
     }
+    // --- Prompt Gallery as Search History ---
+    function getSessionHistoryPrompts() {
+        // Get all user-bot Q&A pairs for the current session, deduplicated by user question
+        const key = 'kkh-chat-history-' + activeSessionId;
+        const history = JSON.parse(localStorage.getItem(key) || '[]');
+        const seen = new Set();
+        const pairs = [];
+        for (let i = 0; i < history.length - 1; i++) {
+            if (history[i].sender === 'user' && history[i + 1].sender === 'bot') {
+                const userQ = history[i].text;
+                if (!seen.has(userQ)) {
+                    seen.add(userQ);
+                    pairs.push({ name: userQ, text: history[i + 1].text });
+                }
+            }
+        }
+        return pairs;
+    }
+
     function renderPrompts() {
         promptList.innerHTML = '';
-        prompts.forEach((prompt, idx) => {
+        const sessionPrompts = getSessionHistoryPrompts();
+        sessionPrompts.forEach((prompt, idx) => {
             const li = document.createElement('li');
-            li.className = 'prompt-item' + (idx === activePromptIdx ? ' active' : '');
+            li.className = 'prompt-item';
             // Truncate and wrap prompt names for sidebar fit
             let displayName = prompt.name.length > 30 ? prompt.name.slice(0, 28) + '...' : prompt.name;
             const nameSpan = document.createElement('span');
@@ -133,7 +153,11 @@ document.addEventListener('DOMContentLoaded', () => {
             nameSpan.title = prompt.name;
             li.appendChild(nameSpan);
             li.tabIndex = 0;
-            li.onclick = () => { activePromptIdx = idx; renderPrompts(); };
+            // Optional: clicking a prompt puts it in the input box
+            li.onclick = () => {
+                userInput.value = prompt.name;
+                userInput.focus();
+            };
             li.style.position = 'relative';
             li.style.display = 'flex';
             li.style.alignItems = 'center';
@@ -141,39 +165,7 @@ document.addEventListener('DOMContentLoaded', () => {
             li.style.gap = '8px';
             promptList.appendChild(li);
         });
-        // Add "+ new prompt" button at the end
-        const addLi = document.createElement('li');
-        addLi.className = 'prompt-item add-new';
-        addLi.textContent = '+ New Prompt';
-        addLi.tabIndex = 0;
-        addLi.onclick = () => {
-            // Use last user message as prompt name and last bot reply as prompt text
-            const key = 'kkh-chat-history-' + activeSessionId;
-            const history = JSON.parse(localStorage.getItem(key) || '[]');
-            if (history.length < 2) {
-                alert('Ask a question first to generate a prompt.');
-                return;
-            }
-            let lastUser = null, lastBot = null;
-            for (let i = history.length - 1; i >= 0; i--) {
-                if (!lastBot && history[i].sender === 'bot') lastBot = history[i].text;
-                if (!lastUser && history[i].sender === 'user') lastUser = history[i].text;
-                if (lastUser && lastBot) break;
-            }
-            if (!lastUser || !lastBot) {
-                alert('Need both a user question and a bot answer to generate a prompt.');
-                return;
-            }
-            // Only add if not already present
-            if (!prompts.some(p => p.name === lastUser && p.text === lastBot)) {
-                prompts.push({ name: lastUser, text: lastBot });
-                savePrompts();
-                renderPrompts();
-            } else {
-                alert('Prompt already exists.');
-            }
-        };
-        promptList.appendChild(addLi);
+        // No manual add/delete for prompt gallery
     }
     function switchSession(sessionId) {
         activeSessionId = sessionId;
@@ -327,13 +319,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const botReply = await searchKnowledge(fullText);
         removeTyping();
         appendMessage('bot', botReply);
-        // --- Auto-generate prompt after each Q&A ---
-        // Only add if not already present
-        if (!prompts.some(p => p.name === userText && p.text === botReply)) {
-            prompts.push({ name: userText, text: botReply });
-            savePrompts();
-            renderPrompts();
-        }
+        // No manual prompt gallery update needed; renderPrompts will reflect history
+        renderPrompts();
     });
 
     // Clear chat functionality
