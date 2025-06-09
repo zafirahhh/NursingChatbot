@@ -282,7 +282,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (history.length === 0) {
             // Only show welcome message if not already present
             if (!chatWindow.querySelector('.message.bot')) {
-                appendMessage('bot', 'Hello! I am your KKH Nursing Chatbot. How can I assist you today?');
+                appendMessage('bot', 'Hello! I am your KKH Nursing Chatbot. How can I assist you today?', false);
             }
         } else {
             history.forEach(msg => appendMessage(msg.sender, msg.text, false));
@@ -385,13 +385,12 @@ document.addEventListener('DOMContentLoaded', () => {
         appendMessage('bot', botReply);
         // No manual prompt gallery update needed; renderPrompts will reflect history
         renderPrompts();
-    });
-
-    // Clear chat functionality
+    });    // Clear chat functionality
     clearChatBtn.addEventListener('click', () => {
-        localStorage.removeItem('kkh-chat-history');
+        localStorage.removeItem('kkh-chat-history-' + activeSessionId);
         chatWindow.innerHTML = '';
         appendMessage('bot', 'Hello! I am your KKH Nursing Chatbot. How can I assist you today?');
+        renderPrompts(); // Update prompts after clearing
     });
 
     // Voice recording setup (Web Speech API)
