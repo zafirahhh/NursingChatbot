@@ -6,6 +6,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const userInput = document.getElementById('user-input');
     const clearChatBtn = document.getElementById('clear-chat');
     const micBtn = document.getElementById('mic-btn');
+    const chatSessionsList = document.getElementById('chat-sessions');
+    const promptList = document.getElementById('prompt-list');
+    const addSessionBtn = document.getElementById('add-session');
+    const addPromptBtn = document.getElementById('add-prompt');
 
     // Avatars
     const avatars = {
@@ -13,9 +17,67 @@ document.addEventListener('DOMContentLoaded', () => {
         bot: '🤖'
     };
 
-    // Load chat history from localStorage
+    // --- Sessions & Prompts Integration ---
+    let sessions = JSON.parse(localStorage.getItem('kkh-sessions') || '[{"name":"General","id":"general"}]');
+    let prompts = JSON.parse(localStorage.getItem('kkh-prompts') || '[{"name":"Default Prompt","text":""}]');
+    let activeSessionId = localStorage.getItem('kkh-active-session') || 'general';
+    let activePromptIdx = 0;
+
+    function renderSessions() {
+        chatSessionsList.innerHTML = '';
+        sessions.forEach((session, idx) => {
+            const li = document.createElement('li');
+            li.className = 'chat-session' + (session.id === activeSessionId ? ' active' : '');
+            li.textContent = session.name;
+            li.tabIndex = 0;
+            li.onclick = () => switchSession(session.id);
+            chatSessionsList.appendChild(li);
+        });
+    }
+    function renderPrompts() {
+        promptList.innerHTML = '';
+        prompts.forEach((prompt, idx) => {
+            const li = document.createElement('li');
+            li.className = 'prompt-item' + (idx === activePromptIdx ? ' active' : '');
+            li.textContent = prompt.name;
+            li.tabIndex = 0;
+            li.onclick = () => { activePromptIdx = idx; renderPrompts(); };
+            promptList.appendChild(li);
+        });
+    }
+    function switchSession(sessionId) {
+        activeSessionId = sessionId;
+        localStorage.setItem('kkh-active-session', sessionId);
+        renderSessions();
+        loadHistory();
+    }
+    function saveSessions() {
+        localStorage.setItem('kkh-sessions', JSON.stringify(sessions));
+    }
+    function savePrompts() {
+        localStorage.setItem('kkh-prompts', JSON.stringify(prompts));
+    }
+    addSessionBtn.onclick = () => {
+        const name = prompt('Session name?');
+        if (!name) return;
+        const id = name.toLowerCase().replace(/\s+/g, '-') + '-' + Date.now();
+        sessions.push({ name, id });
+        saveSessions();
+        renderSessions();
+    };
+    addPromptBtn.onclick = () => {
+        const name = prompt('Prompt name?');
+        if (!name) return;
+        const text = prompt('Prompt text?') || '';
+        prompts.push({ name, text });
+        savePrompts();
+        renderPrompts();
+    };
+
+    // --- Chat History Management ---
     function loadHistory() {
-        const history = JSON.parse(localStorage.getItem('kkh-chat-history') || '[]');
+        chatWindow.innerHTML = '';
+        const history = JSON.parse(localStorage.getItem('kkh-chat-history-' + activeSessionId) || '[]');
         if (history.length === 0) {
             // Show welcome message if no history
             appendMessage('bot', 'Hello! I am your KKH Nursing Chatbot. How can I assist you today?');
@@ -26,9 +88,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Save message to localStorage
     function saveMessage(sender, text) {
-        const history = JSON.parse(localStorage.getItem('kkh-chat-history') || '[]');
+        const key = 'kkh-chat-history-' + activeSessionId;
+        const history = JSON.parse(localStorage.getItem(key) || '[]');
         history.push({ sender, text });
-        localStorage.setItem('kkh-chat-history', JSON.stringify(history));
+        localStorage.setItem(key, JSON.stringify(history));
     }
 
     // Append message to chat window
@@ -95,16 +158,18 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
 
-    // Update chat submit handler to use async/await
+    // --- Prepend prompt to user message on submit ---
     chatForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const userText = userInput.value.trim();
         if (!userText) return;
+        let promptText = prompts[activePromptIdx]?.text || '';
+        let fullText = promptText ? promptText + '\n' + userText : userText;
         appendMessage('user', userText);
         userInput.value = '';
         showTyping();
         // Use the backend for the bot reply
-        const botReply = await searchKnowledge(userText);
+        const botReply = await searchKnowledge(fullText);
         removeTyping();
         appendMessage('bot', botReply);
     });
@@ -163,5 +228,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Accessibility: focus chat window on load
     chatWindow.focus();
+    renderSessions();
+    renderPrompts();
     loadHistory();
 });
