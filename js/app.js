@@ -28,48 +28,82 @@ document.addEventListener('DOMContentLoaded', () => {
         sessions.forEach((session, idx) => {
             const li = document.createElement('li');
             li.className = 'chat-session' + (session.id === activeSessionId ? ' active' : '');
-            li.textContent = session.name;
+            // Truncate long session names and add tooltip
+            let displayName = session.name.length > 22 ? session.name.slice(0, 20) + '...' : session.name;
+            li.textContent = displayName;
+            li.title = session.name;
             li.tabIndex = 0;
             li.onclick = () => switchSession(session.id);
-            // Add rename and delete buttons except for 'General'
+            // Add 3-dot menu for rename/delete except for 'General'
             if (session.id !== 'general') {
-                const renameBtn = document.createElement('button');
-                renameBtn.textContent = '✏️';
-                renameBtn.title = 'Rename Session';
-                renameBtn.className = 'session-action-btn';
-                renameBtn.onclick = (e) => {
+                const menuBtn = document.createElement('button');
+                menuBtn.textContent = '⋮';
+                menuBtn.title = 'More actions';
+                menuBtn.className = 'session-action-btn menu-btn';
+                menuBtn.onclick = (e) => {
                     e.stopPropagation();
-                    const newName = prompt('Rename session:', session.name);
-                    if (newName && newName.trim()) {
-                        session.name = newName.trim();
-                        saveSessions();
-                        renderSessions();
-                    }
+                    // Remove any open menus
+                    document.querySelectorAll('.session-menu').forEach(m => m.remove());
+                    // Create menu
+                    const menu = document.createElement('div');
+                    menu.className = 'session-menu';
+                    menu.style.position = 'absolute';
+                    menu.style.background = '#fff';
+                    menu.style.border = '1px solid #ccc';
+                    menu.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1)';
+                    menu.style.zIndex = 1000;
+                    menu.style.right = '10px';
+                    menu.style.top = '30px';
+                    // Rename
+                    const rename = document.createElement('div');
+                    rename.textContent = 'Rename';
+                    rename.className = 'session-menu-item';
+                    rename.onclick = (ev) => {
+                        ev.stopPropagation();
+                        const newName = prompt('Rename session:', session.name);
+                        if (newName && newName.trim()) {
+                            session.name = newName.trim();
+                            saveSessions();
+                            renderSessions();
+                        }
+                        menu.remove();
+                    };
+                    menu.appendChild(rename);
+                    // Delete
+                    const del = document.createElement('div');
+                    del.textContent = 'Delete';
+                    del.className = 'session-menu-item';
+                    del.onclick = (ev) => {
+                        ev.stopPropagation();
+                        if (confirm('Delete this session?')) {
+                            sessions.splice(idx, 1);
+                            localStorage.removeItem('kkh-chat-history-' + session.id);
+                            if (activeSessionId === session.id) activeSessionId = 'general';
+                            saveSessions();
+                            renderSessions();
+                            switchSession(activeSessionId);
+                        }
+                        menu.remove();
+                    };
+                    menu.appendChild(del);
+                    // Close menu on click outside
+                    document.addEventListener('click', function closeMenu(e) {
+                        if (!menu.contains(e.target) && e.target !== menuBtn) {
+                            menu.remove();
+                            document.removeEventListener('click', closeMenu);
+                        }
+                    });
+                    li.appendChild(menu);
                 };
-                li.appendChild(renameBtn);
-                const delBtn = document.createElement('button');
-                delBtn.textContent = '🗑️';
-                delBtn.title = 'Delete Session';
-                delBtn.className = 'session-action-btn';
-                delBtn.onclick = (e) => {
-                    e.stopPropagation();
-                    if (confirm('Delete this session?')) {
-                        sessions.splice(idx, 1);
-                        localStorage.removeItem('kkh-chat-history-' + session.id);
-                        if (activeSessionId === session.id) activeSessionId = 'general';
-                        saveSessions();
-                        renderSessions();
-                        switchSession(activeSessionId);
-                    }
-                };
-                li.appendChild(delBtn);
+                li.appendChild(menuBtn);
+                li.style.position = 'relative';
             }
             chatSessionsList.appendChild(li);
         });
         // Add "+ new session" button at the end
         const addLi = document.createElement('li');
         addLi.className = 'chat-session add-new';
-        addLi.textContent = '+ new session';
+        addLi.textContent = '+ New Session';
         addLi.tabIndex = 0;
         addLi.onclick = () => {
             const name = prompt('Session name?');
@@ -87,30 +121,63 @@ document.addEventListener('DOMContentLoaded', () => {
         prompts.forEach((prompt, idx) => {
             const li = document.createElement('li');
             li.className = 'prompt-item' + (idx === activePromptIdx ? ' active' : '');
-            li.textContent = prompt.name;
+            // Truncate long prompt names and add tooltip
+            let displayName = prompt.name.length > 30 ? prompt.name.slice(0, 28) + '...' : prompt.name;
+            li.textContent = displayName;
+            li.title = prompt.name;
             li.tabIndex = 0;
             li.onclick = () => { activePromptIdx = idx; renderPrompts(); };
-            // Add delete button except for default
+            // Add 3-dot menu for delete (not for default)
             if (idx !== 0) {
-                const delBtn = document.createElement('button');
-                delBtn.textContent = '🗑️';
-                delBtn.title = 'Delete Prompt';
-                delBtn.className = 'prompt-action-btn';
-                delBtn.onclick = (e) => {
+                const menuBtn = document.createElement('button');
+                menuBtn.textContent = '⋮';
+                menuBtn.title = 'More actions';
+                menuBtn.className = 'prompt-action-btn menu-btn';
+                menuBtn.onclick = (e) => {
                     e.stopPropagation();
-                    prompts.splice(idx, 1);
-                    if (activePromptIdx >= prompts.length) activePromptIdx = 0;
-                    savePrompts();
-                    renderPrompts();
+                    // Remove any open menus
+                    document.querySelectorAll('.prompt-menu').forEach(m => m.remove());
+                    // Create menu
+                    const menu = document.createElement('div');
+                    menu.className = 'prompt-menu';
+                    menu.style.position = 'absolute';
+                    menu.style.background = '#fff';
+                    menu.style.border = '1px solid #ccc';
+                    menu.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1)';
+                    menu.style.zIndex = 1000;
+                    menu.style.right = '10px';
+                    menu.style.top = '30px';
+                    // Delete
+                    const del = document.createElement('div');
+                    del.textContent = 'Delete';
+                    del.className = 'prompt-menu-item';
+                    del.onclick = (ev) => {
+                        ev.stopPropagation();
+                        prompts.splice(idx, 1);
+                        if (activePromptIdx >= prompts.length) activePromptIdx = 0;
+                        savePrompts();
+                        renderPrompts();
+                        menu.remove();
+                    };
+                    menu.appendChild(del);
+                    // Close menu on click outside
+                    document.addEventListener('click', function closeMenu(e) {
+                        if (!menu.contains(e.target) && e.target !== menuBtn) {
+                            menu.remove();
+                            document.removeEventListener('click', closeMenu);
+                        }
+                    });
+                    li.appendChild(menu);
                 };
-                li.appendChild(delBtn);
+                li.appendChild(menuBtn);
+                li.style.position = 'relative';
             }
             promptList.appendChild(li);
         });
         // Add "+ new prompt" button at the end
         const addLi = document.createElement('li');
         addLi.className = 'prompt-item add-new';
-        addLi.textContent = '+ new prompt';
+        addLi.textContent = '+ New Prompt';
         addLi.tabIndex = 0;
         addLi.onclick = () => {
             // Use last user message as prompt name and last bot reply as prompt text
