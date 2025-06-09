@@ -1,5 +1,6 @@
 @import url('https://fonts.googleapis.com/css?family=Inter:400,600|Open+Sans:400,600&display=swap');
 
+/* --- ChatGPT-like UI overhaul --- */
 :root {
     --primary-blue: #23406e;
     --accent-navy: #1a2a40;
@@ -28,8 +29,8 @@ html, body {
 
 body {
     font-family: 'Open Sans', Arial, sans-serif;
-    background: var(--soft-gray);
-    color: var(--charcoal);
+    background: #f7f7f8;
+    color: #23272b;
     font-size: 1.05rem;
     min-height: 100vh;
 }
@@ -73,33 +74,37 @@ header {
 }
 
 .header-text {
-    text-align: center;
+    text-align: left;
 }
 
 .header-text h1 {
-    font-size: 1.3rem;
+    font-size: 1.25rem;
     font-weight: 700;
     margin-bottom: 0.1rem;
-    color: var(--white);
+    color: #23406e;
 }
 
 .subtitle {
     font-size: 1rem;
-    color: #dbe6fa;
+    color: #b0b8c9;
     font-weight: 400;
 }
 
 .container.center-chat {
     display: flex;
-    height: calc(100vh - 70px);
+    height: 100vh;
+    background: #f7f7f8;
 }
 
 .sidebar {
-    min-width: 70px;
-    max-width: 80px;
-    padding: 1.2rem 0.5rem;
-    box-shadow: var(--shadow);
-    background: var(--sidebar-bg);
+    min-width: 260px;
+    max-width: 280px;
+    background: #fff;
+    border-right: 1px solid #e0e0e0;
+    box-shadow: none;
+    padding: 1.5rem 0.7rem 1.5rem 1.2rem;
+    height: 100vh;
+    overflow-y: auto;
 }
 
 .sidebar-btn {
@@ -157,27 +162,29 @@ header {
 .main-chat {
     flex: 1;
     display: flex;
-    justify-content: center;
+    flex-direction: column;
+    justify-content: flex-end;
     align-items: stretch;
-    height: 100%;
+    height: 100vh;
     padding: 0;
-    background-color: var(--soft-gray);
+    background: #f7f7f8;
 }
 
 .chatbot-container {
     width: 100%;
-    max-width: 700px;
-    flex-grow: 1;
+    max-width: 900px;
+    margin: 0 auto;
+    flex: 1 1 auto;
     display: flex;
     flex-direction: column;
-    height: 100%;
-    background: var(--white);
+    background: #fff;
     border-radius: 1.2rem;
-    margin: 1.5rem auto;
     box-shadow: 0 4px 32px rgba(35,64,110,0.10);
     border: 1px solid #e0e0e0;
     overflow: hidden;
     position: relative;
+    margin-top: 2.5rem;
+    margin-bottom: 2.5rem;
 }
 
 .chat-window {
@@ -185,30 +192,47 @@ header {
     overflow-y: auto;
     padding: 2.2rem 1.5rem 1rem;
     scroll-behavior: smooth;
-    background: var(--white);
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
 }
 
 .message {
     display: flex;
     align-items: flex-start;
-    gap: 0.6rem;
-    margin-bottom: 1rem;
+    gap: 0.7rem;
+    margin-bottom: 0;
+}
+.message.user {
+    flex-direction: row-reverse;
+}
+.message.user .message-content {
+    background: #e6eef7;
+    color: #23406e;
+    align-self: flex-end;
 }
 .message-content {
-    background: var(--bot-msg-bg);
+    background: #f3f6fa;
     border-radius: 1.1rem;
     padding: 1.1rem 1.4rem;
     font-size: 1.05rem;
     line-height: 1.7;
-    max-width: 80%;
+    max-width: 70%;
     box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+    word-break: break-word;
 }
 .avatar {
     font-size: 1.3rem;
     background: #e0e5ee;
-    color: var(--primary-blue);
+    color: #23406e;
     border-radius: 50%;
     padding: 0.3rem 0.5rem;
+    min-width: 2.2rem;
+    min-height: 2.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .chat-form {
@@ -216,7 +240,7 @@ header {
     align-items: center;
     gap: 0.7rem;
     padding: 1.2rem 1.5rem;
-    background-color: var(--white);
+    background-color: #fff;
     border-top: 1px solid #e0e0e0;
     position: sticky;
     bottom: 0;
@@ -227,8 +251,8 @@ header {
 }
 
 #mic-btn {
-    background: var(--sidebar-btn);
-    color: var(--primary-blue);
+    background: #e0e5ee;
+    color: #23406e;
     border: 1px solid #c7d0e1;
     border-radius: 50%;
     width: 2.2rem;
@@ -236,8 +260,8 @@ header {
     font-size: 1.1rem;
 }
 #mic-btn.recording {
-    background: var(--primary-blue);
-    color: var(--white);
+    background: #23406e;
+    color: #fff;
 }
 
 #user-input {
@@ -246,13 +270,13 @@ header {
     border-radius: 1.2rem;
     border: 1px solid #c7d0e1;
     font-size: 1.05rem;
-    background: var(--white);
+    background: #fff;
     box-shadow: 0 1px 2px rgba(0,0,0,0.03);
 }
 
 button[type="submit"] {
-    background: var(--primary-blue);
-    color: var(--white);
+    background: #23406e;
+    color: #fff;
     border: none;
     border-radius: 1.2rem;
     padding: 0.9rem 1.6rem;
@@ -261,7 +285,7 @@ button[type="submit"] {
     transition: background 0.2s;
 }
 button[type="submit"]:hover {
-    background: var(--accent-navy);
+    background: #1a2a40;
 }
 
 @media (max-width: 900px) {
