@@ -35,6 +35,8 @@ body {
     color: #23272b;
     font-size: 1.05rem;
     min-height: 100vh;
+    display: flex;
+    flex-direction: column;
 }
 
 header {
@@ -47,48 +49,48 @@ header {
 
 .top-header {
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     align-items: center;
-    justify-content: flex-start;
-    gap: 1.2rem;
+    justify-content: center;
+    gap: 0.7rem;
     background: var(--primary-blue);
     color: #fff;
     box-shadow: 0 2px 12px rgba(35, 64, 110, 0.07);
-    padding: 1.5rem 2rem 1.2rem 2rem !important;
+    padding: 2.2rem 0 1.5rem 0 !important;
     border-bottom: none;
 }
 
 .logo-title {
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     align-items: center;
-    gap: 1.2rem;
+    gap: 0.7rem;
 }
 
 .kkh-logo {
-    height: 48px;
-    width: 48px;
-    margin: 0;
+    height: 64px;
+    width: 64px;
+    margin: 0 auto;
     display: block;
     background: #fff;
-    border-radius: 12px;
-    padding: 0.2rem;
+    border-radius: 16px;
+    padding: 0.3rem;
     box-shadow: 0 2px 8px rgba(35,64,110,0.08);
 }
 
 .header-text {
-    text-align: left;
+    text-align: center;
 }
 
 .header-text h1 {
-    font-size: 1.3rem;
+    font-size: 1.5rem;
     font-weight: 700;
     margin-bottom: 0.1rem;
     color: #fff;
 }
 
 .subtitle {
-    font-size: 1rem;
+    font-size: 1.1rem;
     color: #b0b8c9;
     font-weight: 400;
 }
@@ -101,7 +103,7 @@ body, html {
 }
 .container.center-chat {
     display: flex;
-    height: calc(100vh - 90px);
+    height: 100vh;
     min-height: 0;
 }
 .main-chat {
