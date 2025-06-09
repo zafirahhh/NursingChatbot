@@ -28,10 +28,13 @@ document.addEventListener('DOMContentLoaded', () => {
         sessions.forEach((session, idx) => {
             const li = document.createElement('li');
             li.className = 'chat-session' + (session.id === activeSessionId ? ' active' : '');
-            // Truncate long session names and add tooltip
+            // Truncate and wrap session names for sidebar fit
             let displayName = session.name.length > 22 ? session.name.slice(0, 20) + '...' : session.name;
-            li.textContent = displayName;
-            li.title = session.name;
+            const nameSpan = document.createElement('span');
+            nameSpan.className = 'session-name';
+            nameSpan.textContent = displayName;
+            nameSpan.title = session.name;
+            li.appendChild(nameSpan);
             li.tabIndex = 0;
             li.onclick = () => switchSession(session.id);
             // Add 3-dot menu for rename/delete except for 'General'
@@ -42,23 +45,26 @@ document.addEventListener('DOMContentLoaded', () => {
                 menuBtn.className = 'session-action-btn menu-btn';
                 menuBtn.onclick = (e) => {
                     e.stopPropagation();
-                    // Remove any open menus
                     document.querySelectorAll('.session-menu').forEach(m => m.remove());
-                    // Create menu
                     const menu = document.createElement('div');
                     menu.className = 'session-menu';
+                    menu.innerHTML = `
+                        <div class="session-menu-item rename">Rename</div>
+                        <div class="session-menu-divider"></div>
+                        <div class="session-menu-item delete">Delete</div>
+                    `;
                     menu.style.position = 'absolute';
                     menu.style.background = '#fff';
-                    menu.style.border = '1px solid #ccc';
-                    menu.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1)';
+                    menu.style.border = '1px solid #e0e0e0';
+                    menu.style.boxShadow = '0 4px 16px rgba(0,0,0,0.12)';
                     menu.style.zIndex = 1000;
-                    menu.style.right = '10px';
-                    menu.style.top = '30px';
+                    menu.style.right = '0px';
+                    menu.style.top = '36px';
+                    menu.style.minWidth = '120px';
+                    menu.style.borderRadius = '10px';
+                    menu.style.padding = '8px 0';
                     // Rename
-                    const rename = document.createElement('div');
-                    rename.textContent = 'Rename';
-                    rename.className = 'session-menu-item';
-                    rename.onclick = (ev) => {
+                    menu.querySelector('.rename').onclick = (ev) => {
                         ev.stopPropagation();
                         const newName = prompt('Rename session:', session.name);
                         if (newName && newName.trim()) {
@@ -68,12 +74,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         }
                         menu.remove();
                     };
-                    menu.appendChild(rename);
                     // Delete
-                    const del = document.createElement('div');
-                    del.textContent = 'Delete';
-                    del.className = 'session-menu-item';
-                    del.onclick = (ev) => {
+                    menu.querySelector('.delete').onclick = (ev) => {
                         ev.stopPropagation();
                         if (confirm('Delete this session?')) {
                             sessions.splice(idx, 1);
@@ -85,8 +87,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         }
                         menu.remove();
                     };
-                    menu.appendChild(del);
-                    // Close menu on click outside
                     document.addEventListener('click', function closeMenu(e) {
                         if (!menu.contains(e.target) && e.target !== menuBtn) {
                             menu.remove();
@@ -97,6 +97,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 };
                 li.appendChild(menuBtn);
                 li.style.position = 'relative';
+                li.style.display = 'flex';
+                li.style.alignItems = 'center';
+                li.style.justifyContent = 'space-between';
+                li.style.gap = '8px';
             }
             chatSessionsList.appendChild(li);
         });
@@ -121,10 +125,13 @@ document.addEventListener('DOMContentLoaded', () => {
         prompts.forEach((prompt, idx) => {
             const li = document.createElement('li');
             li.className = 'prompt-item' + (idx === activePromptIdx ? ' active' : '');
-            // Truncate long prompt names and add tooltip
+            // Truncate and wrap prompt names for sidebar fit
             let displayName = prompt.name.length > 30 ? prompt.name.slice(0, 28) + '...' : prompt.name;
-            li.textContent = displayName;
-            li.title = prompt.name;
+            const nameSpan = document.createElement('span');
+            nameSpan.className = 'prompt-name';
+            nameSpan.textContent = displayName;
+            nameSpan.title = prompt.name;
+            li.appendChild(nameSpan);
             li.tabIndex = 0;
             li.onclick = () => { activePromptIdx = idx; renderPrompts(); };
             // Add 3-dot menu for delete (not for default)
@@ -135,23 +142,24 @@ document.addEventListener('DOMContentLoaded', () => {
                 menuBtn.className = 'prompt-action-btn menu-btn';
                 menuBtn.onclick = (e) => {
                     e.stopPropagation();
-                    // Remove any open menus
                     document.querySelectorAll('.prompt-menu').forEach(m => m.remove());
-                    // Create menu
                     const menu = document.createElement('div');
                     menu.className = 'prompt-menu';
+                    menu.innerHTML = `
+                        <div class="prompt-menu-item delete">Delete</div>
+                    `;
                     menu.style.position = 'absolute';
                     menu.style.background = '#fff';
-                    menu.style.border = '1px solid #ccc';
-                    menu.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1)';
+                    menu.style.border = '1px solid #e0e0e0';
+                    menu.style.boxShadow = '0 4px 16px rgba(0,0,0,0.12)';
                     menu.style.zIndex = 1000;
-                    menu.style.right = '10px';
-                    menu.style.top = '30px';
+                    menu.style.right = '0px';
+                    menu.style.top = '36px';
+                    menu.style.minWidth = '120px';
+                    menu.style.borderRadius = '10px';
+                    menu.style.padding = '8px 0';
                     // Delete
-                    const del = document.createElement('div');
-                    del.textContent = 'Delete';
-                    del.className = 'prompt-menu-item';
-                    del.onclick = (ev) => {
+                    menu.querySelector('.delete').onclick = (ev) => {
                         ev.stopPropagation();
                         prompts.splice(idx, 1);
                         if (activePromptIdx >= prompts.length) activePromptIdx = 0;
@@ -159,8 +167,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         renderPrompts();
                         menu.remove();
                     };
-                    menu.appendChild(del);
-                    // Close menu on click outside
                     document.addEventListener('click', function closeMenu(e) {
                         if (!menu.contains(e.target) && e.target !== menuBtn) {
                             menu.remove();
@@ -171,6 +177,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 };
                 li.appendChild(menuBtn);
                 li.style.position = 'relative';
+                li.style.display = 'flex';
+                li.style.alignItems = 'center';
+                li.style.justifyContent = 'space-between';
+                li.style.gap = '8px';
             }
             promptList.appendChild(li);
         });
