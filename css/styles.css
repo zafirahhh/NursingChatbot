@@ -31,7 +31,7 @@ body {
     background: var(--soft-gray);
     color: var(--charcoal);
     font-size: 1.05rem;
-    overflow: hidden;
+    min-height: 100vh;
 }
 
 header {
@@ -162,7 +162,6 @@ header {
     height: 100%;
     padding: 0;
     background-color: var(--soft-gray);
-    overflow: hidden;
 }
 
 .chatbot-container {
