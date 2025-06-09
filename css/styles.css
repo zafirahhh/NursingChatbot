@@ -250,6 +250,11 @@ button[type="submit"]:hover {
     gap: 0.3rem;
 }
 
+/* Remove the sidebar title (assume it's a direct child or h2/h3, hide it) */
+.sidebar > h2, .sidebar > h3, .sidebar > .sidebar-title {
+    display: none !important;
+}
+
 .sidebar-actions {
     margin-bottom: 0.3rem;
     display: flex;
@@ -262,6 +267,7 @@ button[type="submit"]:hover {
     padding: 0.4rem 0.7rem;
     font-size: 0.97rem;
     border-radius: 0.3rem;
+    font-weight: 700 !important;
 }
 
 .sidebar-nav {
