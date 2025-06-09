@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>KKH Nursing Chatbot</title>
-    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/styles.css" />
     <link href="https://fonts.googleapis.com/css?family=Inter:400,600|Open+Sans:400,600&display=swap" rel="stylesheet">
 </head>
 <body>
@@ -17,21 +17,53 @@
             </div>
         </div>
     </header>
+
     <div class="container center-chat">
+        <!-- Sidebar -->
         <aside class="sidebar">
             <div class="sidebar-actions">
                 <button id="clear-chat" class="sidebar-btn" title="Clear Chat History">🗑️ Clear Chat History</button>
             </div>
+
+            <div class="sidebar-nav">
+                <label for="nav-dropdown" class="nav-label">NAVIGATION</label>
+                <select id="nav-dropdown" class="nav-dropdown">
+                    <option>General</option>
+                    <option>Case Study</option>
+                    <option>Quizlet</option>
+                    <option>Education</option>
+                    <option>Videos</option>
+                </select>
+            </div>
+
+            <details class="sidebar-section">
+                <summary>Chat Sessions</summary>
+                <ul class="sidebar-list" id="chat-sessions">
+                    <li>No sessions yet</li>
+                </ul>
+            </details>
+
+            <details class="sidebar-section">
+                <summary>Prompt</summary>
+                <div class="sidebar-prompt" id="sidebar-prompt">No prompt loaded</div>
+            </details>
+        </aside>
+
+        <!-- Main Chat Area -->
+        <main class="main-chat">
             <section class="chatbot-container" aria-label="Nursing Chatbot">
-                <div id="chat-window" class="chat-window" tabindex="0" aria-live="polite"></div>
+                <div id="chat-window" class="chat-window" tabindex="0" aria-live="polite">
+                    <!-- Dynamic messages will appear here -->
+                </div>
                 <form id="chat-form" autocomplete="off" class="chat-form">
                     <button type="button" id="mic-btn" aria-label="Record your question" title="Record your question">🎤</button>
                     <input type="text" id="user-input" placeholder="Type your question..." aria-label="Type your question" required />
                     <button type="submit" aria-label="Send">Send</button>
                 </form>
             </section>
-        </aside>
+        </main>
     </div>
+
     <script src="js/app.js"></script>
 </body>
 </html>
