@@ -40,8 +40,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 renameBtn.onclick = (e) => {
                     e.stopPropagation();
                     const newName = prompt('Rename session:', session.name);
-                    if (newName) {
-                        session.name = newName;
+                    if (newName && newName.trim()) {
+                        session.name = newName.trim();
                         saveSessions();
                         renderSessions();
                     }
@@ -54,7 +54,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 delBtn.onclick = (e) => {
                     e.stopPropagation();
                     if (confirm('Delete this session?')) {
-                        // Remove session and its history
                         sessions.splice(idx, 1);
                         localStorage.removeItem('kkh-chat-history-' + session.id);
                         if (activeSessionId === session.id) activeSessionId = 'general';
@@ -67,6 +66,21 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             chatSessionsList.appendChild(li);
         });
+        // Add "+ new session" button at the end
+        const addLi = document.createElement('li');
+        addLi.className = 'chat-session add-new';
+        addLi.textContent = '+ new session';
+        addLi.tabIndex = 0;
+        addLi.onclick = () => {
+            const name = prompt('Session name?');
+            if (!name) return;
+            const id = name.toLowerCase().replace(/\s+/g, '-') + '-' + Date.now();
+            sessions.push({ name, id });
+            saveSessions();
+            renderSessions();
+            switchSession(id);
+        };
+        chatSessionsList.appendChild(addLi);
     }
     function renderPrompts() {
         promptList.innerHTML = '';
@@ -93,6 +107,39 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             promptList.appendChild(li);
         });
+        // Add "+ new prompt" button at the end
+        const addLi = document.createElement('li');
+        addLi.className = 'prompt-item add-new';
+        addLi.textContent = '+ new prompt';
+        addLi.tabIndex = 0;
+        addLi.onclick = () => {
+            // Use last user message as prompt name and last bot reply as prompt text
+            const key = 'kkh-chat-history-' + activeSessionId;
+            const history = JSON.parse(localStorage.getItem(key) || '[]');
+            if (history.length < 2) {
+                alert('Ask a question first to generate a prompt.');
+                return;
+            }
+            let lastUser = null, lastBot = null;
+            for (let i = history.length - 1; i >= 0; i--) {
+                if (!lastBot && history[i].sender === 'bot') lastBot = history[i].text;
+                if (!lastUser && history[i].sender === 'user') lastUser = history[i].text;
+                if (lastUser && lastBot) break;
+            }
+            if (!lastUser || !lastBot) {
+                alert('Need both a user question and a bot answer to generate a prompt.');
+                return;
+            }
+            // Only add if not already present
+            if (!prompts.some(p => p.name === lastUser && p.text === lastBot)) {
+                prompts.push({ name: lastUser, text: lastBot });
+                savePrompts();
+                renderPrompts();
+            } else {
+                alert('Prompt already exists.');
+            }
+        };
+        promptList.appendChild(addLi);
     }
     function switchSession(sessionId) {
         activeSessionId = sessionId;
