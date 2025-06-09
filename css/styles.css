@@ -19,6 +19,7 @@
 * {
     box-sizing: border-box;
     border: none !important;
+    outline: none;
 }
 
 html, body {
@@ -157,31 +158,34 @@ header {
 .main-chat {
     flex: 1;
     display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 1.5rem 2rem;
+    justify-content: center;
+    align-items: stretch;
     height: 100%;
+    padding: 0;
+    background-color: var(--soft-gray);
     overflow: hidden;
 }
 
 .chatbot-container {
     width: 100%;
-    max-width: 1024px;
+    max-width: 780px;
+    background: var(--white);
     height: 100%;
     display: flex;
     flex-direction: column;
-    background: var(--white);
-    border-radius: 1rem;
-    box-shadow: 0 4px 24px rgba(35,64,110,0.10);
+    border-radius: 0;
+    box-shadow: none;
     position: relative;
     overflow: hidden;
+    border-left: 1px solid #e0e0e0;
+    border-right: 1px solid #e0e0e0;
 }
 
 .chat-window {
-    flex: 1 1 auto;
+    flex: 1;
     overflow-y: auto;
-    padding: 1rem;
-    margin-bottom: 0.5rem;
+    padding: 1.5rem 1rem 1rem;
+    scroll-behavior: smooth;
 }
 
 .message {
@@ -192,10 +196,12 @@ header {
 }
 .message-content {
     background: var(--bot-msg-bg);
-    border-radius: 0.5rem;
-    padding: 0.8rem 1.2rem;
+    border-radius: 0.7rem;
+    padding: 0.9rem 1.2rem;
     font-size: 1rem;
+    line-height: 1.6;
     max-width: 80%;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.03);
 }
 .avatar {
     font-size: 1.3rem;
@@ -207,17 +213,14 @@ header {
 
 .chat-form {
     display: flex;
-    gap: 0.5rem;
     align-items: center;
-    padding: 0.8rem 1rem;
-    background: var(--white);
-    border-top: 1px solid #eee;
+    gap: 0.5rem;
+    padding: 1rem;
+    background-color: var(--white);
+    border-top: 1px solid #e0e0e0;
     position: sticky;
     bottom: 0;
-    left: 0;
-    right: 0;
     z-index: 10;
-    margin-top: auto;
 }
 
 #mic-btn {
