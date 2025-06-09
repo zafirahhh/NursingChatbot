@@ -44,30 +44,31 @@ header {
 
 .top-header {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
+    justify-content: flex-start;
     align-items: center;
-    justify-content: center;
-    padding: 2.5rem 0 2rem 0 !important;
+    gap: 1.2rem;
+    padding: 1.5rem 2rem 1.2rem 2rem !important;
+    min-height: 80px;
     background: var(--primary-blue);
-    min-height: 120px;
+    box-shadow: var(--shadow);
 }
 
 .logo-title {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
-    justify-content: center;
-    gap: 0.7rem;
+    gap: 1.2rem;
 }
 
 .kkh-logo {
-    height: 64px;
-    width: auto;
-    margin: 0.5rem auto;
+    height: 48px;
+    width: 48px;
+    margin: 0;
     display: block;
     background: #fff;
     border-radius: 12px;
-    padding: 0.3rem;
+    padding: 0.2rem;
     box-shadow: 0 2px 8px rgba(35,64,110,0.08);
 }
 
@@ -76,14 +77,15 @@ header {
 }
 
 .header-text h1 {
-    font-size: 1.2rem;
-    font-weight: 600;
+    font-size: 1.3rem;
+    font-weight: 700;
     margin-bottom: 0.1rem;
+    color: var(--white);
 }
 
 .subtitle {
-    font-size: 0.95rem;
-    color: #b0b8c9;
+    font-size: 1rem;
+    color: #dbe6fa;
     font-weight: 400;
 }
 
@@ -93,13 +95,11 @@ header {
 }
 
 .sidebar {
-    background: var(--sidebar-bg);
-    padding: 1.5rem 1rem;
-    min-width: 220px;
-    max-width: 240px;
-    height: 100%;
-    overflow-y: auto;
+    min-width: 70px;
+    max-width: 80px;
+    padding: 1.2rem 0.5rem;
     box-shadow: var(--shadow);
+    background: var(--sidebar-bg);
 }
 
 .sidebar-btn {
@@ -107,7 +107,7 @@ header {
     color: var(--charcoal);
     border-radius: 0.4rem;
     padding: 0.6rem 1rem;
-    font-size: 1rem;
+    font-size: 0.92rem;
     font-weight: 500;
     transition: background var(--transition), border var(--transition);
 }
@@ -167,24 +167,26 @@ header {
 
 .chatbot-container {
     width: 100%;
-    max-width: 780px;
-    flex-grow: 1; /* ✅ NEW */
+    max-width: 700px;
+    flex-grow: 1;
     display: flex;
     flex-direction: column;
     height: 100%;
     background: var(--white);
-    border-left: 1px solid #e0e0e0;
-    border-right: 1px solid #e0e0e0;
+    border-radius: 1.2rem;
+    margin: 1.5rem auto;
+    box-shadow: 0 4px 32px rgba(35,64,110,0.10);
+    border: 1px solid #e0e0e0;
     overflow: hidden;
     position: relative;
 }
 
-
 .chat-window {
     flex: 1 1 auto;
     overflow-y: auto;
-    padding: 1.5rem 1rem 1rem;
+    padding: 2.2rem 1.5rem 1rem;
     scroll-behavior: smooth;
+    background: var(--white);
 }
 
 .message {
@@ -195,10 +197,10 @@ header {
 }
 .message-content {
     background: var(--bot-msg-bg);
-    border-radius: 0.7rem;
-    padding: 0.9rem 1.2rem;
-    font-size: 1rem;
-    line-height: 1.6;
+    border-radius: 1.1rem;
+    padding: 1.1rem 1.4rem;
+    font-size: 1.05rem;
+    line-height: 1.7;
     max-width: 80%;
     box-shadow: 0 1px 2px rgba(0,0,0,0.03);
 }
@@ -213,8 +215,8 @@ header {
 .chat-form {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    padding: 1rem;
+    gap: 0.7rem;
+    padding: 1.2rem 1.5rem;
     background-color: var(--white);
     border-top: 1px solid #e0e0e0;
     position: sticky;
@@ -222,6 +224,7 @@ header {
     left: 0;
     right: 0;
     z-index: 100;
+    box-shadow: 0 -2px 12px rgba(35, 64, 110, 0.04);
 }
 
 #mic-btn {
@@ -240,20 +243,21 @@ header {
 
 #user-input {
     flex: 1;
-    padding: 0.7rem;
-    border-radius: 0.4rem;
+    padding: 1rem 1.2rem;
+    border-radius: 1.2rem;
     border: 1px solid #c7d0e1;
-    font-size: 1rem;
+    font-size: 1.05rem;
     background: var(--white);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.03);
 }
 
 button[type="submit"] {
     background: var(--primary-blue);
     color: var(--white);
     border: none;
-    border-radius: 0.4rem;
-    padding: 0.7rem 1.2rem;
-    font-size: 1rem;
+    border-radius: 1.2rem;
+    padding: 0.9rem 1.6rem;
+    font-size: 1.05rem;
     font-weight: 600;
     transition: background 0.2s;
 }
@@ -267,13 +271,21 @@ button[type="submit"]:hover {
     }
     .sidebar {
         width: 100%;
+        min-width: 0;
+        max-width: 100%;
         height: auto;
+        padding: 0.7rem 0.5rem;
     }
     .main-chat {
-        padding: 1rem;
+        padding: 0.5rem;
     }
     .chatbot-container {
         max-width: 100%;
-        padding: 1.2rem 1rem;
+        margin: 0.7rem 0;
+        border-radius: 0.7rem;
+        padding: 0.7rem 0.5rem;
+    }
+    .chat-form {
+        padding: 0.7rem 0.5rem;
     }
 }
