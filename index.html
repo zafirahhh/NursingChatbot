@@ -22,26 +22,6 @@
             <div class="sidebar-actions">
                 <button id="clear-chat" class="sidebar-btn" title="Clear Chat History">🗑️ Clear Chat History</button>
             </div>
-            <div class="sidebar-nav">
-                <label for="nav-dropdown" class="nav-label">NAVIGATION</label>
-                <select id="nav-dropdown" class="nav-dropdown">
-                    <option>Home</option>
-                    <option>FAQ</option>
-                    <option>Contact</option>
-                </select>
-            </div>
-            <details class="sidebar-section">
-                <summary>Chat Sessions</summary>
-                <ul class="sidebar-list" id="chat-sessions">
-                    <li>No sessions yet</li>
-                </ul>
-            </details>
-            <details class="sidebar-section">
-                <summary>Prompt</summary>
-                <div class="sidebar-prompt" id="sidebar-prompt">No prompt loaded</div>
-            </details>
-        </aside>
-        <main class="main-chat">
             <section class="chatbot-container" aria-label="Nursing Chatbot">
                 <div id="chat-window" class="chat-window" tabindex="0" aria-live="polite"></div>
                 <form id="chat-form" autocomplete="off" class="chat-form">
@@ -50,7 +30,7 @@
                     <button type="submit" aria-label="Send">Send</button>
                 </form>
             </section>
-        </main>
+        </aside>
     </div>
     <script src="js/app.js"></script>
 </body>
