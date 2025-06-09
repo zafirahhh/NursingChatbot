@@ -16,11 +16,17 @@
     --transition: 0.2s cubic-bezier(.4,0,.2,1);
 }
 
+* {
+    box-sizing: border-box;
+    border: none !important;
+}
+
 html, body {
     height: 100%;
     margin: 0;
     padding: 0;
 }
+
 body {
     font-family: 'Open Sans', Arial, sans-serif;
     background: var(--soft-gray);
@@ -45,6 +51,7 @@ header {
     padding: 2.5rem 0 1.5rem 0 !important;
     background: var(--primary-blue);
 }
+
 .logo-title {
     display: flex;
     flex-direction: column;
@@ -52,6 +59,7 @@ header {
     justify-content: center;
     gap: 0.7rem;
 }
+
 .kkh-logo {
     height: 48px;
     width: auto;
@@ -61,14 +69,17 @@ header {
     padding: 0.2rem;
     box-shadow: 0 2px 8px rgba(35,64,110,0.08);
 }
+
 .header-text {
     text-align: center;
 }
+
 .header-text h1 {
     font-size: 1.2rem;
     font-weight: 600;
     margin-bottom: 0.1rem;
 }
+
 .subtitle {
     font-size: 0.95rem;
     color: #b0b8c9;
@@ -78,6 +89,7 @@ header {
 .container.center-chat {
     display: flex;
     height: calc(100vh - 70px);
+    overflow: hidden;
 }
 
 .sidebar {
@@ -93,7 +105,6 @@ header {
 .sidebar-btn {
     background: var(--sidebar-btn);
     color: var(--charcoal);
-    border: 1px solid #c7d0e1;
     border-radius: 0.4rem;
     padding: 0.6rem 1rem;
     font-size: 1rem;
@@ -147,15 +158,21 @@ header {
     flex: 1;
     display: flex;
     flex-direction: column;
-    padding: 1rem 2rem;
+    align-items: center;
+    padding: 1.5rem 2rem;
     height: 100%;
     overflow: hidden;
 }
 
 .chatbot-container {
+    width: 100%;
+    max-width: 1024px;
+    height: 100%;
     display: flex;
     flex-direction: column;
-    height: 100%;
+    background: var(--white);
+    border-radius: 1rem;
+    box-shadow: 0 4px 24px rgba(35,64,110,0.10);
     position: relative;
     overflow: hidden;
 }
@@ -175,7 +192,6 @@ header {
 }
 .message-content {
     background: var(--bot-msg-bg);
-    border: 1px solid #c7d0e1;
     border-radius: 0.5rem;
     padding: 0.8rem 1.2rem;
     font-size: 1rem;
