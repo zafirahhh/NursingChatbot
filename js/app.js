@@ -31,6 +31,40 @@ document.addEventListener('DOMContentLoaded', () => {
             li.textContent = session.name;
             li.tabIndex = 0;
             li.onclick = () => switchSession(session.id);
+            // Add rename and delete buttons except for 'General'
+            if (session.id !== 'general') {
+                const renameBtn = document.createElement('button');
+                renameBtn.textContent = '✏️';
+                renameBtn.title = 'Rename Session';
+                renameBtn.className = 'session-action-btn';
+                renameBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    const newName = prompt('Rename session:', session.name);
+                    if (newName) {
+                        session.name = newName;
+                        saveSessions();
+                        renderSessions();
+                    }
+                };
+                li.appendChild(renameBtn);
+                const delBtn = document.createElement('button');
+                delBtn.textContent = '🗑️';
+                delBtn.title = 'Delete Session';
+                delBtn.className = 'session-action-btn';
+                delBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    if (confirm('Delete this session?')) {
+                        // Remove session and its history
+                        sessions.splice(idx, 1);
+                        localStorage.removeItem('kkh-chat-history-' + session.id);
+                        if (activeSessionId === session.id) activeSessionId = 'general';
+                        saveSessions();
+                        renderSessions();
+                        switchSession(activeSessionId);
+                    }
+                };
+                li.appendChild(delBtn);
+            }
             chatSessionsList.appendChild(li);
         });
     }
@@ -42,6 +76,21 @@ document.addEventListener('DOMContentLoaded', () => {
             li.textContent = prompt.name;
             li.tabIndex = 0;
             li.onclick = () => { activePromptIdx = idx; renderPrompts(); };
+            // Add delete button except for default
+            if (idx !== 0) {
+                const delBtn = document.createElement('button');
+                delBtn.textContent = '🗑️';
+                delBtn.title = 'Delete Prompt';
+                delBtn.className = 'prompt-action-btn';
+                delBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    prompts.splice(idx, 1);
+                    if (activePromptIdx >= prompts.length) activePromptIdx = 0;
+                    savePrompts();
+                    renderPrompts();
+                };
+                li.appendChild(delBtn);
+            }
             promptList.appendChild(li);
         });
     }
@@ -178,6 +227,15 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
         const userText = userInput.value.trim();
         if (!userText) return;
+        // Auto-create new session if in General
+        if (activeSessionId === 'general') {
+            const id = 'session-' + Date.now();
+            const name = userText.slice(0, 20) + (userText.length > 20 ? '...' : '');
+            sessions.push({ name, id });
+            saveSessions();
+            renderSessions();
+            switchSession(id);
+        }
         let promptText = prompts[activePromptIdx]?.text || '';
         let fullText = promptText ? promptText + '\n' + userText : userText;
         appendMessage('user', userText);
