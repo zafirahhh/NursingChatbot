@@ -183,10 +183,16 @@ document.addEventListener('DOMContentLoaded', () => {
         appendMessage('user', userText);
         userInput.value = '';
         showTyping();
-        // Use the backend for the bot reply
         const botReply = await searchKnowledge(fullText);
         removeTyping();
         appendMessage('bot', botReply);
+        // --- Auto-generate prompt after each Q&A ---
+        // Only add if not already present
+        if (!prompts.some(p => p.name === userText && p.text === botReply)) {
+            prompts.push({ name: userText, text: botReply });
+            savePrompts();
+            renderPrompts();
+        }
     });
 
     // Clear chat functionality
