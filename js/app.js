@@ -66,10 +66,25 @@ document.addEventListener('DOMContentLoaded', () => {
         renderSessions();
     };
     addPromptBtn.onclick = () => {
-        const name = prompt('Prompt name?');
-        if (!name) return;
-        const text = prompt('Prompt text?') || '';
-        prompts.push({ name, text });
+        // Instead of manual prompt, use last user message as prompt name and last bot reply as prompt text
+        const key = 'kkh-chat-history-' + activeSessionId;
+        const history = JSON.parse(localStorage.getItem(key) || '[]');
+        if (history.length < 2) {
+            alert('Ask a question first to generate a prompt.');
+            return;
+        }
+        // Find last user message and last bot reply
+        let lastUser = null, lastBot = null;
+        for (let i = history.length - 1; i >= 0; i--) {
+            if (!lastBot && history[i].sender === 'bot') lastBot = history[i].text;
+            if (!lastUser && history[i].sender === 'user') lastUser = history[i].text;
+            if (lastUser && lastBot) break;
+        }
+        if (!lastUser || !lastBot) {
+            alert('Need both a user question and a bot answer to generate a prompt.');
+            return;
+        }
+        prompts.push({ name: lastUser, text: lastBot });
         savePrompts();
         renderPrompts();
     };
