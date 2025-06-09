@@ -1,4 +1,3 @@
-/* Mature, professional nurse UI update */
 @import url('https://fonts.googleapis.com/css?family=Inter:400,600|Open+Sans:400,600&display=swap');
 
 :root {
@@ -27,8 +26,6 @@ body {
     background: var(--soft-gray);
     color: var(--charcoal);
     font-size: 1.05rem;
-    min-height: 100vh;
-    height: 100vh;
     overflow: hidden;
 }
 
@@ -55,25 +52,14 @@ header {
     justify-content: center;
     gap: 0.7rem;
 }
-.logo-icon {
-    font-size: 2.2rem;
-    background: var(--accent-navy);
-    color: var(--white);
-    border-radius: 0.7rem;
-    padding: 0.5rem 0.7rem;
-    box-shadow: none;
-}
 .kkh-logo {
     height: 48px;
     width: auto;
-    margin: 0 0 0.7rem 0;
     margin-top: 0.7rem;
-    vertical-align: middle;
-    display: inline-block;
-    box-shadow: 0 2px 8px rgba(35,64,110,0.08);
     background: #fff;
     border-radius: 12px;
     padding: 0.2rem;
+    box-shadow: 0 2px 8px rgba(35,64,110,0.08);
 }
 .header-text {
     text-align: center;
@@ -87,81 +73,68 @@ header {
     font-size: 0.95rem;
     color: #b0b8c9;
     font-weight: 400;
-    letter-spacing: 0.2px;
 }
 
-.container {
-    background: none;
-}
 .container.center-chat {
-    height: calc(100vh - 70px);
-    min-height: 0;
     display: flex;
-    flex-direction: row;
-    align-items: stretch;
-    justify-content: center;
-    gap: 0;
+    height: calc(100vh - 70px);
 }
 
 .sidebar {
     background: var(--sidebar-bg);
-    border-radius: var(--radius);
-    box-shadow: var(--shadow);
-    padding: 1.5rem 1rem 1rem 1rem;
-    margin: 0;
-    min-width: 200px;
-    max-width: 220px;
+    padding: 1.5rem 1rem;
+    min-width: 220px;
+    max-width: 240px;
     height: 100%;
     overflow-y: auto;
-    border-radius: 0 0 0.5rem 0;
+    box-shadow: var(--shadow);
 }
+
 .sidebar-btn {
     background: var(--sidebar-btn);
     color: var(--charcoal);
     border: 1px solid #c7d0e1;
     border-radius: 0.4rem;
+    padding: 0.6rem 1rem;
     font-size: 1rem;
     font-weight: 500;
-    padding: 0.6rem 1rem;
-    box-shadow: none;
     transition: background var(--transition), border var(--transition);
 }
-.sidebar-btn:hover, .sidebar-btn:focus {
+.sidebar-btn:hover {
     background: var(--sidebar-btn-hover);
     border-color: var(--primary-blue);
 }
+
 .sidebar-nav {
     margin-bottom: 1.5rem;
     padding-bottom: 1rem;
     border-bottom: 1px solid #d3dbe8;
 }
 .nav-label {
-    margin-bottom: 0.5rem;
     display: block;
-    color: var(--primary-blue);
     font-weight: 600;
     font-size: 0.97rem;
+    color: var(--primary-blue);
+    margin-bottom: 0.5rem;
 }
 .nav-dropdown {
-    margin-top: 0.5rem;
-    margin-bottom: 0.5rem;
     width: 100%;
-    border: 1px solid #c7d0e1;
-    border-radius: 0.4rem;
-    font-size: 1rem;
     padding: 0.4rem 0.7rem;
+    font-size: 1rem;
+    border-radius: 0.4rem;
+    border: 1px solid #c7d0e1;
 }
+
 .sidebar-section {
     margin-top: 1.2rem;
     background: #f7f9fc;
     border-radius: 0.4rem;
-    box-shadow: none;
     padding: 0.5rem 0.7rem;
 }
 .sidebar-section summary {
-    color: var(--primary-blue);
     font-weight: 600;
     font-size: 1rem;
+    color: var(--primary-blue);
 }
 .sidebar-list {
     font-size: 0.97rem;
@@ -170,66 +143,74 @@ header {
 .main-chat {
     flex: 1;
     display: flex;
-    align-items: flex-start;
     justify-content: center;
-    padding: 0;
+    align-items: flex-start;
+    padding: 2rem 2rem 1rem 2rem;
     height: 100%;
+    overflow: hidden;
 }
 
 .chatbot-container {
     width: 100%;
-    max-width: 480px;
-    min-width: 0;
+    max-width: 960px;
     min-height: 0;
-    height: 70vh;
+    height: 100%;
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
-    padding: 1.5rem 1rem 0.7rem 1rem;
-    box-sizing: border-box;
+    padding: 2rem 2.5rem 1rem 2.5rem;
     background: var(--white);
     border-radius: 1rem;
     box-shadow: 0 4px 24px rgba(35,64,110,0.10);
 }
+
 .chat-window {
-    flex: 1 1 auto;
+    flex: 1;
     overflow-y: auto;
-    margin-bottom: 0.7rem;
-    padding: 0.7rem;
+    padding: 1rem;
+    margin-bottom: 1rem;
 }
+
 .message {
-    margin-bottom: 0.1rem;
-    opacity: 1;
-    transform: none;
-    animation: none;
+    margin-bottom: 0.7rem;
 }
 .message.user .message-content {
     background: var(--user-msg-bg);
-    color: var(--charcoal);
-    border-top-left-radius: 0.2rem;
-    border-bottom-right-radius: 1rem;
     border: 1px solid #c7d0e1;
+    border-radius: 0.5rem;
 }
 .message.bot .message-content {
     background: var(--bot-msg-bg);
-    color: var(--charcoal);
-    border-top-right-radius: 0.2rem;
-    border-bottom-left-radius: 1rem;
     border: 1px solid #c7d0e1;
+    border-radius: 0.5rem;
 }
 .message-content {
-    font-size: 1.01rem;
-    padding: 0.6rem 1rem;
-    box-shadow: none;
+    font-size: 1rem;
+    padding: 0.7rem 1.1rem;
     max-width: 85%;
 }
+
 .avatar {
     font-size: 1.3rem;
     background: #e0e5ee;
     color: var(--primary-blue);
     border-radius: 50%;
     padding: 0.3rem 0.5rem;
-    margin: 0 0.3rem;
+    margin-right: 0.3rem;
+}
+
+.chat-form {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    padding: 0.8rem 1rem;
+    background: var(--white);
+    border-top: 1px solid #eee;
+    position: sticky;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 10;
 }
 
 #mic-btn {
@@ -240,99 +221,57 @@ header {
     width: 2.2rem;
     height: 2.2rem;
     font-size: 1.1rem;
-    margin-right: 0.3rem;
-    transition: background 0.2s, color 0.2s, border 0.2s;
+    transition: background 0.2s, color 0.2s;
 }
 #mic-btn.recording {
     background: var(--primary-blue);
     color: var(--white);
-    border-color: var(--primary-blue);
 }
 
-.chat-form {
-    display: flex;
-    gap: 0.3rem;
-    align-items: center;
-    background: var(--white);
-    border-radius: 0.4rem;
-    box-shadow: 0 1px 4px rgba(35, 64, 110, 0.07);
-    padding: 0.5rem 0.7rem;
-    margin-top: 0;
-    position: sticky;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    z-index: 10;
-}
 #user-input {
     flex: 1;
     padding: 0.7rem;
     border-radius: 0.4rem;
     border: 1px solid #c7d0e1;
     font-size: 1rem;
-    margin-right: 0.3rem;
     background: var(--white);
-    min-width: 0;
 }
+
 button[type="submit"] {
     background: var(--primary-blue);
     color: var(--white);
     border: none;
     border-radius: 0.4rem;
-    padding: 0.7rem 1.1rem;
+    padding: 0.7rem 1.2rem;
     font-size: 1rem;
     font-weight: 600;
-    letter-spacing: 0.5px;
     transition: background 0.2s;
 }
-button[type="submit"]:hover,
-button[type="submit"]:focus {
+button[type="submit"]:hover {
     background: var(--accent-navy);
-    color: var(--white);
-    outline: none;
 }
 
-.center-chat {
-    justify-content: center;
-    align-items: flex-start;
-    display: flex;
-}
-
-/* Responsive Layout */
 @media (max-width: 900px) {
-    .top-header, .logo-title {
-        align-items: center;
-        justify-content: center;
-    }
     .container.center-chat {
         flex-direction: column;
-        height: 100vh;
     }
     .sidebar {
-        min-width: 100vw;
-        max-width: 100vw;
+        width: 100%;
         height: auto;
         border-radius: 0 0 0.5rem 0.5rem;
     }
     .main-chat {
-        padding: 0;
-        height: 100%;
+        padding: 1rem;
     }
     .chatbot-container {
-        max-width: 98vw;
-        height: 60vh;
-        padding: 1rem 0.2rem;
-    }
-    .top-header {
-        padding-top: 1.2rem !important;
+        max-width: 100%;
+        padding: 1.2rem 1rem;
     }
 }
+
 @media (max-width: 600px) {
     .chatbot-container {
-        height: 55vh;
-        padding: 0.5rem 0.1rem;
-    }
-    .top-header {
-        padding-top: 0.7rem !important;
+        height: auto;
+        padding: 1rem 0.7rem;
     }
 }
