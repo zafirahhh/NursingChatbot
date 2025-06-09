@@ -144,7 +144,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             chatSessionsList.appendChild(li);
         });
-        // Add new session button at the bottom
+        // Only add one new session button at the bottom (remove duplicate)
         const addBtn = document.createElement('button');
         addBtn.className = 'add-session-btn';
         addBtn.textContent = '+ New Chat';
@@ -170,7 +170,7 @@ document.addEventListener('DOMContentLoaded', () => {
         };
         chatSessionsList.appendChild(addBtn);
     }
-    // --- Prompt Gallery as Search History ---
+    // --- Prompt Gallery as Chat History for Selected Prompt ---
     function getSessionHistoryPrompts() {
         // Get all user-bot Q&A pairs for the current session, deduplicated by user question
         const key = 'kkh-chat-history-' + activeSessionId;
@@ -217,9 +217,22 @@ document.addEventListener('DOMContentLoaded', () => {
             nameSpan.style.lineHeight = '22px';
             li.appendChild(nameSpan);
             li.tabIndex = 0;
+            // On click, show a modal or alert with the full chat history for this prompt
             li.onclick = () => {
-                userInput.value = prompt.name;
-                userInput.focus();
+                const key = 'kkh-chat-history-' + activeSessionId;
+                const history = JSON.parse(localStorage.getItem(key) || '[]');
+                let chatHistory = '';
+                for (let i = 0; i < history.length - 1; i++) {
+                    if (history[i].sender === 'user' && history[i].text === prompt.name && history[i + 1].sender === 'bot') {
+                        chatHistory += 'You: ' + history[i].text + '\n';
+                        chatHistory += 'Bot: ' + history[i + 1].text + '\n\n';
+                    }
+                }
+                if (chatHistory) {
+                    alert(chatHistory.trim());
+                } else {
+                    alert('No chat history found for this prompt.');
+                }
             };
             promptList.appendChild(li);
         });
