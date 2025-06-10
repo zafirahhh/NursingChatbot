@@ -546,3 +546,7 @@ async def search(request: QueryRequest):
         print(f"Error in /search: {e}")
         traceback.print_exc()
         return {"answer": "Internal server error. Please check backend logs."}
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run("backend:app", host="0.0.0.0", port=8000, reload=True)
