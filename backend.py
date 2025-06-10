@@ -395,7 +395,6 @@ def find_vitals_row_for_age(query):
     return None, None
 
 def normalize(s):
-    import re
     s = s.lower()
     s = re.sub(r'\([^)]*\)', '', s)
     s = s.replace('-', ' ').replace('<', '').replace('>', '').replace(':', '').replace('/', ' ')
@@ -525,7 +524,6 @@ async def search(request: QueryRequest):
                 return {"answer": "Sorry, no relevant answer found."}
             if len(sentences) == 1:
                 sent = sentences[0]
-                # Fix regex typo and close string
                 if len(sent.split()) < 6 or re.match(r'^[A-Za-z ]+\(.*\)?$', sent):
                     return {"answer": chunk}
                 return {"answer": sent}
