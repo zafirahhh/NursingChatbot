@@ -299,7 +299,7 @@ row_embeddings = safe_load_row_embeddings()
 
 # --- Clinical Synonym Map ---
 age_synonyms = {
-    'neonate': ['birth - < 3 months', '<1 month', '0-1 month', 'neonate'],
+    'neonate': ['birth - < 3 months', '<1 month', '0-1 month', 'neonate', 'newborn'],
     'infant': ['1 month to 1 year', '1 month - < 1 year', 'infant', '1 mth to 1 yr', '6 months - <1 year'],
     'toddler': ['1 year - < 6 years', 'toddler', '1-2 yr'],
     'child': ['6 years - < 10 years', 'child', '10 years - < 15 years', '1 year - < 6 years'],
@@ -307,6 +307,8 @@ age_synonyms = {
     '6 year old': ['6 years - < 10 years', '6-10 years', '6 yr', '6 years'],
     '1 year old': ['1 year - < 6 years', '1 year', '1 yr'],
     'newborn': ['birth - < 3 months', 'neonate', '0-1 month'],
+    'young child': ['young child', '2-7 years', '2 - 7 years', 'younger child', 'child (2-7 years)', 'young children'],
+    'older child': ['older child', '7-12 years', '7 - 12 years', 'child (7-12 years)', 'older children'],
 }
 param_synonyms = {
     'bp': ['bp', 'blood pressure', 'systolic', 'expected systolic bp (mmhg)', 'minimum systolic bp (mmhg)'],
@@ -355,6 +357,8 @@ vitals_age_aliases = {
     'toddler': ['1-2 years', 'toddler'],
     'child': ['2-12 years', 'child'],
     'adolescent': ['12-18 years', 'adolescent'],
+    'young child': ['2-7 years', 'young child', 'younger child'],
+    'older child': ['7-12 years', 'older child'],
 }
 
 def find_vitals_row_for_age(query):
@@ -404,7 +408,35 @@ async def search(request: QueryRequest):
     try:
         q = request.query.strip()
         ql = q.lower()
-        # --- Vitals Table Direct Answer ---
+        threshold = 0.38  # Lowered threshold for semantic search
+        q_emb = model.encode(q, convert_to_tensor=True, dtype=torch.float32)
+        # --- 1. QA Pair Semantic Search (most direct answer) ---
+        if qa_embeddings is not None:
+            qa_scores = util.pytorch_cos_sim(q_emb, qa_embeddings)[0]
+            qa_best_idx = int(torch.argmax(qa_scores))
+            qa_best_score = float(qa_scores[qa_best_idx])
+            if qa_best_score > threshold:
+                return {"answer": qa_answers[qa_best_idx]}
+        # --- 2. Chunk Semantic Search (extract best sentence) ---
+        chunk_cos_scores = util.pytorch_cos_sim(q_emb, chunk_embeddings)[0]
+        best_chunk_idx = int(torch.argmax(chunk_cos_scores))
+        best_chunk_score = float(chunk_cos_scores[best_chunk_idx])
+        if best_chunk_score > threshold:
+            # Extract the most relevant sentence from the chunk
+            chunk = chunks[best_chunk_idx]
+            sentences = sent_tokenize(chunk)
+            if len(sentences) == 1:
+                return {"answer": sentences[0]}
+            sent_embs = model.encode(sentences, convert_to_tensor=True, dtype=torch.float32)
+            sent_scores = util.pytorch_cos_sim(q_emb, sent_embs)[0]
+            best_sent_idx = int(torch.argmax(sent_scores))
+            best_sent_score = float(sent_scores[best_sent_idx])
+            # If the best sentence is reasonably relevant, return it
+            if best_sent_score > threshold:
+                return {"answer": sentences[best_sent_idx]}
+            # Otherwise, return the whole chunk
+            return {"answer": chunk}
+        # --- 2. Vitals Table Direct Answer ---
         vitals_keywords = ["vital sign", "vitals", "normal vital"]
         specific_vital_params = ["heart rate", "respiratory rate", "systolic bp", "blood pressure", "bp"]
         min_synonyms = ["minimum", "min", "lowest", "lower"]
