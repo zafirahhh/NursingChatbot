@@ -359,15 +359,31 @@ vitals_age_aliases = {
 
 def find_vitals_row_for_age(query):
     ql = query.lower()
+    # 1. Try exact match first
+    for idx, row in vitals_df.iterrows():
+        age_val = row[vitals_df.columns[0]].lower().strip()
+        if age_val == ql:
+            return age_val, row
+    # 2. Try longest substring match (most specific)
+    best_match = None
+    best_len = 0
+    for idx, row in vitals_df.iterrows():
+        age_val = row[vitals_df.columns[0]].lower().strip()
+        if age_val in ql or ql in age_val:
+            if len(age_val) > best_len:
+                best_match = (age_val, row)
+                best_len = len(age_val)
+    if best_match:
+        return best_match
+    # 3. Try alias/synonym match
     for alias, options in vitals_age_aliases.items():
         for opt in options:
             if opt in ql or alias in ql:
-                # Try to find row in df
                 for idx, row in vitals_df.iterrows():
                     age_val = row[vitals_df.columns[0]].lower()
                     if opt in age_val or alias in age_val:
                         return alias, row
-    # Fallback: try partial match
+    # 4. Fallback: try partial match
     for idx, row in vitals_df.iterrows():
         age_val = row[vitals_df.columns[0]].lower()
         if any(a in ql for a in age_val.split()):
@@ -446,7 +462,12 @@ async def search(request: QueryRequest):
                 if v_norm in normalize(ql) or normalize(ql) in v_norm:
                     for cell in table_cell_lookup:
                         row_norm = normalize(cell[1])
-                        if v_norm in row_norm or row_norm in v_norm:
+                        # Prefer exact match, then longest match
+                        if v_norm == row_norm:
+                            matched_age = cell[1]
+                            matched_age_syn = v
+                            best_age_score = 999
+                        elif v_norm in row_norm or row_norm in v_norm:
                             score = len(v_norm)
                             if score > best_age_score:
                                 matched_age = cell[1]
@@ -458,7 +479,12 @@ async def search(request: QueryRequest):
                 if v_norm in normalize(ql) or normalize(ql) in v_norm:
                     for cell in table_cell_lookup:
                         col_norm = normalize(cell[2])
-                        if v_norm in col_norm or col_norm in v_norm:
+                        # Prefer exact match, then longest match
+                        if v_norm == col_norm:
+                            matched_param = cell[2]
+                            matched_param_syn = v
+                            best_param_score = 999
+                        elif v_norm in col_norm or col_norm in v_norm:
                             score = len(v_norm)
                             if score > best_param_score:
                                 matched_param = cell[2]
