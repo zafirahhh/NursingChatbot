@@ -86,7 +86,7 @@ print(f'Model loaded in {time.time() - model_load_start:.2f} seconds.')
 def safe_load_embeddings(path, encode_fn, items, name):
     try:
         if os.path.exists(path):
-            emb = torch.load(path, map_location='cpu', weights_only=True)
+            emb = torch.load(path, map_location='cpu')
             if emb.dtype != torch.float32:
                 emb = emb.float()
             print(f'Loaded {name} embeddings from disk. (dtype: {emb.dtype})')
