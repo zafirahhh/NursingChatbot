@@ -426,14 +426,21 @@ async def search(request: QueryRequest):
             chunk = chunks[best_chunk_idx]
             sentences = sent_tokenize(chunk)
             if len(sentences) == 1:
-                return {"answer": sentences[0]}
+                sent = sentences[0]
+                # If the sentence is too short or looks like a header/value, return the chunk
+                if len(sent.split()) < 6 or re.match(r'^[A-Za-z ]+\(.*\)?$', sent):
+                    return {"answer": chunk}
+                return {"answer": sent}
             sent_embs = model.encode(sentences, convert_to_tensor=True, dtype=torch.float32)
             sent_scores = util.pytorch_cos_sim(q_emb, sent_embs)[0]
             best_sent_idx = int(torch.argmax(sent_scores))
             best_sent_score = float(sent_scores[best_sent_idx])
-            # If the best sentence is reasonably relevant, return it
+            best_sent = sentences[best_sent_idx]
+            # If the best sentence is too short or looks like a header/value, return the chunk
+            if len(best_sent.split()) < 6 or re.match(r'^[A-Za-z ]+\(.*\)?$', best_sent):
+                return {"answer": chunk}
             if best_sent_score > threshold:
-                return {"answer": sentences[best_sent_idx]}
+                return {"answer": best_sent}
             # Otherwise, return the whole chunk
             return {"answer": chunk}
         # --- 2. Vitals Table Direct Answer ---
@@ -444,33 +451,25 @@ async def search(request: QueryRequest):
         if any(term in ql for term in vitals_keywords + specific_vital_params):
             age_label, row = find_vitals_row_for_age(ql)
             if row is not None:
-                # If the query is for a specific vital parameter, only return that value
                 for param in specific_vital_params:
                     if param in ql:
-                        # Determine if min/max is requested
                         is_min = any(word in ql for word in min_synonyms)
                         is_max = any(word in ql for word in max_synonyms)
-                        # Find all matching columns for the parameter
                         matching_cols = [c for c in vitals_df.columns[1:] if param.replace("bp", "blood pressure") in c or c in param]
                         if matching_cols:
                             answers = []
                             for c in matching_cols:
                                 c_norm = c.lower()
-                                if is_min and "min" in c_norm:
-                                    val = row[c]
-                                    if val and val.lower() != 'nan':
-                                        answers.append(f"the minimum {param} is {val}")
-                                elif is_max and "max" in c_norm:
-                                    val = row[c]
-                                    if val and val.lower() != 'nan':
-                                        answers.append(f"the maximum {param} is {val}")
-                                elif not is_min and not is_max:
-                                    # If neither min nor max specified, return both if available
-                                    val = row[c]
-                                    if val and val.lower() != 'nan':
-                                        answers.append(f"{c} is {val}")
+                                val = row[c]
+                                if val and val.lower() != 'nan':
+                                    if is_min and "min" in c_norm:
+                                        answers.append(f"For {age_label}, the minimum {param} is {val}.")
+                                    elif is_max and "max" in c_norm:
+                                        answers.append(f"For {age_label}, the maximum {param} is {val}.")
+                                    elif not is_min and not is_max:
+                                        answers.append(f"For {age_label}, {c} is {val}.")
                             if answers:
-                                return {"answer": f"For {age_label if age_label else row[vitals_df.columns[0]]}, " + ' and '.join(answers) + "."}
+                                return {"answer": ' '.join(answers)}
                 # Otherwise, return the full row summary
                 col_map = {c: c for c in vitals_df.columns if c != vitals_df.columns[0]}
                 col_map = {c: c.replace('bpm', 'beats per minute').replace('respiratory rate', 'respiratory rate').replace('heart rate', 'heart rate').replace('bp', 'blood pressure') for c in col_map}
@@ -523,7 +522,6 @@ async def search(request: QueryRequest):
                                 matched_param_syn = v
                                 best_param_score = score
         if matched_age and matched_param:
-            # Find the most contextually appropriate cell (avoid repeated/irrelevant age groups)
             best_cell = None
             for cell in table_cell_lookup:
                 if normalize(cell[1]) == normalize(matched_age) and normalize(cell[2]) == normalize(matched_param):
@@ -533,12 +531,8 @@ async def search(request: QueryRequest):
                 param_label = best_cell[2].replace("(mmHg)", "").replace(":", "").strip()
                 age_label = best_cell[1]
                 value = best_cell[3]
-                # Format answer naturally
-                if re.match(r"\\d+", age_label):
-                    age_phrase = f"a {age_label} old"
-                else:
-                    age_phrase = f"children in the '{age_label}' group"
-                return {"answer": f"For {age_phrase}, the normal {param_label.lower()} is {value}."}
+                # Always return a full, natural-language answer
+                return {"answer": f"For {age_label}, the normal {param_label.lower()} is {value}."}
         # --- Direct Table Cell Answer for Specific Parameter with Robust Age/Parameter Matching ---
         def extract_age_from_query(query):
             # Try to extract age in years/months from the query
