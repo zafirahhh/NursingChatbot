@@ -529,5 +529,22 @@ async def search(request: QueryRequest):
                 if len(sent.split()) < 6 or re.match(r'^[A-Za-z ]+\(.*\)?$', sent):
                     return {"answer": chunk}
                 return {"answer": sent}
+            sent_embs = model.encode(sentences, convert_to_tensor=True, dtype=torch.float32)
+            sent_scores = util.pytorch_cos_sim(q_emb, sent_embs)[0]
+            best_sent_idx = int(torch.argmax(sent_scores))
+            best_sent_score = float(sent_scores[best_sent_idx])
+            best_sent = sentences[best_sent_idx]
+            if len(best_sent.split()) < 6 or re.match(r'^[A-Za-z ]+\(.*\)?$', best_sent):
+                return {"answer": chunk}
+            if best_sent_score > threshold:
+                return {"answer": best_sent}
+            return {"answer": chunk}
+        # --- 5. Fallback: Table Row/Cell/QA Semantic Search (as before) ---
+        fallback_age = best_age_label if best_age_label else "the specified age group"
+        fallback_param = best_param_label if best_param_label else "the specific parameter"
+        return {"answer": f"Sorry, the specific range for {fallback_age} and {fallback_param} is not available."}
     except Exception as e:
-        return {"error": str(e)}
+        import traceback
+        print(f"Error in /search: {e}")
+        traceback.print_exc()
+        return {"answer": "Internal server error. Please check backend logs."}
