@@ -410,40 +410,9 @@ async def search(request: QueryRequest):
         ql = q.lower()
         threshold = 0.38  # Lowered threshold for semantic search
         q_emb = model.encode(q, convert_to_tensor=True, dtype=torch.float32)
-        # --- 1. QA Pair Semantic Search (most direct answer) ---
-        if qa_embeddings is not None:
-            qa_scores = util.pytorch_cos_sim(q_emb, qa_embeddings)[0]
-            qa_best_idx = int(torch.argmax(qa_scores))
-            qa_best_score = float(qa_scores[qa_best_idx])
-            if qa_best_score > threshold:
-                return {"answer": qa_answers[qa_best_idx]}
-        # --- 2. Chunk Semantic Search (extract best sentence) ---
-        chunk_cos_scores = util.pytorch_cos_sim(q_emb, chunk_embeddings)[0]
-        best_chunk_idx = int(torch.argmax(chunk_cos_scores))
-        best_chunk_score = float(chunk_cos_scores[best_chunk_idx])
-        if best_chunk_score > threshold:
-            # Extract the most relevant sentence from the chunk
-            chunk = chunks[best_chunk_idx]
-            sentences = sent_tokenize(chunk)
-            if len(sentences) == 1:
-                sent = sentences[0]
-                # If the sentence is too short or looks like a header/value, return the chunk
-                if len(sent.split()) < 6 or re.match(r'^[A-Za-z ]+\(.*\)?$', sent):
-                    return {"answer": chunk}
-                return {"answer": sent}
-            sent_embs = model.encode(sentences, convert_to_tensor=True, dtype=torch.float32)
-            sent_scores = util.pytorch_cos_sim(q_emb, sent_embs)[0]
-            best_sent_idx = int(torch.argmax(sent_scores))
-            best_sent_score = float(sent_scores[best_sent_idx])
-            best_sent = sentences[best_sent_idx]
-            # If the best sentence is too short or looks like a header/value, return the chunk
-            if len(best_sent.split()) < 6 or re.match(r'^[A-Za-z ]+\(.*\)?$', best_sent):
-                return {"answer": chunk}
-            if best_sent_score > threshold:
-                return {"answer": best_sent}
-            # Otherwise, return the whole chunk
-            return {"answer": chunk}
-        # --- 2. Vitals Table Direct Answer ---
+        best_age_label = None
+        best_param_label = None
+        # --- 1. Vitals/Table Logic FIRST ---
         vitals_keywords = ["vital sign", "vitals", "normal vital"]
         specific_vital_params = ["heart rate", "respiratory rate", "systolic bp", "blood pressure", "bp"]
         min_synonyms = ["minimum", "min", "lowest", "lower"]
@@ -480,7 +449,7 @@ async def search(request: QueryRequest):
                         values.append(f"{col_map[c]} is {val}")
                 age_phrase = age_label if age_label else row[vitals_df.columns[0]]
                 return {"answer": f"For {age_phrase} ({row[vitals_df.columns[0]]}), " + ' and '.join(values) + "."}
-        # --- Direct Table Cell Answer for Specific Parameter ---
+        # --- 2. Direct Table Cell Answer for Specific Parameter ---
         matched_age = None
         matched_param = None
         best_age_score = 0
@@ -493,7 +462,6 @@ async def search(request: QueryRequest):
                 if v_norm in normalize(ql) or normalize(ql) in v_norm:
                     for cell in table_cell_lookup:
                         row_norm = normalize(cell[1])
-                        # Prefer exact match, then longest match
                         if v_norm == row_norm:
                             matched_age = cell[1]
                             matched_age_syn = v
@@ -510,7 +478,6 @@ async def search(request: QueryRequest):
                 if v_norm in normalize(ql) or normalize(ql) in v_norm:
                     for cell in table_cell_lookup:
                         col_norm = normalize(cell[2])
-                        # Prefer exact match, then longest match
                         if v_norm == col_norm:
                             matched_param = cell[2]
                             matched_param_syn = v
@@ -521,6 +488,10 @@ async def search(request: QueryRequest):
                                 matched_param = cell[2]
                                 matched_param_syn = v
                                 best_param_score = score
+        if matched_age:
+            best_age_label = matched_age
+        if matched_param:
+            best_param_label = matched_param
         if matched_age and matched_param:
             best_cell = None
             for cell in table_cell_lookup:
@@ -531,150 +502,37 @@ async def search(request: QueryRequest):
                 param_label = best_cell[2].replace("(mmHg)", "").replace(":", "").strip()
                 age_label = best_cell[1]
                 value = best_cell[3]
-                # Always return a full, natural-language answer
                 return {"answer": f"For {age_label}, the normal {param_label.lower()} is {value}."}
-        # --- Direct Table Cell Answer for Specific Parameter with Robust Age/Parameter Matching ---
-        def extract_age_from_query(query):
-            # Try to extract age in years/months from the query
-            match = re.search(r'(\d+)\s*(year|yr|month|mo)', query)
-            if match:
-                num = int(match.group(1))
-                unit = match.group(2)
-                if 'month' in unit:
-                    return num, 'month'
-                return num, 'year'
-            return None, None
-
-        def parse_age_label(label):
-            # Returns (start_age, end_age, unit) where unit is 'years' or 'months'
-            label = label.lower().replace('years', 'year').replace('months', 'month')
-            m = re.match(r'(\d+)[-–<]+(\d+)', label)
-            if m:
-                start = int(m.group(1))
-                end = int(m.group(2))
-                unit = 'year' if 'year' in label else 'month'
-                return (start, end, unit)
-            m = re.match(r'(\d+)[^\d]+and above', label)
-            if m:
-                start = int(m.group(1))
-                unit = 'year' if 'year' in label else 'month'
-                return (start, float('inf'), unit)
-            m = re.match(r'(\d+)[^\d]+month', label)
-            if m:
-                start = int(m.group(1))
-                return (start, start+1, 'month')
-            return None
-
-        def find_best_age_group(age, age_unit, all_age_labels):
-            # Try to map a numeric age to the closest age group label
-            best_label = None
-            for label in all_age_labels:
-                parsed = parse_age_label(label)
-                if parsed:
-                    start, end, unit = parsed
-                    # Convert age to correct unit
-                    age_cmp = age if unit == age_unit else (age/12 if age_unit=='month' and unit=='year' else age*12)
-                    if start <= age_cmp < end:
-                        return label
-                    # For open-ended ranges
-                    if end == float('inf') and age_cmp >= start:
-                        return label
-            return None
-
-        # Extract age and parameter from query
-        age_in_query, age_unit = extract_age_from_query(ql)
-        all_age_labels = [cell[1] for cell in table_cell_lookup]
-        best_age_label = None
-        if age_in_query is not None:
-            best_age_label = find_best_age_group(age_in_query, age_unit, all_age_labels)
-        # Fallback to synonym match if no numeric age
-        if not best_age_label:
-            for key, vals in age_synonyms.items():
-                for v in vals:
-                    v_norm = normalize(v)
-                    if v_norm in normalize(ql) or normalize(ql) in v_norm:
-                        for cell in table_cell_lookup:
-                            row_norm = normalize(cell[1])
-                            if v_norm in row_norm or row_norm in v_norm:
-                                best_age_label = cell[1]
-                                break
-                if best_age_label:
-                    break
-        # Parameter matching (robust)
-        best_param_label = None
-        for key, vals in param_synonyms.items():
-            for v in vals:
-                v_norm = normalize(v)
-                if v_norm in normalize(ql) or normalize(ql) in v_norm:
-                    for cell in table_cell_lookup:
-                        col_norm = normalize(cell[2])
-                        if v_norm in col_norm or col_norm in v_norm:
-                            best_param_label = cell[2]
-                            break
-            if best_param_label:
-                break
-        # Only answer if both age and parameter are matched
-        if best_age_label and best_param_label:
-            for cell in table_cell_lookup:
-                if normalize(cell[1]) == normalize(best_age_label) and normalize(cell[2]) == normalize(best_param_label):
-                    param_label = cell[2].replace("(mmHg)", "").replace(":", "").strip()
-                    age_label = cell[1]
-                    value = cell[3]
-                    if re.match(r"\d+", age_label):
-                        age_phrase = f"a {age_label} old"
-                    else:
-                        age_phrase = f"children in the '{age_label}' group"
-                    return {"answer": f"For {age_phrase}, the normal {param_label.lower()} is {value}."}
-        # --- Row-level Semantic Search for Generic Queries ---
-        threshold = 0.38  # Lowered threshold for row-level semantic search
-        q_emb = model.encode(q, convert_to_tensor=True, dtype=torch.float32)
-        row_cos_scores = util.pytorch_cos_sim(q_emb, row_embeddings)[0]
-        best_row_idx = int(torch.argmax(row_cos_scores))
-        best_row_score = float(row_cos_scores[best_row_idx])
-        if best_row_score > threshold:
-            table_title, row = row_lookup[best_row_idx]
-            # Compose a readable, natural summary of the row, only include non-empty, non-NaN values
-            summary = []
-            age_label = None
-            param_label = None
-            value = None
-            for k, v in row.items():
-                if k and v and str(v).strip().lower() not in ["", "nan", "none"]:
-                    if not age_label and ("age" in k.lower() or "group" in k.lower()):
-                        age_label = v.strip()
-                    elif not param_label and ("fluid" in k.lower() or "bp" in k.lower() or "urine" in k.lower() or "rate" in k.lower()):
-                        param_label = k.strip()
-                        value = v.strip()
-            if age_label and param_label and value:
-                if re.match(r"\\d+", age_label):
-                    age_phrase = f"a {age_label} old"
-                else:
-                    age_phrase = f"children in the '{age_label}' group"
-                return {"answer": f"For {age_phrase}, the normal {param_label.lower()} is {value}."}
-            # Fallback: join all row info naturally
-            summary = [f"{k.strip()}: {v.strip()}" for k, v in row.items() if k and v and str(v).strip().lower() not in ["", "nan", "none"]]
-            if summary:
-                return {"answer": f"According to the table '{table_title}', {', '.join(summary)}."}
-        # --- Fallback: Table Cell Semantic Search ---
-        cos_scores = util.pytorch_cos_sim(q_emb, table_cell_embeddings)[0]
-        best_idx = int(torch.argmax(cos_scores))
-        best_score = float(cos_scores[best_idx])
-        if best_score > threshold:
-            table_title, row_label, col, value = table_cell_lookup[best_idx]
-            param_label = col.replace("(mmHg)", "").replace(":", "").strip()
-            age_label = row_label
-            if re.match(r"\\d+", age_label):
-                age_phrase = f"a {age_label} old"
-            else:
-                age_phrase = f"children in the '{age_label}' group"
-            return {"answer": f"For {age_phrase}, the normal {param_label.lower()} is {value}."}
-        # --- Fallback: QA Pairs ---
+        # --- 3. QA Pair Semantic Search (for non-vitals/table queries) ---
         if qa_embeddings is not None:
             qa_scores = util.pytorch_cos_sim(q_emb, qa_embeddings)[0]
             qa_best_idx = int(torch.argmax(qa_scores))
             qa_best_score = float(qa_scores[qa_best_idx])
             if qa_best_score > threshold:
                 return {"answer": qa_answers[qa_best_idx]}
+        # --- 4. Chunk Semantic Search (extract best sentence) ---
+        chunk_cos_scores = util.pytorch_cos_sim(q_emb, chunk_embeddings)[0]
+        best_chunk_idx = int(torch.argmax(chunk_cos_scores))
+        best_chunk_score = float(chunk_cos_scores[best_chunk_idx])
+        if best_chunk_score > threshold:
+            chunk = chunks[best_chunk_idx]
+            sentences = sent_tokenize(chunk)
+            if len(sentences) == 1:
+                sent = sentences[0]
+                if len(sent.split()) < 6 or re.match(r'^[A-Za-z ]+\(.*\)?$', sent):
+                    return {"answer": chunk}
+                return {"answer": sent}
+            sent_embs = model.encode(sentences, convert_to_tensor=True, dtype=torch.float32)
+            sent_scores = util.pytorch_cos_sim(q_emb, sent_embs)[0]
+            best_sent_idx = int(torch.argmax(sent_scores))
+            best_sent_score = float(sent_scores[best_sent_idx])
+            best_sent = sentences[best_sent_idx]
+            if len(best_sent.split()) < 6 or re.match(r'^[A-Za-z ]+\(.*\)?$', best_sent):
+                return {"answer": chunk}
+            if best_sent_score > threshold:
+                return {"answer": best_sent}
+            return {"answer": chunk}
+        # --- 5. Fallback: Table Row/Cell/QA Semantic Search (as before) ---
         fallback_age = best_age_label if best_age_label else "the specified age group"
         fallback_param = best_param_label if best_param_label else "the specific parameter"
         return {"answer": f"Sorry, the specific range for {fallback_age} and {fallback_param} is not available."}
