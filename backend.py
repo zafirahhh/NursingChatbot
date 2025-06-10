@@ -525,4 +525,9 @@ async def search(request: QueryRequest):
                 return {"answer": "Sorry, no relevant answer found."}
             if len(sentences) == 1:
                 sent = sentences[0]
-                if len(sent.split()) < 6 or re.match(r'^[A-Zaz
+                # Fix regex typo and close string
+                if len(sent.split()) < 6 or re.match(r'^[A-Za-z ]+\(.*\)?$', sent):
+                    return {"answer": chunk}
+                return {"answer": sent}
+    except Exception as e:
+        return {"error": str(e)}
