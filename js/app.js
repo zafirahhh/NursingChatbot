@@ -338,7 +338,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let knowledgeText = '';
 
     // Load the knowledge base from the PDF (as text)
-    fetch('data/nursing_guide.txt')
+    fetch('data/nursing_guide_cleaned.txt')
       .then(response => response.text())
       .then(text => {
         knowledgeText = text;
