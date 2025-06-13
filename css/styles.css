@@ -387,12 +387,12 @@ button[type="submit"]:hover {
 @media (max-width: 600px) {
     html, body {
         font-size: 0.95rem;
-        overflow-x: hidden !important;
-        overflow-y: hidden !important;
+        overflow: hidden !important;
         height: 100vh !important;
         min-height: 100vh !important;
         width: 100vw !important;
         max-width: 100vw !important;
+        position: fixed;
     }
     body {
         display: flex;
@@ -402,6 +402,7 @@ button[type="submit"]:hover {
         width: 100vw !important;
         max-width: 100vw !important;
         overflow: hidden !important;
+        position: fixed;
     }
     .container.center-chat {
         flex-direction: column;
@@ -412,6 +413,9 @@ button[type="submit"]:hover {
         overflow: hidden !important;
         padding: 0;
         display: flex;
+        position: fixed;
+        top: 0;
+        left: 0;
     }
     .main-chat {
         padding: 0;
