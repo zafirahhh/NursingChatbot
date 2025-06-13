@@ -87,11 +87,13 @@ function openSidebar() {
   sidebar.classList.add('open');
   overlay.classList.add('open');
   toggle.classList.add('open');
+  document.body.classList.add('sidebar-open');
 }
 function closeSidebar() {
   sidebar.classList.remove('open');
   overlay.classList.remove('open');
   toggle.classList.remove('open');
+  document.body.classList.remove('sidebar-open');
 }
 toggle.addEventListener('click', () => {
   if (sidebar.classList.contains('open')) {

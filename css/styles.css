@@ -493,6 +493,7 @@ button[type="submit"]:hover {
         padding: 0.7rem 0.2rem 0.7rem 0.2rem;
     }
     .sidebar {
+        position: fixed;
         top: 0;
         left: -80vw;
         width: 80vw;
@@ -507,25 +508,40 @@ button[type="submit"]:hover {
         overflow-y: auto;
         overflow-x: hidden;
         padding: 1.2rem 0.7rem 1rem 0.7rem;
+        /* Hide sidebar visually when closed, but keep in DOM for accessibility */
+        pointer-events: none;
+        opacity: 0;
     }
     .sidebar.open {
         left: 0;
+        pointer-events: auto;
+        opacity: 1;
     }
-    header.top-header {
+    .sidebar-overlay {
+        display: none;
         position: fixed;
         top: 0;
         left: 0;
         width: 100vw;
-        z-index: 3500;
-        border-radius: 0;
-        padding: 1.2rem 0.5rem 1rem 0.5rem;
-        box-shadow: none;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        background: var(--primary-blue);
+        height: 100vh;
+        background: rgba(0,0,0,0.18);
+        z-index: 3999;
     }
-    .container.center-chat, .main-chat {
-        padding-top: 110px !important; /* header height */
+    .sidebar-overlay.open {
+        display: block;
+    }
+    /* When sidebar is open, prevent scrolling and interaction with main content */
+    body.sidebar-open, .container.center-chat, .main-chat, .chatbot-container, .chat-form, .chat-window {
+        filter: none;
+        pointer-events: auto;
+    }
+    body.sidebar-open .container.center-chat,
+    body.sidebar-open .main-chat,
+    body.sidebar-open .chatbot-container,
+    body.sidebar-open .chat-form,
+    body.sidebar-open .chat-window {
+        filter: blur(2px) grayscale(0.2) brightness(0.95);
+        pointer-events: none;
+        user-select: none;
     }
 }
