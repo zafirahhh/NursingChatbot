@@ -501,7 +501,7 @@ button[type="submit"]:hover {
         background: var(--sidebar-bg);
         box-shadow: 2px 0 16px rgba(0,0,0,0.10);
         transition: left 0.3s cubic-bezier(.4,0,.2,1);
-        display: flex !important;
+        display: block !important;
         flex-direction: column;
         overflow-y: auto;
         overflow-x: hidden;
