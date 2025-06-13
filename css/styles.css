@@ -491,12 +491,74 @@ button[type="submit"]:hover {
         background: var(--primary-blue);
     }
     .sidebar {
-        display: none !important;
+        position: fixed;
+        top: 0;
+        left: -80vw;
+        width: 80vw;
+        max-width: 320px;
+        height: 100vh;
+        z-index: 2000;
+        background: var(--sidebar-bg);
+        box-shadow: 2px 0 16px rgba(0,0,0,0.10);
+        transition: left 0.3s cubic-bezier(.4,0,.2,1);
+        display: flex !important;
+        flex-direction: column;
+        overflow-y: auto;
+        overflow-x: hidden;
+        padding: 1.2rem 0.7rem 1rem 0.7rem;
     }
-    .main-chat, .container.center-chat, .chatbot-container {
-        margin-top: 0 !important;
+    .sidebar.open {
+        left: 0;
     }
-    .header-overlay, .hamburger-menu {
-        display: none !important;
+    .sidebar-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(0,0,0,0.18);
+        z-index: 1999;
+    }
+    .sidebar-overlay.open {
+        display: block;
+    }
+    .hamburger-menu {
+        position: fixed;
+        top: 1rem;
+        left: 1rem;
+        z-index: 2100;
+        width: 2.5rem;
+        height: 2.5rem;
+        background: #fff;
+        border-radius: 0.5rem;
+        box-shadow: 0 2px 8px rgba(35,64,110,0.10);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        border: none;
+    }
+    .hamburger-menu span {
+        display: block;
+        width: 1.6rem;
+        height: 0.2rem;
+        background: #23406e;
+        margin: 0.25rem 0;
+        border-radius: 2px;
+        transition: all 0.2s;
+    }
+    .hamburger-menu.open span:nth-child(1) {
+        transform: rotate(45deg) translate(5px, 5px);
+    }
+    .hamburger-menu.open span:nth-child(2) {
+        opacity: 0;
+    }
+    .hamburger-menu.open span:nth-child(3) {
+        transform: rotate(-45deg) translate(5px, -5px);
+    }
+    /* Hide sidebar in main layout, only show as overlay */
+    .container.center-chat {
+        padding-left: 0 !important;
     }
 }
