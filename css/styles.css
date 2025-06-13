@@ -455,11 +455,11 @@ button[type="submit"]:hover {
         padding: 0.7rem 0.2rem 0.7rem 0.2rem;
     }
     .chat-form {
-        position: relative;
-        bottom: 0;
+        position: fixed;
         left: 0;
         right: 0;
-        z-index: 100;
+        bottom: 0;
+        z-index: 3000;
         background: #fff;
         box-shadow: 0 -2px 12px rgba(35, 64, 110, 0.04);
         border-top: 1px solid #e0e0e0;
@@ -471,49 +471,34 @@ button[type="submit"]:hover {
         width: 100vw;
         max-width: 100vw;
     }
-    #user-input {
-        font-size: 1rem;
-        padding: 0.7rem 0.8rem;
-    }
-    button[type="submit"], #mic-btn {
-        font-size: 1.05rem;
-        padding: 0.7rem 1rem;
-        min-width: 40px;
-        min-height: 40px;
-    }
-    .kkh-logo {
-        height: 40px;
-        width: 40px;
-    }
-    .header-text h1 {
-        font-size: 1rem;
-    }
-    .subtitle {
-        font-size: 0.9rem;
-    }
-    header {
-        position: static;
-        width: 100vw;
-        left: 0;
-        top: 0;
-        height: auto;
-        z-index: 1;
-        border-radius: 0;
-        padding: 1.2rem 0.5rem 1rem 0.5rem;
-        box-shadow: none;
+    .chatbot-container {
         display: flex;
         flex-direction: column;
-        align-items: center;
-        background: var(--primary-blue);
+        height: 100vh !important;
+        max-height: 100vh !important;
+        width: 100vw !important;
+        max-width: 100vw !important;
+        overflow: hidden !important;
+        position: relative;
+    }
+    .chat-window {
+        flex: 1 1 auto;
+        overflow-y: auto !important;
+        overflow-x: hidden;
+        min-height: 0;
+        max-height: calc(100vh - 120px); /* header + chat-form height */
+        display: flex;
+        flex-direction: column;
+        background: #fff;
+        padding: 0.7rem 0.2rem 0.7rem 0.2rem;
     }
     .sidebar {
-        position: fixed;
         top: 0;
         left: -80vw;
         width: 80vw;
         max-width: 320px;
         height: 100vh;
-        z-index: 2000;
+        z-index: 4000;
         background: var(--sidebar-bg);
         box-shadow: 2px 0 16px rgba(0,0,0,0.10);
         transition: left 0.3s cubic-bezier(.4,0,.2,1);
@@ -526,55 +511,21 @@ button[type="submit"]:hover {
     .sidebar.open {
         left: 0;
     }
-    .sidebar-overlay {
-        display: none;
+    header.top-header {
         position: fixed;
         top: 0;
         left: 0;
         width: 100vw;
-        height: 100vh;
-        background: rgba(0,0,0,0.18);
-        z-index: 1999;
-    }
-    .sidebar-overlay.open {
-        display: block;
-    }
-    .hamburger-menu {
-        position: fixed;
-        top: 1rem;
-        left: 1rem;
-        z-index: 2100;
-        width: 2.5rem;
-        height: 2.5rem;
-        background: #fff;
-        border-radius: 0.5rem;
-        box-shadow: 0 2px 8px rgba(35,64,110,0.10);
+        z-index: 3500;
+        border-radius: 0;
+        padding: 1.2rem 0.5rem 1rem 0.5rem;
+        box-shadow: none;
         display: flex;
+        flex-direction: column;
         align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        border: none;
+        background: var(--primary-blue);
     }
-    .hamburger-menu span {
-        display: block;
-        width: 1.6rem;
-        height: 0.2rem;
-        background: #23406e;
-        margin: 0.25rem 0;
-        border-radius: 2px;
-        transition: all 0.2s;
-    }
-    .hamburger-menu.open span:nth-child(1) {
-        transform: rotate(45deg) translate(5px, 5px);
-    }
-    .hamburger-menu.open span:nth-child(2) {
-        opacity: 0;
-    }
-    .hamburger-menu.open span:nth-child(3) {
-        transform: rotate(-45deg) translate(5px, -5px);
-    }
-    /* Hide sidebar in main layout, only show as overlay */
-    .container.center-chat {
-        padding-left: 0 !important;
+    .container.center-chat, .main-chat {
+        padding-top: 110px !important; /* header height */
     }
 }
