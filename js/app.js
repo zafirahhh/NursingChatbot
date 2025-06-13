@@ -344,11 +344,16 @@ document.addEventListener('DOMContentLoaded', () => {
         knowledgeText = text;
       });
 
+    // --- Backend URL Configuration ---
+    // Use relative path if served together, or set your public backend URL here
+    const BACKEND_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+      ? 'http://127.0.0.1:8000/search' // local dev
+      : 'https://YOUR_PUBLIC_BACKEND_URL/search'; // <-- Replace with your deployed backend URL
+
     // Replace searchKnowledge with backend API call
     async function searchKnowledge(query) {
       try {
-        // Use local backend for development
-        const response = await fetch('http://127.0.0.1:8000/search', {
+        const response = await fetch(BACKEND_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ query })

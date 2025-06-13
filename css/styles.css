@@ -393,6 +393,7 @@ button[type="submit"]:hover {
         max-width: 100vw !important;
         overflow: hidden !important;
         position: static;
+        overscroll-behavior: none;
     }
     body {
         display: flex;
