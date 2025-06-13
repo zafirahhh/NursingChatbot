@@ -387,11 +387,11 @@ button[type="submit"]:hover {
 @media (max-width: 600px) {
     html, body {
         font-size: 0.95rem;
-        overflow: hidden !important;
         height: 100vh !important;
         min-height: 100vh !important;
         width: 100vw !important;
         max-width: 100vw !important;
+        overflow: hidden !important;
         position: static;
     }
     body {
@@ -414,10 +414,9 @@ button[type="submit"]:hover {
         padding: 0;
         display: flex;
         position: static;
-        top: auto;
-        left: auto;
     }
     .main-chat {
+        flex: 1 1 auto;
         padding: 0;
         min-height: 0 !important;
         height: 100vh !important;
@@ -430,6 +429,7 @@ button[type="submit"]:hover {
         position: relative;
     }
     .chatbot-container {
+        flex: 1 1 auto;
         max-width: 100vw;
         width: 100vw !important;
         margin: 0;
@@ -500,7 +500,7 @@ button[type="submit"]:hover {
         background: var(--sidebar-bg);
         box-shadow: 2px 0 16px rgba(0,0,0,0.10);
         transition: left 0.3s cubic-bezier(.4,0,.2,1);
-        display: block !important;
+        display: flex !important;
         flex-direction: column;
         overflow-y: auto;
         overflow-x: hidden;
@@ -534,5 +534,11 @@ button[type="submit"]:hover {
         filter: blur(2px) grayscale(0.2) brightness(0.95);
         pointer-events: none;
         user-select: none;
+    }
+    body.sidebar-open .sidebar,
+    body.sidebar-open .sidebar-overlay {
+        filter: none;
+        pointer-events: auto;
+        user-select: auto;
     }
 }
