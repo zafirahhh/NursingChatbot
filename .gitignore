@@ -1,2 +1,29 @@
 node_modules/
 .DS_Store
+# Python virtual environments
+venv/
+eb-env/
+.venv/
+ENV/
+env.bak/
+venv.bak/
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+# Build and distribution
+build/
+dist/
+.eggs/
+*.egg-info/
+# VS Code
+.vscode/
+# Jupyter
+.ipynb_checkpoints
+# Test/coverage
+.tox/
+.pytest_cache/
+.coverage
+.mypy_cache/
+.dmypy.json
+.pyre/
