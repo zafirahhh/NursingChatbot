@@ -15,7 +15,7 @@ RUN apt-get update && \
 COPY . .
 
 # Expose the port FastAPI will run on
-EXPOSE 8000
+EXPOSE 80
 
 # Start FastAPI with Uvicorn
-CMD ["uvicorn", "backend:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "backend:app", "--host", "0.0.0.0", "--port", "80"]
