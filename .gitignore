@@ -27,3 +27,8 @@ dist/
 .mypy_cache/
 .dmypy.json
 .pyre/
+
+# Elastic Beanstalk Files
+.elasticbeanstalk/*
+!.elasticbeanstalk/*.cfg.yml
+!.elasticbeanstalk/*.global.yml
