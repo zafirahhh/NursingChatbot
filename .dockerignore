@@ -1,0 +1,27 @@
+# Ignore Python cache and virtual environments
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+
+# Ignore version control and AWS CLI setup
+.git/
+.gitmodules
+aws-elastic-beanstalk-cli-setup/
+
+# Ignore build, logs, and database files
+*.db
+*.sqlite3
+*.log
+build/
+dist/
+.eggs/
+*.egg-info/
+
+# Ignore Jupyter and VS Code files
+.ipynb_checkpoints/
+.vscode/
