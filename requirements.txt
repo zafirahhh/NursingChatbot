@@ -1,8 +1,7 @@
 fastapi
 uvicorn
 sentence-transformers
-torch
+torch==2.0.1+cu118 -f https://download.pytorch.org/whl/torch_stable.html
 nltk
 pydantic
 PyPDF2
-gunicorn
