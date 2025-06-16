@@ -42,7 +42,7 @@ def load_chunks_from_text(text, max_len=300):
 
 chunks = load_chunks_from_text(text)
 
-# === Load Model + Embeddings ===
+# === Load Model and Chunk Embeddings ===
 model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
 chunk_embeddings = model.encode(chunks, convert_to_tensor=True)
 
@@ -50,7 +50,7 @@ chunk_embeddings = model.encode(chunks, convert_to_tensor=True)
 class QueryRequest(BaseModel):
     query: str
 
-# === Filtering Logic ===
+# === Filter Based on Medical Keywords and Intent ===
 def filter_chunks_by_keywords_and_intent(query, chunks, keywords_map, intent_map):
     query_lower = query.lower()
     matched_keywords = []
@@ -75,7 +75,7 @@ def filter_chunks_by_keywords_and_intent(query, chunks, keywords_map, intent_map
 
     return filtered if filtered else list(enumerate(chunks))
 
-# === Semantic Answer Finder ===
+# === Core Semantic Search Logic ===
 def find_best_answer(user_query, chunks, chunk_embeddings, top_k=5):
     keywords_map = {
         "urine": ["urine", "output"],
@@ -108,12 +108,12 @@ def find_best_answer(user_query, chunks, chunk_embeddings, top_k=5):
             return filtered_chunks[hit['corpus_id']]
     return "Sorry, I could not find relevant information for that question."
 
-# === Search Endpoint ===
+# === /search Endpoint ===
 @app.post("/search")
 async def search(query: QueryRequest):
     answer = find_best_answer(query.query, chunks, chunk_embeddings)
     return {"answer": answer}
 
-# === Run App ===
+# === Run the Server ===
 if __name__ == "__main__":
     uvicorn.run("backend:app", host="0.0.0.0", port=8000, reload=True)
