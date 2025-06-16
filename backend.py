@@ -175,24 +175,68 @@ model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
 # Load knowledge base
 # (Refined chunking logic already present)
 
-def embed_chunks(chunks):
-    return model.encode(chunks, convert_to_tensor=True)
+def load_chunks_from_text(text, max_len=300):
+    paragraphs = [p.strip() for p in re.split(r'\n\s*\n', text) if p.strip()]
+    chunks = []
+    current_chunk = ""
+    for para in paragraphs:
+        if len(current_chunk + para) < max_len:
+            current_chunk += para + "\n"
+        else:
+            chunks.append(current_chunk.strip())
+            current_chunk = para + "\n"
+    if current_chunk:
+        chunks.append(current_chunk.strip())
+    return chunks
 
-def find_best_answer(user_query, chunks, chunk_embeddings, top_k=5):
-    query_embedding = model.encode(user_query, convert_to_tensor=True)
-    hits = util.semantic_search(query_embedding, chunk_embeddings, top_k=top_k)[0]
-    re_ranked = sorted(hits, key=lambda x: float(x['score']), reverse=True)
-    for hit in re_ranked:
-        if float(hit['score']) > 0.4:  # threshold to prevent bad matches
-            return chunks[hit['corpus_id']]
-    return "Sorry, I could not find relevant information for that question."
-
-# Read knowledge base
+# Load file
+KNOWLEDGE_PATH = os.path.join("data", "nursing_guide_cleaned.txt")
 with open(KNOWLEDGE_PATH, encoding="utf-8") as f:
     text = f.read()
 
 chunks = load_chunks_from_text(text)
-chunk_embeddings = embed_chunks(chunks)
+chunk_embeddings = model.encode(chunks, convert_to_tensor=True)
+
+# Keyword-based chunk filtering
+def filter_chunks_by_keywords(query, chunks, keywords_map):
+    lowered = query.lower()
+    matched_keywords = []
+    for concept, required_keywords in keywords_map.items():
+        if all(kw in lowered for kw in required_keywords):
+            matched_keywords = required_keywords
+            break
+    if not matched_keywords:
+        return list(enumerate(chunks))  # return all if no keywords matched
+    filtered = []
+    for i, chunk in enumerate(chunks):
+        if all(k in chunk.lower() for k in matched_keywords):
+            filtered.append((i, chunk))
+    return filtered if filtered else list(enumerate(chunks))  # fallback to full set
+
+# Semantic search with filtering and reranking
+def find_best_answer(user_query, chunks, chunk_embeddings, top_k=5):
+    keywords_map = {
+        "urine": ["urine", "output"],
+        "heart": ["heart", "rate"],
+        "respiratory": ["respiratory", "rate"],
+        "bp": ["blood", "pressure"],
+        "fluid": ["fluid", "intake"],
+        "temperature": ["temperature"],
+        "neonate": ["neonate"]
+    }
+
+    filtered_pairs = filter_chunks_by_keywords(user_query, chunks, keywords_map)
+    filtered_indices, filtered_chunks = zip(*filtered_pairs)
+
+    query_embedding = model.encode(user_query, convert_to_tensor=True)
+    reduced_embeddings = torch.stack([chunk_embeddings[i] for i in filtered_indices])
+    hits = util.semantic_search(query_embedding, reduced_embeddings, top_k=top_k)[0]
+
+    ranked = sorted(hits, key=lambda x: float(x['score']), reverse=True)
+    for hit in ranked:
+        if float(hit['score']) > 0.4:
+            return filtered_chunks[hit['corpus_id']]
+    return "Sorry, I could not find relevant information for that question."
 
 # FastAPI setup
 app = FastAPI()
