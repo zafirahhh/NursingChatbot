@@ -1,5 +1,7 @@
 // KKH Nursing Chatbot - Basic Chat Interactivity
 
+const BACKEND_URL = "http://localhost:8000/search";
+
 document.addEventListener('DOMContentLoaded', () => {
     const chatWindow = document.getElementById('chat-window');
     const chatForm = document.getElementById('chat-form');
@@ -343,10 +345,6 @@ document.addEventListener('DOMContentLoaded', () => {
       .then(text => {
         knowledgeText = text;
       });
-
-    // --- Backend URL Configuration ---
-    // Always use local backend for development
-    const BACKEND_URL = 'http://127.0.0.1:8000/search';
 
     // Replace searchKnowledge with backend API call
     async function searchKnowledge(query) {
