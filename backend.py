@@ -341,22 +341,23 @@ row_embeddings = safe_load_row_embeddings()
 
 # --- Clinical Synonym Map ---
 age_synonyms = {
-    'neonate': ['birth - < 3 months', '<1 month', '0-1 month', 'neonate', 'newborn'],
-    'infant': ['1 month to 1 year', '1 month - < 1 year', 'infant', '1 mth to 1 yr', '6 months - <1 year'],
-    'toddler': ['1 year - < 6 years', 'toddler', '1-2 yr'],
-    'child': ['6 years - < 10 years', 'child', '10 years - < 15 years', '1 year - < 6 years'],
-    'adolescent': ['15 years and above', 'adolescent', '10 years - < 15 years'],
+    'neonate': ['birth - < 3 months', '<1 month', '0-1 month', 'neonate', 'newborn', '0 to 1 month', '0–1 month'],
+    'infant': ['1 month to 1 year', '1 month - < 1 year', 'infant', '1 mth to 1 yr', '6 months - <1 year', '1-12 months', '1 to 12 months'],
+    'toddler': ['1 year - < 6 years', 'toddler', '1-2 yr', '1-2 years', '1 to 2 years'],
+    'child': ['6 years - < 10 years', 'child', '10 years - < 15 years', '1 year - < 6 years', '1-10 years', '1 to 10 years', '2-12 years', '2 to 12 years'],
+    'adolescent': ['15 years and above', 'adolescent', '10 years - < 15 years', '12-18 years', '12 to 18 years'],
     '6 year old': ['6 years - < 10 years', '6-10 years', '6 yr', '6 years'],
     '1 year old': ['1 year - < 6 years', '1 year', '1 yr'],
-    'newborn': ['birth - < 3 months', 'neonate', '0-1 month'],
+    'newborn': ['birth - < 3 months', 'neonate', '0-1 month', '0 to 1 month'],
     'young child': ['young child', '2-7 years', '2 - 7 years', 'younger child', 'child (2-7 years)', 'young children'],
     'older child': ['older child', '7-12 years', '7 - 12 years', 'child (7-12 years)', 'older children'],
 }
 param_synonyms = {
-    'bp': ['bp', 'blood pressure', 'systolic', 'expected systolic bp (mmhg)', 'minimum systolic bp (mmhg)'],
+    'bp': ['bp', 'blood pressure', 'systolic', 'expected systolic bp (mmhg)', 'minimum systolic bp (mmhg)', 'systolic blood pressure', 'hypotension'],
     'heart rate': ['heart rate', 'pulse'],
     'respiratory rate': ['respiratory rate', 'rr'],
     'urine': ['urine output', 'urine'],
+    'formula': ['formula', 'calculation', 'calculate', 'expected', 'range'],
 }
 
 def find_synonym_matches(q, lookup_list, synonyms):
@@ -592,6 +593,35 @@ async def search(request: QueryRequest):
             if best_sent_score > 0.38:
                 return {"answer": best_sent}
         # --- 5. Fallback: Table Row/Cell/QA Semantic Search (as before) ---
+        # New: Fallback to most relevant chunk or table row that matches at least one keyword from the question
+        import heapq
+        import string
+        def extract_keywords(text):
+            # Remove punctuation and split
+            text = text.translate(str.maketrans('', '', string.punctuation))
+            words = set(w.lower() for w in text.split() if len(w) > 2)
+            return words
+        q_keywords = extract_keywords(q)
+        # Search chunks for keyword overlap
+        chunk_scores = []
+        for i, chunk in enumerate(chunks):
+            chunk_words = extract_keywords(chunk)
+            if q_keywords & chunk_words:
+                score = float(util.pytorch_cos_sim(q_emb, model.encode([chunk], convert_to_tensor=True, dtype=torch.float32))[0][0])
+                chunk_scores.append((score, chunk))
+        if chunk_scores:
+            best_score, best_chunk = max(chunk_scores)
+            return {"answer": best_chunk}
+        # Search table rows for keyword overlap
+        row_scores = []
+        for i, row in enumerate(table_row_texts):
+            row_words = extract_keywords(row)
+            if q_keywords & row_words:
+                score = float(util.pytorch_cos_sim(q_emb, model.encode([row], convert_to_tensor=True, dtype=torch.float32))[0][0])
+                row_scores.append((score, row))
+        if row_scores:
+            best_score, best_row = max(row_scores)
+            return {"answer": best_row}
         fallback_age = best_age_label if best_age_label else "the specified age group"
         fallback_param = best_param_label if best_param_label else "the specific parameter"
         return {"answer": f"Sorry, the specific range for {fallback_age} and {fallback_param} is not available."}
