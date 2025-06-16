@@ -1,6 +1,6 @@
 // KKH Nursing Chatbot - Basic Chat Interactivity
 
-const BACKEND_URL = "http://localhost:8000/search";
+const BACKEND_URL = "http://127.0.0.1:8000/search";
 
 document.addEventListener('DOMContentLoaded', () => {
     const chatWindow = document.getElementById('chat-window');
