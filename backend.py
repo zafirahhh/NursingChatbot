@@ -108,10 +108,21 @@ def find_best_answer(user_query, chunks, chunk_embeddings, top_k=5):
             chunk = filtered_chunks[hit['corpus_id']]
             sentences = sent_tokenize(chunk)
             if sentences:
-                sent_embeddings = model.encode(sentences, convert_to_tensor=True)
+                filtered_sentences = [
+                    s for s in sentences
+                    if len(s.split()) >= 5 and any(
+                        kw in s.lower() for kw in [
+                            'administer', 'dose', 'mg', 'kg', 'should', 'treatment',
+                            'avoid', 'indicated', 'given', 'monitor', 'infusion',
+                            'start', 'perform', 'not used', 'required', 'value'
+                        ])
+                ]
+                if not filtered_sentences:
+                    filtered_sentences = sentences
+                sent_embeddings = model.encode(filtered_sentences, convert_to_tensor=True)
                 sent_scores = util.cos_sim(query_embedding, sent_embeddings)[0]
                 best_sent_idx = int(torch.argmax(sent_scores))
-                return sentences[best_sent_idx]
+                return filtered_sentences[best_sent_idx]
             else:
                 return chunk
     return "Sorry, I could not find relevant information for that question."
