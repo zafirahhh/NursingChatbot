@@ -105,7 +105,15 @@ def find_best_answer(user_query, chunks, chunk_embeddings, top_k=5):
     ranked = sorted(hits, key=lambda x: float(x['score']), reverse=True)
     for hit in ranked:
         if float(hit['score']) > 0.4:
-            return filtered_chunks[hit['corpus_id']]
+            chunk = filtered_chunks[hit['corpus_id']]
+            sentences = sent_tokenize(chunk)
+            if sentences:
+                sent_embeddings = model.encode(sentences, convert_to_tensor=True)
+                sent_scores = util.cos_sim(query_embedding, sent_embeddings)[0]
+                best_sent_idx = int(torch.argmax(sent_scores))
+                return sentences[best_sent_idx]
+            else:
+                return chunk  # fallback
     return "Sorry, I could not find relevant information for that question."
 
 # === Both Endpoints ===
