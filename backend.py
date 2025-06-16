@@ -21,6 +21,17 @@ def extract_qa_pairs(chunks):
     questions = []
     answers = []
     for chunk in chunks:
+        # Try to find Q: ... A: ... pairs anywhere in the chunk (multi-line, not just at start)
+        qa_matches = re.findall(r"Q[:：]\s*(.*?)\nA[:：]\s*([\s\S]*?)(?=\nQ[:：]|$)", chunk, re.IGNORECASE)
+        if qa_matches:
+            for q, a in qa_matches:
+                q = q.strip()
+                a = a.strip()
+                if q and a:
+                    qa_pairs.append((q, a))
+                    questions.append(q)
+                    answers.append(a)
+            continue
         # Improved: Find the first line ending with '?' as the question, rest as answer
         lines = [l.strip() for l in chunk.split("\n") if l.strip()]
         q_idx = None
@@ -36,14 +47,14 @@ def extract_qa_pairs(chunks):
                 questions.append(q)
                 answers.append(a)
                 continue
-        # Fallback: Q: ... A: ...
-        match = re.match(r"Q:\s*(.*?)\nA:\s*(.*)", chunk, re.DOTALL)
-        if match:
-            q = match.group(1).strip()
-            a = match.group(2).strip()
-            qa_pairs.append((q, a))
-            questions.append(q)
-            answers.append(a)
+        # Fallback: If chunk has at least 2 lines, treat first as question, rest as answer
+        if len(lines) >= 2:
+            q = lines[0]
+            a = "\n".join(lines[1:]).strip()
+            if q and a:
+                qa_pairs.append((q, a))
+                questions.append(q)
+                answers.append(a)
     return qa_pairs, questions, answers
 
 # Path to your knowledge base text file
@@ -55,6 +66,15 @@ def load_chunks_from_text(text):
     raw_chunks = [chunk.strip() for chunk in re.split(r'\n\s*\n', text) if chunk.strip()]
     chunks = []
     for chunk in raw_chunks:
+        # Split out table sections as separate chunks
+        if chunk.startswith('#') and '|' in chunk:
+            # Table header and rows
+            table_lines = chunk.split('\n')
+            for line in table_lines:
+                if '|' in line and not line.strip().startswith('#'):
+                    # Each table row as a chunk
+                    chunks.append(line.strip())
+            continue
         # If chunk contains multiple bullet points, split each bullet as a separate chunk
         if re.search(r'\n\s*[•\-\*]', chunk):
             bullets = re.split(r'\n\s*(?=[•\-\*])', chunk)
@@ -62,9 +82,18 @@ def load_chunks_from_text(text):
                 b = b.strip()
                 if b and len(b.split()) > 4:
                     chunks.append(b)
-        else:
-            if len(chunk.split()) > 4:
-                chunks.append(chunk)
+            continue
+        # If chunk contains numbered list, split each number as a chunk
+        if re.search(r'\n\s*\d+\.', chunk):
+            numbers = re.split(r'\n\s*(?=\d+\.)', chunk)
+            for n in numbers:
+                n = n.strip()
+                if n and len(n.split()) > 4:
+                    chunks.append(n)
+            continue
+        # Otherwise, treat the paragraph as a chunk if it's not too short
+        if len(chunk.split()) > 4:
+            chunks.append(chunk)
     return chunks
 
 def load_fine_chunks_from_text(text):
@@ -539,13 +568,15 @@ async def search(request: QueryRequest):
             qa_best_score = float(qa_scores[qa_best_idx])
             qa_answer = qa_answers[qa_best_idx]
             # Filter out copyright/disclaimer, too short, or generic answers
-            if qa_best_score > improved_threshold and len(qa_answer.split()) > 6 and not re.search(r'copyright|distribution is allowed|worldscientific|KK Women|The Baby Bear Book', qa_answer, re.I):
+            # Lowered threshold for QA semantic search
+            if qa_best_score > 0.45 and len(qa_answer.split()) > 6 and not re.search(r'copyright|distribution is allowed|worldscientific|KK Women|The Baby Bear Book', qa_answer, re.I):
                 return {"answer": qa_answer}
         # --- 4. Chunk Semantic Search (extract best sentence) ---
         chunk_cos_scores = util.pytorch_cos_sim(q_emb, chunk_embeddings)[0]
         best_chunk_idx = int(torch.argmax(chunk_cos_scores))
         best_chunk_score = float(chunk_cos_scores[best_chunk_idx])
-        if best_chunk_score > improved_threshold:
+        # Lowered threshold for chunk semantic search
+        if best_chunk_score > 0.40:
             chunk = chunks[best_chunk_idx]
             sentences = sent_tokenize(chunk)
             # Filter out copyright/disclaimer, too short, or generic sentences
@@ -557,7 +588,8 @@ async def search(request: QueryRequest):
             best_sent_idx = int(torch.argmax(sent_scores))
             best_sent_score = float(sent_scores[best_sent_idx])
             best_sent = sentences[best_sent_idx]
-            if best_sent_score > improved_threshold:
+            # Lowered threshold for best sentence
+            if best_sent_score > 0.38:
                 return {"answer": best_sent}
         # --- 5. Fallback: Table Row/Cell/QA Semantic Search (as before) ---
         fallback_age = best_age_label if best_age_label else "the specified age group"
