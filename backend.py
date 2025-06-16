@@ -108,7 +108,12 @@ def find_best_answer(user_query, chunks, chunk_embeddings, top_k=5):
             return filtered_chunks[hit['corpus_id']]
     return "Sorry, I could not find relevant information for that question."
 
-# === /search Endpoint ===
+# === Both Endpoints ===
+@app.post("/ask")
+async def ask_question(query: QueryRequest):
+    answer = find_best_answer(query.query, chunks, chunk_embeddings)
+    return {"answer": answer}
+
 @app.post("/search")
 async def search(query: QueryRequest):
     answer = find_best_answer(query.query, chunks, chunk_embeddings)
