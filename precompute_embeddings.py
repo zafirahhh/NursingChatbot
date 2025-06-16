@@ -5,7 +5,7 @@ import torch
 from sentence_transformers import SentenceTransformer
 import re
 
-KNOWLEDGE_PATH = os.path.join('data', 'nursing_guide.txt')
+KNOWLEDGE_PATH = os.path.join('data', 'nursing_guide_cleaned.txt')
 EMBEDDINGS_DIR = 'data/embeddings'
 os.makedirs(EMBEDDINGS_DIR, exist_ok=True)
 
