@@ -51,7 +51,20 @@ KNOWLEDGE_PATH = os.path.join('data', 'nursing_guide_cleaned.txt')
 
 # Load the knowledge base as chunks (paragraphs separated by blank lines)
 def load_chunks_from_text(text):
-    chunks = [chunk.strip() for chunk in re.split(r'\n\s*\n', text) if chunk.strip()]
+    # Split on double newlines (paragraphs)
+    raw_chunks = [chunk.strip() for chunk in re.split(r'\n\s*\n', text) if chunk.strip()]
+    chunks = []
+    for chunk in raw_chunks:
+        # If chunk contains multiple bullet points, split each bullet as a separate chunk
+        if re.search(r'\n\s*[•\-\*]', chunk):
+            bullets = re.split(r'\n\s*(?=[•\-\*])', chunk)
+            for b in bullets:
+                b = b.strip()
+                if b and len(b.split()) > 4:
+                    chunks.append(b)
+        else:
+            if len(chunk.split()) > 4:
+                chunks.append(chunk)
     return chunks
 
 def load_fine_chunks_from_text(text):
