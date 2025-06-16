@@ -416,38 +416,54 @@ async def search(request: QueryRequest):
         specific_vital_params = ["heart rate", "respiratory rate", "systolic bp", "blood pressure", "bp"]
         min_synonyms = ["minimum", "min", "lowest", "lower"]
         max_synonyms = ["maximum", "max", "highest", "upper"]
-        if any(term in ql for term in vitals_keywords + specific_vital_params):
-            age_label, row = find_vitals_row_for_age(ql)
-            if row is not None:
-                for param in specific_vital_params:
-                    if param in ql:
-                        is_min = any(word in ql for word in min_synonyms)
-                        is_max = any(word in ql for word in max_synonyms)
-                        matching_cols = [c for c in vitals_df.columns[1:] if param.replace("bp", "blood pressure") in c or c in param]
-                        if matching_cols:
-                            answers = []
-                            for c in matching_cols:
-                                c_norm = c.lower()
-                                val = row[c]
-                                if val and val.lower() != 'nan':
-                                    if is_min and "min" in c_norm:
-                                        answers.append(f"For {age_label}, the minimum {param} is {val}.")
-                                    elif is_max and "max" in c_norm:
-                                        answers.append(f"For {age_label}, the maximum {param} is {val}.")
-                                    elif not is_min and not is_max:
-                                        answers.append(f"For {age_label}, {c} is {val}.")
-                            if answers:
-                                return {"answer": ' '.join(answers)}
-                # Otherwise, return the full row summary
-                col_map = {c: c for c in vitals_df.columns if c != vitals_df.columns[0]}
-                col_map = {c: c.replace('bpm', 'beats per minute').replace('respiratory rate', 'respiratory rate').replace('heart rate', 'heart rate').replace('bp', 'blood pressure') for c in col_map}
-                values = []
-                for c in vitals_df.columns[1:]:
-                    val = row[c]
-                    if val and val.lower() != 'nan':
-                        values.append(f"{col_map[c]} is {val}")
-                age_phrase = age_label if age_label else row[vitals_df.columns[0]]
-                return {"answer": f"For {age_phrase} ({row[vitals_df.columns[0]]}), " + ' and '.join(values) + "."}
+        age_label, row = find_vitals_row_for_age(ql)
+        param_found = any(param in ql for param in specific_vital_params)
+        if row is not None and param_found:
+            for param in specific_vital_params:
+                if param in ql:
+                    is_min = any(word in ql for word in min_synonyms)
+                    is_max = any(word in ql for word in max_synonyms)
+                    matching_cols = [c for c in vitals_df.columns[1:] if param.replace("bp", "blood pressure") in c or c in param]
+                    if matching_cols:
+                        answers = []
+                        for c in matching_cols:
+                            c_norm = c.lower()
+                            val = row[c]
+                            if val and val.lower() != 'nan':
+                                if is_min and "min" in c_norm:
+                                    answers.append(f"For {age_label}, the minimum {param} is {val}.")
+                                elif is_max and "max" in c_norm:
+                                    answers.append(f"For {age_label}, the maximum {param} is {val}.")
+                                elif not is_min and not is_max:
+                                    answers.append(f"For {age_label}, the {param} is {val}.")
+                        if answers:
+                            return {"answer": ' '.join(answers)}
+        elif row is not None:
+            # Only age matched, return all vitals for that age
+            col_map = {c: c for c in vitals_df.columns if c != vitals_df.columns[0]}
+            col_map = {c: c.replace('bpm', 'beats per minute').replace('respiratory rate', 'respiratory rate').replace('heart rate', 'heart rate').replace('bp', 'blood pressure') for c in col_map}
+            values = []
+            for c in vitals_df.columns[1:]:
+                val = row[c]
+                if val and val.lower() != 'nan':
+                    values.append(f"{col_map[c]} is {val}")
+            age_phrase = age_label if age_label else row[vitals_df.columns[0]]
+            return {"answer": f"For {age_phrase} ({row[vitals_df.columns[0]]}), " + ' and '.join(values) + "."}
+        elif param_found:
+            # Only parameter matched, return values for all age groups
+            param = next((p for p in specific_vital_params if p in ql), None)
+            if param:
+                matching_cols = [c for c in vitals_df.columns[1:] if param.replace("bp", "blood pressure") in c or c in param]
+                if matching_cols:
+                    answers = []
+                    for idx, r in vitals_df.iterrows():
+                        age = r[vitals_df.columns[0]]
+                        for c in matching_cols:
+                            val = r[c]
+                            if val and val.lower() != 'nan':
+                                answers.append(f"For {age}, the {param} is {val}.")
+                    if answers:
+                        return {"answer": ' '.join(answers)}
         # --- 2. Direct Table Cell Answer for Specific Parameter ---
         matched_age = None
         matched_param = None
