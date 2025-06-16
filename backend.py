@@ -519,40 +519,33 @@ async def search(request: QueryRequest):
                 value = best_cell[3]
                 return {"answer": f"For {age_label}, the normal {param_label.lower()} is {value}."}
         # --- 3. QA Pair Semantic Search (for non-vitals/table queries) ---
+        improved_threshold = 0.55  # Only accept strong matches
         if qa_embeddings is not None:
             qa_scores = util.pytorch_cos_sim(q_emb, qa_embeddings)[0]
             qa_best_idx = int(torch.argmax(qa_scores))
             qa_best_score = float(qa_scores[qa_best_idx])
             qa_answer = qa_answers[qa_best_idx]
-            # Filter out copyright/disclaimer or too short answers
-            if qa_best_score > threshold and not re.search(r'copyright|distribution is allowed|worldscientific|KK Women', qa_answer, re.I) and len(qa_answer.split()) > 6:
+            # Filter out copyright/disclaimer, too short, or generic answers
+            if qa_best_score > improved_threshold and len(qa_answer.split()) > 6 and not re.search(r'copyright|distribution is allowed|worldscientific|KK Women|The Baby Bear Book', qa_answer, re.I):
                 return {"answer": qa_answer}
         # --- 4. Chunk Semantic Search (extract best sentence) ---
         chunk_cos_scores = util.pytorch_cos_sim(q_emb, chunk_embeddings)[0]
         best_chunk_idx = int(torch.argmax(chunk_cos_scores))
         best_chunk_score = float(chunk_cos_scores[best_chunk_idx])
-        if best_chunk_score > threshold:
+        if best_chunk_score > improved_threshold:
             chunk = chunks[best_chunk_idx]
             sentences = sent_tokenize(chunk)
-            # Filter out copyright/disclaimer sentences
-            sentences = [s for s in sentences if not re.search(r'copyright|distribution is allowed|worldscientific|KK Women', s, re.I)]
+            # Filter out copyright/disclaimer, too short, or generic sentences
+            sentences = [s for s in sentences if len(s.split()) > 6 and not re.search(r'copyright|distribution is allowed|worldscientific|KK Women|The Baby Bear Book', s, re.I)]
             if not sentences:
                 return {"answer": "Sorry, no relevant answer found."}
-            if len(sentences) == 1:
-                sent = sentences[0]
-                if len(sent.split()) < 6 or re.match(r'^[A-Za-z ]+\(.*\)?$', sent):
-                    return {"answer": chunk}
-                return {"answer": sent}
             sent_embs = model.encode(sentences, convert_to_tensor=True, dtype=torch.float32)
             sent_scores = util.pytorch_cos_sim(q_emb, sent_embs)[0]
             best_sent_idx = int(torch.argmax(sent_scores))
             best_sent_score = float(sent_scores[best_sent_idx])
             best_sent = sentences[best_sent_idx]
-            if len(best_sent.split()) < 6 or re.match(r'^[A-Za-z ]+\(.*\)?$', best_sent):
-                return {"answer": chunk}
-            if best_sent_score > threshold:
+            if best_sent_score > improved_threshold:
                 return {"answer": best_sent}
-            return {"answer": chunk}
         # --- 5. Fallback: Table Row/Cell/QA Semantic Search (as before) ---
         fallback_age = best_age_label if best_age_label else "the specified age group"
         fallback_param = best_param_label if best_param_label else "the specific parameter"
