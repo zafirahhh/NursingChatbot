@@ -8,9 +8,9 @@ import os
 import re
 import torch
 import nltk
+from nltk.tokenize import sent_tokenize
 
 nltk.download('punkt')
-from nltk.tokenize import sent_tokenize
 
 # === FastAPI Setup ===
 app = FastAPI()
@@ -50,7 +50,7 @@ chunk_embeddings = model.encode(chunks, convert_to_tensor=True)
 class QueryRequest(BaseModel):
     query: str
 
-# === Filter Based on Medical Keywords and Intent ===
+# === Filtering Logic ===
 def filter_chunks_by_keywords_and_intent(query, chunks, keywords_map, intent_map):
     query_lower = query.lower()
     matched_keywords = []
@@ -75,7 +75,7 @@ def filter_chunks_by_keywords_and_intent(query, chunks, keywords_map, intent_map
 
     return filtered if filtered else list(enumerate(chunks))
 
-# === Core Semantic Search Logic ===
+# === Semantic Answer Logic (shortened version) ===
 def find_best_answer(user_query, chunks, chunk_embeddings, top_k=5):
     keywords_map = {
         "urine": ["urine", "output"],
@@ -113,7 +113,7 @@ def find_best_answer(user_query, chunks, chunk_embeddings, top_k=5):
                 best_sent_idx = int(torch.argmax(sent_scores))
                 return sentences[best_sent_idx]
             else:
-                return chunk  # fallback
+                return chunk
     return "Sorry, I could not find relevant information for that question."
 
 # === Both Endpoints ===
