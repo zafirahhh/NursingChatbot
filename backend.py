@@ -174,7 +174,6 @@ model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
 
 # Load knowledge base
 # (Refined chunking logic already present)
-
 def load_chunks_from_text(text, max_len=300):
     paragraphs = [p.strip() for p in re.split(r'\n\s*\n', text) if p.strip()]
     chunks = []
@@ -197,23 +196,32 @@ with open(KNOWLEDGE_PATH, encoding="utf-8") as f:
 chunks = load_chunks_from_text(text)
 chunk_embeddings = model.encode(chunks, convert_to_tensor=True)
 
-# Keyword-based chunk filtering
-def filter_chunks_by_keywords(query, chunks, keywords_map):
-    lowered = query.lower()
+# Enhanced keyword and intent-based chunk filtering
+def filter_chunks_by_keywords_and_intent(query, chunks, keywords_map, intent_map):
+    query_lower = query.lower()
+
     matched_keywords = []
-    for concept, required_keywords in keywords_map.items():
-        if all(kw in lowered for kw in required_keywords):
-            matched_keywords = required_keywords
+    for concept, keywords in keywords_map.items():
+        if all(k in query_lower for k in keywords):
+            matched_keywords = keywords
             break
-    if not matched_keywords:
-        return list(enumerate(chunks))  # return all if no keywords matched
+
+    matched_intent = []
+    for intent, triggers in intent_map.items():
+        if any(t in query_lower for t in triggers):
+            matched_intent = triggers
+            break
+
     filtered = []
     for i, chunk in enumerate(chunks):
-        if all(k in chunk.lower() for k in matched_keywords):
-            filtered.append((i, chunk))
-    return filtered if filtered else list(enumerate(chunks))  # fallback to full set
+        if matched_keywords and not all(k in chunk.lower() for k in matched_keywords):
+            continue
+        if matched_intent and not any(t in chunk.lower() for t in matched_intent):
+            continue
+        filtered.append((i, chunk))
 
-# Semantic search with filtering and reranking
+    return filtered if filtered else list(enumerate(chunks))  # fallback to all chunks
+
 def find_best_answer(user_query, chunks, chunk_embeddings, top_k=5):
     keywords_map = {
         "urine": ["urine", "output"],
@@ -222,10 +230,18 @@ def find_best_answer(user_query, chunks, chunk_embeddings, top_k=5):
         "bp": ["blood", "pressure"],
         "fluid": ["fluid", "intake"],
         "temperature": ["temperature"],
-        "neonate": ["neonate"]
+        "neonate": ["neonate"],
+        "shock": ["shock"],
+        "child": ["child"],
     }
 
-    filtered_pairs = filter_chunks_by_keywords(user_query, chunks, keywords_map)
+    intent_map = {
+        "signs": ["signs", "symptoms", "indicators"],
+        "treatment": ["first step", "treatment", "initial", "intervention", "manage", "management"],
+        "vitals": ["rate", "temperature", "pressure", "value", "normal"],
+    }
+
+    filtered_pairs = filter_chunks_by_keywords_and_intent(user_query, chunks, keywords_map, intent_map)
     filtered_indices, filtered_chunks = zip(*filtered_pairs)
 
     query_embedding = model.encode(user_query, convert_to_tensor=True)
