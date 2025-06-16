@@ -169,20 +169,47 @@ except Exception:
 
 print(f'Backend ready in {time.time() - start_time:.2f} seconds.')
 
-app = FastAPI()
+# --- Embedding Model ---
+model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
 
-# Allow CORS for local frontend
+# Load knowledge base
+# (Refined chunking logic already present)
+
+def embed_chunks(chunks):
+    return model.encode(chunks, convert_to_tensor=True)
+
+def find_best_answer(user_query, chunks, chunk_embeddings, top_k=5):
+    query_embedding = model.encode(user_query, convert_to_tensor=True)
+    hits = util.semantic_search(query_embedding, chunk_embeddings, top_k=top_k)[0]
+    re_ranked = sorted(hits, key=lambda x: float(x['score']), reverse=True)
+    for hit in re_ranked:
+        if float(hit['score']) > 0.4:  # threshold to prevent bad matches
+            return chunks[hit['corpus_id']]
+    return "Sorry, I could not find relevant information for that question."
+
+# Read knowledge base
+with open(KNOWLEDGE_PATH, encoding="utf-8") as f:
+    text = f.read()
+
+chunks = load_chunks_from_text(text)
+chunk_embeddings = embed_chunks(chunks)
+
+# FastAPI setup
+app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://127.0.0.1:5500",
-        "http://localhost:5500",
-        "https://zafirahhh.github.io"
-    ],  # Explicitly allow local and GitHub Pages origins
-    allow_credentials=True,
+    allow_origins=["*"],
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+class Query(BaseModel):
+    question: str
+
+@app.post("/ask")
+async def ask_question(query: Query):
+    answer = find_best_answer(query.question, chunks, chunk_embeddings)
+    return {"answer": answer}
 
 class QueryRequest(BaseModel):
     query: str
