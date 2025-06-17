@@ -42,15 +42,13 @@ def load_chunks_from_text(text, max_len=300):
 
 chunks = load_chunks_from_text(text)
 
-# === Load Model and Chunk Embeddings ===
+# === Load Model and Embeddings ===
 model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
 chunk_embeddings = model.encode(chunks, convert_to_tensor=True)
 
-# === Request Schema ===
 class QueryRequest(BaseModel):
     query: str
 
-# === Filtering Logic ===
 def filter_chunks_by_keywords_and_intent(query, chunks, keywords_map, intent_map):
     query_lower = query.lower()
     matched_keywords = []
@@ -75,7 +73,6 @@ def filter_chunks_by_keywords_and_intent(query, chunks, keywords_map, intent_map
 
     return filtered if filtered else list(enumerate(chunks))
 
-# === Semantic Answer Logic (shortened version) ===
 def find_best_answer(user_query, chunks, chunk_embeddings, top_k=5):
     keywords_map = {
         "urine": ["urine", "output"],
@@ -102,32 +99,35 @@ def find_best_answer(user_query, chunks, chunk_embeddings, top_k=5):
     reduced_embeddings = torch.stack([chunk_embeddings[i] for i in filtered_indices])
     hits = util.semantic_search(query_embedding, reduced_embeddings, top_k=top_k)[0]
 
+    # === GLOBAL SENTENCE RE-RANKING ACROSS TOP CHUNKS ===
     ranked = sorted(hits, key=lambda x: float(x['score']), reverse=True)
-    for hit in ranked:
-        if float(hit['score']) > 0.4:
-            chunk = filtered_chunks[hit['corpus_id']]
-            sentences = sent_tokenize(chunk)
-            if sentences:
-                filtered_sentences = [
-                    s for s in sentences
-                    if len(s.split()) >= 5 and any(
-                        kw in s.lower() for kw in [
-                            'administer', 'dose', 'mg', 'kg', 'should', 'treatment',
-                            'avoid', 'indicated', 'given', 'monitor', 'infusion',
-                            'start', 'perform', 'not used', 'required', 'value'
-                        ])
-                ]
-                if not filtered_sentences:
-                    filtered_sentences = sentences
-                sent_embeddings = model.encode(filtered_sentences, convert_to_tensor=True)
-                sent_scores = util.cos_sim(query_embedding, sent_embeddings)[0]
-                best_sent_idx = int(torch.argmax(sent_scores))
-                return filtered_sentences[best_sent_idx]
-            else:
-                return chunk
-    return "Sorry, I could not find relevant information for that question."
+    top_chunks = [filtered_chunks[hit['corpus_id']] for hit in ranked[:3]]
 
-# === Both Endpoints ===
+    all_sentences = []
+    for chunk in top_chunks:
+        sentences = sent_tokenize(chunk)
+        for s in sentences:
+            if len(s.split()) >= 5 and any(
+                kw in s.lower() for kw in [
+                    'administer', 'dose', 'mg', 'kg', 'should', 'treatment',
+                    'avoid', 'indicated', 'given', 'monitor', 'infusion',
+                    'start', 'perform', 'not used', 'required', 'value'
+                ]
+            ):
+                all_sentences.append(s)
+
+    if not all_sentences:
+        all_sentences = [s for chunk in top_chunks for s in sent_tokenize(chunk) if len(s.split()) >= 5]
+
+    if not all_sentences:
+        return top_chunks[0]  # fallback
+
+    sent_embeddings = model.encode(all_sentences, convert_to_tensor=True)
+    sent_scores = util.cos_sim(query_embedding, sent_embeddings)[0]
+    best_idx = int(torch.argmax(sent_scores))
+    return all_sentences[best_idx]
+
+# === Endpoints ===
 @app.post("/ask")
 async def ask_question(query: QueryRequest):
     answer = find_best_answer(query.query, chunks, chunk_embeddings)
@@ -138,6 +138,6 @@ async def search(query: QueryRequest):
     answer = find_best_answer(query.query, chunks, chunk_embeddings)
     return {"answer": answer}
 
-# === Run the Server ===
+# === Run Server ===
 if __name__ == "__main__":
     uvicorn.run("backend:app", host="0.0.0.0", port=8000, reload=True)
