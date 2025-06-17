@@ -9,6 +9,7 @@ import re
 import torch
 import nltk
 from nltk.tokenize import sent_tokenize
+from sklearn.feature_extraction.text import ENGLISH_STOP_WORDS
 
 nltk.download('punkt')
 
@@ -48,6 +49,10 @@ chunk_embeddings = model.encode(chunks, convert_to_tensor=True)
 
 class QueryRequest(BaseModel):
     query: str
+
+def extract_keywords(text):
+    words = re.findall(r'\b\w{4,}\b', text.lower())
+    return [w for w in words if w not in ENGLISH_STOP_WORDS]
 
 def filter_chunks_by_keywords_and_intent(query, chunks, keywords_map, intent_map):
     query_lower = query.lower()
@@ -103,17 +108,13 @@ def find_best_answer(user_query, chunks, chunk_embeddings, top_k=5):
     ranked = sorted(hits, key=lambda x: float(x['score']), reverse=True)
     top_chunks = [filtered_chunks[hit['corpus_id']] for hit in ranked[:3]]
 
+    # === NEW: extract keywords from query and sentences ===
+    query_keywords = set(extract_keywords(user_query))
     all_sentences = []
     for chunk in top_chunks:
-        sentences = sent_tokenize(chunk)
-        for s in sentences:
-            if len(s.split()) >= 5 and any(
-                kw in s.lower() for kw in [
-                    'administer', 'dose', 'mg', 'kg', 'should', 'treatment',
-                    'avoid', 'indicated', 'given', 'monitor', 'infusion',
-                    'start', 'perform', 'not used', 'required', 'value'
-                ]
-            ):
+        for s in sent_tokenize(chunk):
+            sent_keywords = set(extract_keywords(s))
+            if len(s.split()) >= 5 and len(sent_keywords & query_keywords) >= 2:
                 all_sentences.append(s)
 
     if not all_sentences:
