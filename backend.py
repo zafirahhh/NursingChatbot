@@ -129,7 +129,19 @@ def find_best_answer(user_query, chunks, chunk_embeddings, top_k=5):
     embeddings = model.encode(scored_chunks, convert_to_tensor=True)
     scores = util.cos_sim(query_embedding, embeddings)[0]
     best_idx = int(torch.argmax(scores))
-    return scored_chunks[best_idx]
+    # Cleanup and summarize the best sentence
+    best = scored_chunks[best_idx]
+    lines = best.split("\n")
+    for line in lines:
+        if len(line.split()) >= 4 and any(
+            line.strip().lower().startswith(v) for v in [
+                "give", "administer", "start", "treat", "use", "avoid", 
+                "consider", "monitor", "perform", "discontinue"
+            ]
+        ):
+            return line.strip()
+    return best.split(".")[0].strip()  # fallback: return first sentence
+    
 
 # === Endpoints ===
 @app.post("/ask")
