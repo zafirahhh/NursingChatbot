@@ -28,18 +28,21 @@ with open(KNOWLEDGE_PATH, encoding="utf-8") as f:
     text = f.read()
 
 def load_chunks_from_text(text, max_len=300):
-    paragraphs = [p.strip() for p in re.split(r'\n\s*\n', text) if p.strip()]
-    chunks = []
-    current_chunk = ""
+    # group bullets with their heading
+    paragraphs = re.split(r'\n\s*\n', text)
+    grouped = []
+    buffer = ""
     for para in paragraphs:
-        if len(current_chunk + para) < max_len:
-            current_chunk += para + "\n"
+        if re.match(r'^[•*-]|^\d+\.', para.strip()):
+            buffer += para.strip() + " "
         else:
-            chunks.append(current_chunk.strip())
-            current_chunk = para + "\n"
-    if current_chunk:
-        chunks.append(current_chunk.strip())
-    return chunks
+            if buffer:
+                grouped.append(buffer.strip())
+                buffer = ""
+            grouped.append(para.strip())
+    if buffer:
+        grouped.append(buffer.strip())
+    return [p for p in grouped if len(p.split()) > 5]
 
 chunks = load_chunks_from_text(text)
 
@@ -74,6 +77,8 @@ def filter_chunks_by_keywords_and_intent(query, chunks, keywords_map, intent_map
             continue
         if matched_intent and not any(t in chunk.lower() for t in matched_intent):
             continue
+        if any(skip in chunk.lower() for skip in ['figure', 'table', 'chapter']):
+            continue
         filtered.append((i, chunk))
 
     return filtered if filtered else list(enumerate(chunks))
@@ -103,30 +108,28 @@ def find_best_answer(user_query, chunks, chunk_embeddings, top_k=5):
     query_embedding = model.encode(user_query, convert_to_tensor=True)
     reduced_embeddings = torch.stack([chunk_embeddings[i] for i in filtered_indices])
     hits = util.semantic_search(query_embedding, reduced_embeddings, top_k=top_k)[0]
-
-    # === GLOBAL SENTENCE RE-RANKING ACROSS TOP CHUNKS ===
     ranked = sorted(hits, key=lambda x: float(x['score']), reverse=True)
     top_chunks = [filtered_chunks[hit['corpus_id']] for hit in ranked[:3]]
 
-    # === NEW: extract keywords from query and sentences ===
     query_keywords = set(extract_keywords(user_query))
-    all_sentences = []
+    action_verbs = ["give", "administer", "start", "treat", "use", "perform", "consider", "avoid", "manage", "monitor", "discontinue"]
+
+    scored_chunks = []
     for chunk in top_chunks:
-        for s in sent_tokenize(chunk):
-            sent_keywords = set(extract_keywords(s))
-            if len(s.split()) >= 5 and len(sent_keywords & query_keywords) >= 2:
-                all_sentences.append(s)
+        chunk_lower = chunk.lower()
+        if any(v in chunk_lower for v in action_verbs) and len(set(extract_keywords(chunk)) & query_keywords) >= 2:
+            scored_chunks.append(chunk)
 
-    if not all_sentences:
-        all_sentences = [s for chunk in top_chunks for s in sent_tokenize(chunk) if len(s.split()) >= 5]
+    if not scored_chunks:
+        scored_chunks = [c for c in top_chunks if len(c.split()) > 5]
 
-    if not all_sentences:
+    if not scored_chunks:
         return top_chunks[0]  # fallback
 
-    sent_embeddings = model.encode(all_sentences, convert_to_tensor=True)
-    sent_scores = util.cos_sim(query_embedding, sent_embeddings)[0]
-    best_idx = int(torch.argmax(sent_scores))
-    return all_sentences[best_idx]
+    embeddings = model.encode(scored_chunks, convert_to_tensor=True)
+    scores = util.cos_sim(query_embedding, embeddings)[0]
+    best_idx = int(torch.argmax(scores))
+    return scored_chunks[best_idx]
 
 # === Endpoints ===
 @app.post("/ask")
