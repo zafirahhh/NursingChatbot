@@ -24,9 +24,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# === Load Q&A Reference ===
-with open("data/qa_reference.json", encoding="utf-8") as f:
-    qa_reference = json.load(f)
+# === Load Q&A Reference if available ===
+qa_reference_path = os.path.join("data", "qa_reference.json")
+qa_reference = []
+if os.path.exists(qa_reference_path):
+    with open(qa_reference_path, encoding="utf-8") as f:
+        qa_reference = json.load(f)
 
 def match_known_answer(query):
     best_match = None
@@ -46,7 +49,6 @@ with open(KNOWLEDGE_PATH, encoding="utf-8") as f:
     text = f.read()
 
 def load_chunks_from_text(text, max_len=300):
-    # group bullets with their heading
     paragraphs = re.split(r'\n\s*\n', text)
     grouped = []
     buffer = ""
@@ -64,17 +66,20 @@ def load_chunks_from_text(text, max_len=300):
 
 chunks = load_chunks_from_text(text)
 
-# === Load Model and Embeddings ===
+# === Load Model and Chunk Embeddings ===
 model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
 chunk_embeddings = model.encode(chunks, convert_to_tensor=True)
 
+# === Request Schema ===
 class QueryRequest(BaseModel):
     query: str
 
+# === Helper Functions ===
 def extract_keywords(text):
     words = re.findall(r'\b\w{4,}\b', text.lower())
     return [w for w in words if w not in ENGLISH_STOP_WORDS]
 
+# === Filtering Logic ===
 def filter_chunks_by_keywords_and_intent(query, chunks, keywords_map, intent_map):
     query_lower = query.lower()
     matched_keywords = []
@@ -101,6 +106,7 @@ def filter_chunks_by_keywords_and_intent(query, chunks, keywords_map, intent_map
 
     return filtered if filtered else list(enumerate(chunks))
 
+# === Semantic Answer Logic (shortened version) ===
 def find_best_answer(user_query, chunks, chunk_embeddings, top_k=5):
     # Try known Q&A match first
     known = match_known_answer(user_query)
@@ -147,26 +153,21 @@ def find_best_answer(user_query, chunks, chunk_embeddings, top_k=5):
         scored_chunks = [c for c in top_chunks if len(c.split()) > 5]
 
     if not scored_chunks:
-        return top_chunks[0]  # fallback
+        return top_chunks[0]
 
     embeddings = model.encode(scored_chunks, convert_to_tensor=True)
     scores = util.cos_sim(query_embedding, embeddings)[0]
     best_idx = int(torch.argmax(scores))
-    # Cleanup and summarize the best sentence
+
+    # final cleanup
     best = scored_chunks[best_idx]
     lines = best.split("\n")
     for line in lines:
-        if len(line.split()) >= 4 and any(
-            line.strip().lower().startswith(v) for v in [
-                "give", "administer", "start", "treat", "use", "avoid", 
-                "consider", "monitor", "perform", "discontinue"
-            ]
-        ):
+        if len(line.split()) >= 4 and any(line.strip().lower().startswith(v) for v in action_verbs):
             return line.strip()
-    return best.split(".")[0].strip()  # fallback
-    
+    return best.split(".")[0].strip()
 
-# === Endpoints ===
+# === Both Endpoints ===
 @app.post("/ask")
 async def ask_question(query: QueryRequest):
     answer = find_best_answer(query.query, chunks, chunk_embeddings)
@@ -177,6 +178,6 @@ async def search(query: QueryRequest):
     answer = find_best_answer(query.query, chunks, chunk_embeddings)
     return {"answer": answer}
 
-# === Run Server ===
+# === Run the Server ===
 if __name__ == "__main__":
     uvicorn.run("backend:app", host="0.0.0.0", port=8000, reload=True)
