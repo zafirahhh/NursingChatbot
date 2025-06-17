@@ -7,9 +7,11 @@ import uvicorn
 import os
 import re
 import torch
+import json
 import nltk
 from nltk.tokenize import sent_tokenize
 from sklearn.feature_extraction.text import ENGLISH_STOP_WORDS
+from difflib import SequenceMatcher
 
 nltk.download('punkt')
 
@@ -21,6 +23,22 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# === Load Q&A Reference ===
+with open("data/qa_reference.json", encoding="utf-8") as f:
+    qa_reference = json.load(f)
+
+def match_known_answer(query):
+    best_match = None
+    best_score = 0
+    for pair in qa_reference:
+        score = SequenceMatcher(None, query.lower(), pair["q"].lower()).ratio()
+        if score > best_score:
+            best_match = pair
+            best_score = score
+    if best_score >= 0.9:
+        return best_match["a"]
+    return None
 
 # === Load Knowledge Base ===
 KNOWLEDGE_PATH = os.path.join("data", "nursing_guide_cleaned.txt")
@@ -84,6 +102,11 @@ def filter_chunks_by_keywords_and_intent(query, chunks, keywords_map, intent_map
     return filtered if filtered else list(enumerate(chunks))
 
 def find_best_answer(user_query, chunks, chunk_embeddings, top_k=5):
+    # Try known Q&A match first
+    known = match_known_answer(user_query)
+    if known:
+        return known
+
     keywords_map = {
         "urine": ["urine", "output"],
         "heart": ["heart", "rate"],
@@ -112,7 +135,7 @@ def find_best_answer(user_query, chunks, chunk_embeddings, top_k=5):
     top_chunks = [filtered_chunks[hit['corpus_id']] for hit in ranked[:3]]
 
     query_keywords = set(extract_keywords(user_query))
-    action_verbs = ["give", "administer", "start", "treat", "use", "perform", "consider", "avoid", "manage", "monitor", "discontinue"]
+    action_verbs = ["give", "administer", "start", "treat", "use", "avoid", "consider", "monitor", "perform", "discontinue"]
 
     scored_chunks = []
     for chunk in top_chunks:
@@ -140,7 +163,7 @@ def find_best_answer(user_query, chunks, chunk_embeddings, top_k=5):
             ]
         ):
             return line.strip()
-    return best.split(".")[0].strip()  # fallback: return first sentence
+    return best.split(".")[0].strip()  # fallback
     
 
 # === Endpoints ===
