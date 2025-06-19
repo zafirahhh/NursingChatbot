@@ -85,20 +85,20 @@ def extract_relevant_answer(question, matched_chunks):
     max_score = 0
 
     for chunk in matched_chunks:
-        lines = sent_tokenize(chunk)
+        lines = chunk.split('\n')
         for line in lines:
-            line_lower = line.lower()
+            line_lower = line.strip().lower()
 
-            # Skip generic headings, table references, source lines
-            if re.search(r'table\s*\d|figure\s*\d|adapted from|source[:\s]', line_lower):
+            # Skip table headers, metadata
+            if re.search(r'(table \d+|adapted from|figure \d+|source[:\s])', line_lower):
                 continue
 
             score = sum(1 for word in keywords if word in line_lower)
 
-            # Boost score if numeric/clinical actionable info
-            if re.search(r'\b\d+\s*(mg|g|ml|mmol|hours?|mins?)\b', line_lower):
+            # Boost score for bullet/list format and relevant medical phrases
+            if re.match(r'^[\u2022\*-]', line.strip()):
                 score += 2
-            if re.search(r'double|increase|reduce|adjust|infusion|bolus|dialysis|resuscitation|dose|indicated|symptom|signs|history|criteria', line_lower):
+            if re.search(r'\d+\s*(mg|ml|mmol|bpm|hr|min)|signs|symptoms|toxicity|refill|pulse', line_lower):
                 score += 1
 
             if score > max_score:
@@ -109,7 +109,6 @@ def extract_relevant_answer(question, matched_chunks):
 
 # === Semantic Answer Logic ===
 def find_best_answer(user_query, chunks, chunk_embeddings, top_k=5):
-    # Try known Q&A match first
     known = match_known_answer(user_query)
     if known:
         return known
