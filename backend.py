@@ -96,16 +96,17 @@ def extract_relevant_answer(question, matched_chunks):
 
             if re.match(r'^[\u2022\*-]', line.strip()):
                 score += 2
-            if re.search(r'\d+\s*(mg|ml|mmol|bpm|hr|min)|signs|symptoms|toxicity|refill|pulse|contraindicated|indicated', line_lower):
+            if re.search(r'\d+\s*(mg|ml|mmol|bpm|hr|min)|signs|symptoms|toxicity|refill|pulse|contraindicated|indicated|airway|lavage|charcoal', line_lower):
                 score += 1
 
             if score > max_score:
                 max_score = score
+                # Combine with following lines if they are part of the same block
                 best_block = line.strip()
-                j = i + 1
-                while j < len(lines) and lines[j].strip().startswith(('•', '-', '*')):
-                    best_block += "\n" + lines[j].strip()
-                    j += 1
+                for j in range(i + 1, len(lines)):
+                    if lines[j].strip().startswith(('•', '-', '*')) or not lines[j].strip():
+                        break
+                    best_block += " " + lines[j].strip()
 
     return best_block or "Sorry, I couldn't find a clear answer in the document."
 
@@ -135,4 +136,6 @@ async def search(query: QueryRequest):
 
 # === Run the Server ===
 if __name__ == "__main__":
+    import time
+    time.sleep(2)  # delay to ensure server is ready before first request
     uvicorn.run("backend:app", host="0.0.0.0", port=8000, reload=True)
