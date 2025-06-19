@@ -85,7 +85,7 @@ def extract_relevant_answer(question, matched_chunks):
     max_score = 0
 
     for chunk in matched_chunks:
-        lines = chunk.split('\n')
+        lines = sent_tokenize(chunk)
         for line in lines:
             line_lower = line.lower()
             score = sum(1 for word in keywords if word in line_lower)
@@ -93,14 +93,14 @@ def extract_relevant_answer(question, matched_chunks):
             # Boost if numeric/clinical action line
             if re.search(r'\b\d+\s*(mg|g|ml|mmol|hours?|mins?)\b', line_lower):
                 score += 2
-            if re.search(r'double|increase|reduce|adjust|infusion|bolus|dialysis|resuscitation|dose', line_lower):
+            if re.search(r'double|increase|reduce|adjust|infusion|bolus|dialysis|resuscitation|dose|indicated', line_lower):
                 score += 1
 
             if score > max_score:
                 max_score = score
                 best_line = line.strip()
 
-    return best_line or "Sorry, I couldn't find a clear answer in the document."
+    return best_line if best_line else "Sorry, I couldn't find a clear answer in the document."
 
 # === Semantic Answer Logic ===
 def find_best_answer(user_query, chunks, chunk_embeddings, top_k=5):
