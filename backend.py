@@ -81,31 +81,33 @@ def extract_keywords(text):
 
 def extract_relevant_answer(question, matched_chunks):
     keywords = re.findall(r'\b\w+\b', question.lower())
-    best_line = None
+    best_block = ""
     max_score = 0
 
     for chunk in matched_chunks:
         lines = chunk.split('\n')
-        for line in lines:
+        for i, line in enumerate(lines):
             line_lower = line.strip().lower()
 
-            # Skip table headers, metadata
             if re.search(r'(table \d+|adapted from|figure \d+|source[:\s])', line_lower):
                 continue
 
             score = sum(1 for word in keywords if word in line_lower)
 
-            # Boost score for bullet/list format and relevant medical phrases
             if re.match(r'^[\u2022\*-]', line.strip()):
                 score += 2
-            if re.search(r'\d+\s*(mg|ml|mmol|bpm|hr|min)|signs|symptoms|toxicity|refill|pulse', line_lower):
+            if re.search(r'\d+\s*(mg|ml|mmol|bpm|hr|min)|signs|symptoms|toxicity|refill|pulse|contraindicated|indicated', line_lower):
                 score += 1
 
             if score > max_score:
                 max_score = score
-                best_line = line.strip()
+                best_block = line.strip()
+                j = i + 1
+                while j < len(lines) and lines[j].strip().startswith(('•', '-', '*')):
+                    best_block += "\n" + lines[j].strip()
+                    j += 1
 
-    return best_line or "Sorry, I couldn't find a clear answer in the document."
+    return best_block or "Sorry, I couldn't find a clear answer in the document."
 
 # === Semantic Answer Logic ===
 def find_best_answer(user_query, chunks, chunk_embeddings, top_k=5):
