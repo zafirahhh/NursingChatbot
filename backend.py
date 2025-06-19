@@ -53,7 +53,7 @@ def load_chunks_from_text(text, max_len=300):
     grouped = []
     buffer = ""
     for para in paragraphs:
-        if re.match(r'^[•*-]|^\d+\.', para.strip()):
+        if re.match(r'^[\u2022\*-]|^\d+\.', para.strip()):
             buffer += para.strip() + " "
         else:
             if buffer:
@@ -79,95 +79,44 @@ def extract_keywords(text):
     words = re.findall(r'\b\w{4,}\b', text.lower())
     return [w for w in words if w not in ENGLISH_STOP_WORDS]
 
-# === Filtering Logic ===
-def filter_chunks_by_keywords_and_intent(query, chunks, keywords_map, intent_map):
-    query_lower = query.lower()
-    matched_keywords = []
-    for concept, keywords in keywords_map.items():
-        if all(k in query_lower for k in keywords):
-            matched_keywords = keywords
-            break
+def extract_relevant_answer(question, matched_chunks):
+    keywords = re.findall(r'\b\w+\b', question.lower())
+    best_line = None
+    max_score = 0
 
-    matched_intent = []
-    for intent, triggers in intent_map.items():
-        if any(t in query_lower for t in triggers):
-            matched_intent = triggers
-            break
+    for chunk in matched_chunks:
+        lines = chunk.split('\n')
+        for line in lines:
+            line_lower = line.lower()
+            score = sum(1 for word in keywords if word in line_lower)
 
-    filtered = []
-    for i, chunk in enumerate(chunks):
-        if matched_keywords and not all(k in chunk.lower() for k in matched_keywords):
-            continue
-        if matched_intent and not any(t in chunk.lower() for t in matched_intent):
-            continue
-        if any(skip in chunk.lower() for skip in ['figure', 'table', 'chapter']):
-            continue
-        filtered.append((i, chunk))
+            # Boost if numeric/clinical action line
+            if re.search(r'\b\d+\s*(mg|g|ml|mmol|hours?|mins?)\b', line_lower):
+                score += 2
+            if re.search(r'double|increase|reduce|adjust|infusion|bolus|dialysis|resuscitation|dose', line_lower):
+                score += 1
 
-    return filtered if filtered else list(enumerate(chunks))
+            if score > max_score:
+                max_score = score
+                best_line = line.strip()
 
-# === Semantic Answer Logic (shortened version) ===
+    return best_line or "Sorry, I couldn't find a clear answer in the document."
+
+# === Semantic Answer Logic ===
 def find_best_answer(user_query, chunks, chunk_embeddings, top_k=5):
     # Try known Q&A match first
     known = match_known_answer(user_query)
     if known:
         return known
 
-    keywords_map = {
-        "urine": ["urine", "output"],
-        "heart": ["heart", "rate"],
-        "respiratory": ["respiratory", "rate"],
-        "bp": ["blood", "pressure"],
-        "fluid": ["fluid", "intake"],
-        "temperature": ["temperature"],
-        "neonate": ["neonate"],
-        "shock": ["shock"],
-        "child": ["child"],
-    }
-
-    intent_map = {
-        "signs": ["signs", "symptoms", "indicators"],
-        "treatment": ["first step", "treatment", "initial", "intervention", "manage", "management"],
-        "vitals": ["rate", "temperature", "pressure", "value", "normal"],
-    }
-
-    filtered_pairs = filter_chunks_by_keywords_and_intent(user_query, chunks, keywords_map, intent_map)
-    filtered_indices, filtered_chunks = zip(*filtered_pairs)
-
     query_embedding = model.encode(user_query, convert_to_tensor=True)
-    reduced_embeddings = torch.stack([chunk_embeddings[i] for i in filtered_indices])
-    hits = util.semantic_search(query_embedding, reduced_embeddings, top_k=top_k)[0]
-    ranked = sorted(hits, key=lambda x: float(x['score']), reverse=True)
-    top_chunks = [filtered_chunks[hit['corpus_id']] for hit in ranked[:3]]
+    similarities = util.pytorch_cos_sim(query_embedding, chunk_embeddings)[0]
+    top_indices = similarities.topk(k=min(top_k, len(chunks))).indices
+    matched_chunks = [chunks[i] for i in top_indices]
 
-    query_keywords = set(extract_keywords(user_query))
-    action_verbs = ["give", "administer", "start", "treat", "use", "avoid", "consider", "monitor", "perform", "discontinue"]
+    return extract_relevant_answer(user_query, matched_chunks)
 
-    scored_chunks = []
-    for chunk in top_chunks:
-        chunk_lower = chunk.lower()
-        if any(v in chunk_lower for v in action_verbs) and len(set(extract_keywords(chunk)) & query_keywords) >= 2:
-            scored_chunks.append(chunk)
-
-    if not scored_chunks:
-        scored_chunks = [c for c in top_chunks if len(c.split()) > 5]
-
-    if not scored_chunks:
-        return top_chunks[0]
-
-    embeddings = model.encode(scored_chunks, convert_to_tensor=True)
-    scores = util.cos_sim(query_embedding, embeddings)[0]
-    best_idx = int(torch.argmax(scores))
-
-    # final cleanup
-    best = scored_chunks[best_idx]
-    lines = best.split("\n")
-    for line in lines:
-        if len(line.split()) >= 4 and any(line.strip().lower().startswith(v) for v in action_verbs):
-            return line.strip()
-    return best.split(".")[0].strip()
-
-# === Both Endpoints ===
+# === Endpoints ===
 @app.post("/ask")
 async def ask_question(query: QueryRequest):
     answer = find_best_answer(query.query, chunks, chunk_embeddings)
