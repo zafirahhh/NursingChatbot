@@ -89,24 +89,30 @@ def extract_relevant_answer(question, matched_chunks):
         for i, line in enumerate(lines):
             line_lower = line.strip().lower()
 
+            # Skip table headers, metadata
             if re.search(r'(table \d+|adapted from|figure \d+|source[:\s])', line_lower):
                 continue
 
             score = sum(1 for word in keywords if word in line_lower)
 
+            # Strong boost for bullet-style answers with signs/symptoms/indicators
             if re.match(r'^[\u2022\*-]', line.strip()):
+                score += 3
+            if re.search(r'signs|symptoms|indicated|contraindicated|criteria|manifestation|features', line_lower):
                 score += 2
-            if re.search(r'\d+\s*(mg|ml|mmol|bpm|hr|min)|signs|symptoms|toxicity|refill|pulse|contraindicated|indicated|airway|lavage|charcoal', line_lower):
+            if re.search(r'\d+\s*(mg|ml|mmol|bpm|hr|min)', line_lower):
                 score += 1
 
             if score > max_score:
                 max_score = score
-                # Combine with following lines if they are part of the same block
                 best_block = line.strip()
+
+                # Extend answer if part of a list
                 for j in range(i + 1, len(lines)):
-                    if lines[j].strip().startswith(('•', '-', '*')) or not lines[j].strip():
+                    if lines[j].strip().startswith(('•', '-', '*')):
+                        best_block += "\n" + lines[j].strip()
+                    else:
                         break
-                    best_block += " " + lines[j].strip()
 
     return best_block or "Sorry, I couldn't find a clear answer in the document."
 
@@ -137,5 +143,5 @@ async def search(query: QueryRequest):
 # === Run the Server ===
 if __name__ == "__main__":
     import time
-    time.sleep(2)  # delay to ensure server is ready before first request
+    time.sleep(2)
     uvicorn.run("backend:app", host="0.0.0.0", port=8000, reload=True)
