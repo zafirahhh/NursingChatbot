@@ -80,25 +80,28 @@ def extract_keywords(text):
     return [w for w in words if w not in ENGLISH_STOP_WORDS]
 
 def extract_relevant_answer(question, matched_chunks):
-    # Find the most relevant sentence(s) from the top chunk based on keyword overlap
+    # Handle very short or non-informative queries
+    if not question or len(question.strip()) < 4:
+        return "Please provide a more specific question."
     if not matched_chunks:
         return "Sorry, I couldn't find a clear answer in the document."
     chunk = matched_chunks[0]
-    # Remove bullet points and list markers
+    # Remove bullet points, list markers, and template/placeholder lines
     clean_chunk = re.sub(r'^[\u2022\*-]\s*', '', chunk, flags=re.MULTILINE)
+    clean_chunk = '\n'.join(line for line in clean_chunk.split('\n') if not line.strip().startswith('#'))
     # Split into sentences
     sentences = re.split(r'(?<=[.!?]) +', clean_chunk.strip())
+    # Remove sentences that are placeholders or templates
+    sentences = [s for s in sentences if not s.strip().startswith('#') and 'add any other content' not in s.lower()]
     keywords = set(re.findall(r'\b\w+\b', question.lower()))
     best_score = 0
     best_sentence = sentences[0] if sentences else ""
-    # Find the sentence with the most keyword overlap
     for sent in sentences:
         sent_words = set(re.findall(r'\b\w+\b', sent.lower()))
         score = len(keywords & sent_words)
         if score > best_score:
             best_score = score
             best_sentence = sent
-    # Optionally, return the best sentence plus the next one for context
     idx = sentences.index(best_sentence) if best_sentence in sentences else 0
     answer = best_sentence
     if idx + 1 < len(sentences):
