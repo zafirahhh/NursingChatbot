@@ -105,16 +105,14 @@ def extract_relevant_answer(question, matched_chunks):
 
             if score > max_score:
                 max_score = score
-                # --- Collect the full answer block, but limit to 3 lines ---
-                answer_lines = [line.strip()]
+                best_block = line.strip()
+
+                # Extend answer if part of a list
                 for j in range(i + 1, len(lines)):
-                    next_line = lines[j].strip()
-                    if not next_line or len(answer_lines) >= 3:
+                    if lines[j].strip().startswith(('•', '-', '*')):
+                        best_block += "\n" + lines[j].strip()
+                    else:
                         break
-                    if re.match(r'^[A-Z\s]{6,}$', next_line) or re.match(r'^\d+\.', next_line):
-                        break
-                    answer_lines.append(next_line)
-                best_block = "\n".join(answer_lines)
 
     return best_block or "Sorry, I couldn't find a clear answer in the document."
 
@@ -131,16 +129,32 @@ def find_best_answer(user_query, chunks, chunk_embeddings, top_k=5):
 
     return extract_relevant_answer(user_query, matched_chunks)
 
+def smart_summarize(text, max_words=60):
+    import re
+    text = re.sub(r"\n+", " ", text.strip())  # Remove line breaks
+    sentences = re.split(r"(?<=[.?!]) +", text)
+    result = []
+    word_count = 0
+    for s in sentences:
+        s_words = len(s.split())
+        if word_count + s_words > max_words:
+            break
+        result.append(s)
+        word_count += s_words
+    return " ".join(result)
+
 # === Endpoints ===
 @app.post("/ask")
 async def ask_question(query: QueryRequest):
     answer = find_best_answer(query.query, chunks, chunk_embeddings)
-    return {"answer": answer}
+    clean_answer = smart_summarize(answer)
+    return {"answer": clean_answer}
 
 @app.post("/search")
 async def search(query: QueryRequest):
     answer = find_best_answer(query.query, chunks, chunk_embeddings)
-    return {"answer": answer}
+    clean_answer = smart_summarize(answer)
+    return {"answer": clean_answer}
 
 # === Run the Server ===
 if __name__ == "__main__":
