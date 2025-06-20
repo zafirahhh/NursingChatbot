@@ -80,18 +80,30 @@ def extract_keywords(text):
     return [w for w in words if w not in ENGLISH_STOP_WORDS]
 
 def extract_relevant_answer(question, matched_chunks):
-    # Instead of picking the best line, pick the most relevant chunk and return its first 2-3 sentences
+    # Find the most relevant sentence(s) from the top chunk based on keyword overlap
     if not matched_chunks:
         return "Sorry, I couldn't find a clear answer in the document."
-    # Pick the top chunk (most similar)
     chunk = matched_chunks[0]
     # Remove bullet points and list markers
     clean_chunk = re.sub(r'^[\u2022\*-]\s*', '', chunk, flags=re.MULTILINE)
     # Split into sentences
     sentences = re.split(r'(?<=[.!?]) +', clean_chunk.strip())
-    # Return the first 2-3 sentences joined
-    answer = ' '.join(sentences[:3]).strip()
-    return answer or "Sorry, I couldn't find a clear answer in the document."
+    keywords = set(re.findall(r'\b\w+\b', question.lower()))
+    best_score = 0
+    best_sentence = sentences[0] if sentences else ""
+    # Find the sentence with the most keyword overlap
+    for sent in sentences:
+        sent_words = set(re.findall(r'\b\w+\b', sent.lower()))
+        score = len(keywords & sent_words)
+        if score > best_score:
+            best_score = score
+            best_sentence = sent
+    # Optionally, return the best sentence plus the next one for context
+    idx = sentences.index(best_sentence) if best_sentence in sentences else 0
+    answer = best_sentence
+    if idx + 1 < len(sentences):
+        answer += ' ' + sentences[idx + 1]
+    return answer.strip() or "Sorry, I couldn't find a clear answer in the document."
 
 def smart_summarize(text, max_words=60):
     import re
