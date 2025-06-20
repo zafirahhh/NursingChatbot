@@ -85,7 +85,9 @@ def extract_relevant_answer(question, matched_chunks):
     max_score = 0
 
     for chunk in matched_chunks:
-        lines = chunk.split('\n')
+        # Remove bullet points and list markers
+        clean_chunk = re.sub(r'^[\u2022\*-]\s*', '', chunk, flags=re.MULTILINE)
+        lines = clean_chunk.split('\n')
         for i, line in enumerate(lines):
             line_lower = line.strip().lower()
 
@@ -95,9 +97,7 @@ def extract_relevant_answer(question, matched_chunks):
 
             score = sum(1 for word in keywords if word in line_lower)
 
-            # Strong boost for bullet-style answers with signs/symptoms/indicators
-            if re.match(r'^[\u2022\*-]', line.strip()):
-                score += 3
+            # Boost for contextually relevant lines
             if re.search(r'signs|symptoms|indicated|contraindicated|criteria|manifestation|features', line_lower):
                 score += 2
             if re.search(r'\d+\s*(mg|ml|mmol|bpm|hr|min)', line_lower):
@@ -105,16 +105,32 @@ def extract_relevant_answer(question, matched_chunks):
 
             if score > max_score:
                 max_score = score
-                best_block = line.strip()
-
-                # Extend answer if part of a list
+                # Collect up to 2 lines for context
+                answer_lines = [line.strip()]
                 for j in range(i + 1, len(lines)):
-                    if lines[j].strip().startswith(('•', '-', '*')):
-                        best_block += "\n" + lines[j].strip()
-                    else:
+                    next_line = lines[j].strip()
+                    if not next_line or len(answer_lines) >= 2:
                         break
+                    if re.match(r'^[A-Z\s]{6,}$', next_line) or re.match(r'^\d+\.', next_line):
+                        break
+                    answer_lines.append(next_line)
+                best_block = " ".join(answer_lines)
 
     return best_block or "Sorry, I couldn't find a clear answer in the document."
+
+def smart_summarize(text, max_words=60):
+    import re
+    text = re.sub(r"\n+", " ", text.strip())  # Remove line breaks
+    sentences = re.split(r"(?<=[.?!]) +", text)
+    result = []
+    word_count = 0
+    for s in sentences:
+        s_words = len(s.split())
+        if word_count + s_words > max_words:
+            break
+        result.append(s)
+        word_count += s_words
+    return " ".join(result)
 
 # === Semantic Answer Logic ===
 def find_best_answer(user_query, chunks, chunk_embeddings, top_k=5):
@@ -128,37 +144,6 @@ def find_best_answer(user_query, chunks, chunk_embeddings, top_k=5):
     matched_chunks = [chunks[i] for i in top_indices]
 
     return extract_relevant_answer(user_query, matched_chunks)
-
-def smart_summarize(text, max_words=90):
-    import re
-    # If the answer is a bullet or list, keep the full block up to the word limit
-    if text.strip().startswith(('•', '-', '*')):
-        # Split by bullets, but keep the first block(s) up to max_words
-        bullets = re.split(r'(?:\n|^)([•\-*].*)', text)
-        result = []
-        word_count = 0
-        for b in bullets:
-            b = b.strip()
-            if not b or not b.startswith(('•', '-', '*')):
-                continue
-            b_words = len(b.split())
-            if word_count + b_words > max_words:
-                break
-            result.append(b)
-            word_count += b_words
-        return '\n'.join(result) if result else text
-    # Otherwise, summarize by sentences
-    text = re.sub(r"\n+", " ", text.strip())  # Remove line breaks
-    sentences = re.split(r"(?<=[.?!]) +", text)
-    result = []
-    word_count = 0
-    for s in sentences:
-        s_words = len(s.split())
-        if word_count + s_words > max_words:
-            break
-        result.append(s)
-        word_count += s_words
-    return " ".join(result)
 
 # === Endpoints ===
 @app.post("/ask")
