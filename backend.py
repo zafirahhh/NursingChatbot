@@ -105,14 +105,18 @@ def extract_relevant_answer(question, matched_chunks):
 
             if score > max_score:
                 max_score = score
-                best_block = line.strip()
-
-                # Extend answer if part of a list
+                # --- Collect the full answer block ---
+                answer_lines = [line.strip()]
+                # Collect following lines that are not empty and not a new section
                 for j in range(i + 1, len(lines)):
-                    if lines[j].strip().startswith(('•', '-', '*')):
-                        best_block += "\n" + lines[j].strip()
-                    else:
+                    next_line = lines[j].strip()
+                    if not next_line:
                         break
+                    # Stop if next line looks like a new section (e.g., all caps or starts with a heading number)
+                    if re.match(r'^[A-Z\s]{6,}$', next_line) or re.match(r'^\d+\.', next_line):
+                        break
+                    answer_lines.append(next_line)
+                best_block = "\n".join(answer_lines)
 
     return best_block or "Sorry, I couldn't find a clear answer in the document."
 
