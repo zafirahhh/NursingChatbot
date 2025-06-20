@@ -83,42 +83,17 @@ def format_answer(answer: str) -> str:
     answer = re.sub(r"\s{2,}", " ", answer)
     return answer.strip()
 
-def extract_relevant_answer(question, matched_chunks):
-    keywords = re.findall(r'\b\w+\b', question.lower())
-    signs_keywords = {'signs', 'symptoms', 'features', 'indicators', 'criteria', 'distress'}
-    best_block = ""
-    max_score = 0
-
-    for chunk in matched_chunks:
-        lines = chunk.split('\n')
-        for i, line in enumerate(lines):
-            line_lower = line.strip().lower()
-            score = sum(1 for word in keywords if word in line_lower)
-            has_signs = any(key in line_lower for key in signs_keywords)
-            if has_signs:
-                score += 3
-            if re.match(r'^[\u2022\*-]', line.strip()):
-                score += 2
-            if score > max_score:
-                max_score = score
-                best_block = line.strip()
-                for j in range(i + 1, len(lines)):
-                    if lines[j].strip().startswith(('•', '-', '*')):
-                        best_block += "\n" + lines[j].strip()
-                    else:
-                        break
-    return best_block if best_block else matched_chunks[0]
-
-def find_best_answer(user_query, chunks, chunk_embeddings, top_k=4):
+def find_best_answer(user_query, chunks, chunk_embeddings, top_k=2):
     known = match_known_answer(user_query)
     if known:
         return known
+
     query_embedding = model.encode(user_query, convert_to_tensor=True)
     similarities = util.pytorch_cos_sim(query_embedding, chunk_embeddings)[0]
     top_indices = similarities.topk(k=min(top_k, len(chunks))).indices.tolist()
+
     combined_context = "\n\n".join([chunks[i] for i in top_indices])
-    extracted = extract_relevant_answer(user_query, [combined_context])
-    return format_answer(extracted)
+    return format_answer(combined_context)
 
 # === Endpoints ===
 @app.post("/ask")
