@@ -75,86 +75,63 @@ class QueryRequest(BaseModel):
     query: str
 
 # === Helper Functions ===
-def extract_keywords(text):
-    words = re.findall(r'\b\w{4,}\b', text.lower())
-    return [w for w in words if w not in ENGLISH_STOP_WORDS]
+def format_answer(answer: str) -> str:
+    import re
+    # Add bullets and line breaks for clarity
+    answer = re.sub(r"(?<=\))\s+", "\n• ", answer)
+    answer = re.sub(r"(?<!\n)[•\-–]\s*", "\n• ", answer)
+    answer = re.sub(r"\s{2,}", " ", answer)
+    return answer.strip()
 
 def extract_relevant_answer(question, matched_chunks):
-    # Handle very short or non-informative queries
-    if not question or len(question.strip()) < 4:
-        return "Please provide a more specific question."
-    if not matched_chunks:
-        return "Sorry, I couldn't find a clear answer in the document."
-    chunk = matched_chunks[0]
-    # Remove bullet points, list markers, and template/placeholder lines
-    clean_chunk = re.sub(r'^[\u2022\*-]\s*', '', chunk, flags=re.MULTILINE)
-    clean_chunk = '\n'.join(line for line in clean_chunk.split('\n') if not line.strip().startswith('#'))
-    # Split into sentences
-    sentences = re.split(r'(?<=[.!?]) +', clean_chunk.strip())
-    # Remove sentences that are placeholders or templates
-    sentences = [s for s in sentences if not s.strip().startswith('#') and 'add any other content' not in s.lower()]
-    keywords = set(re.findall(r'\b\w+\b', question.lower()))
-    best_score = 0
-    best_idx = 0
-    for idx, sent in enumerate(sentences):
-        sent_words = set(re.findall(r'\b\w+\b', sent.lower()))
-        score = len(keywords & sent_words)
-        if score > best_score:
-            best_score = score
-            best_idx = idx
-    # If the best match is a heading or very short, return the next 2-3 sentences for context
-    answer = sentences[best_idx].strip()
-    if len(answer.split()) < 6 and best_idx + 1 < len(sentences):
-        # Combine with next 2 sentences if available
-        extra = []
-        for i in range(1, 3):
-            if best_idx + i < len(sentences):
-                extra.append(sentences[best_idx + i].strip())
-        answer = ' '.join([answer] + extra)
-    elif best_idx + 1 < len(sentences):
-        # Otherwise, return the best sentence plus the next one for context
-        answer += ' ' + sentences[best_idx + 1].strip()
-    return answer.strip() or "Sorry, I couldn't find a clear answer in the document."
+    keywords = re.findall(r'\b\w+\b', question.lower())
+    best_block = ""
+    max_score = 0
 
-def smart_summarize(text, max_words=60):
-    import re
-    text = re.sub(r"\n+", " ", text.strip())  # Remove line breaks
-    sentences = re.split(r"(?<=[.?!]) +", text)
-    result = []
-    word_count = 0
-    for s in sentences:
-        s_words = len(s.split())
-        if word_count + s_words > max_words:
-            break
-        result.append(s)
-        word_count += s_words
-    return " ".join(result)
+    for chunk in matched_chunks:
+        lines = chunk.split('\n')
+        for i, line in enumerate(lines):
+            line_lower = line.strip().lower()
+            if re.search(r'(table \d+|adapted from|figure \d+|source[:\s])', line_lower):
+                continue
+            score = sum(1 for word in keywords if word in line_lower)
+            if re.match(r'^[\u2022\*-]', line.strip()):
+                score += 3
+            if re.search(r'signs|symptoms|indicated|contraindicated|criteria|manifestation|features', line_lower):
+                score += 2
+            if re.search(r'\d+\s*(mg|ml|mmol|bpm|hr|min)', line_lower):
+                score += 1
+            if score > max_score:
+                max_score = score
+                best_block = line.strip()
+                for j in range(i + 1, len(lines)):
+                    if lines[j].strip().startswith(('•', '-', '*')):
+                        best_block += "\n" + lines[j].strip()
+                    else:
+                        break
+    return best_block or matched_chunks[0]
 
-# === Semantic Answer Logic ===
-def find_best_answer(user_query, chunks, chunk_embeddings, top_k=5):
+def find_best_answer(user_query, chunks, chunk_embeddings, top_k=3):
     known = match_known_answer(user_query)
     if known:
         return known
-
     query_embedding = model.encode(user_query, convert_to_tensor=True)
     similarities = util.pytorch_cos_sim(query_embedding, chunk_embeddings)[0]
-    top_indices = similarities.topk(k=min(top_k, len(chunks))).indices
-    matched_chunks = [chunks[i] for i in top_indices]
-
-    return extract_relevant_answer(user_query, matched_chunks)
+    top_indices = similarities.topk(k=min(top_k, len(chunks))).indices.tolist()
+    combined_context = "\n\n".join([chunks[i] for i in top_indices])
+    extracted = extract_relevant_answer(user_query, [combined_context])
+    return format_answer(extracted)
 
 # === Endpoints ===
 @app.post("/ask")
 async def ask_question(query: QueryRequest):
     answer = find_best_answer(query.query, chunks, chunk_embeddings)
-    clean_answer = smart_summarize(answer)
-    return {"answer": clean_answer}
+    return {"answer": answer}
 
 @app.post("/search")
 async def search(query: QueryRequest):
     answer = find_best_answer(query.query, chunks, chunk_embeddings)
-    clean_answer = smart_summarize(answer)
-    return {"answer": clean_answer}
+    return {"answer": answer}
 
 # === Run the Server ===
 if __name__ == "__main__":
