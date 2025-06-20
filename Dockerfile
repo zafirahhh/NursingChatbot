@@ -1,23 +1,21 @@
-# Use NVIDIA CUDA base image for GPU support
-FROM nvidia/cuda:11.8.0-cudnn8-runtime-ubuntu22.04
+# Use Python 3.9 as the base image
+FROM python:3.9
 
-# Set the working directory
+# Set the working directory inside the container
 WORKDIR /app
 
-# Copy only requirements first for better build caching
-COPY requirements.txt ./
-
-# Install pip and dependencies
-RUN apt-get update && \
-    apt-get install -y python3-pip && \
-    python3 -m pip install --upgrade pip && \
-    pip3 install --no-cache-dir -r requirements.txt
-
-# Now copy the rest of your code
+# Copy all local files to the container
 COPY . .
 
-# Expose the port FastAPI will run on
-EXPOSE 80
+# Upgrade pip and install Python dependencies
+RUN pip install --upgrade pip
+RUN pip install -r requirements.txt
 
-# Start FastAPI with Uvicorn
-CMD ["uvicorn", "backend:app", "--host", "0.0.0.0", "--port", "80"]
+# Download required NLTK data
+RUN python -m nltk.downloader punkt
+
+# Expose the port required by Hugging Face (7860)
+EXPOSE 7860
+
+# Start the FastAPI app using uvicorn on the correct port
+CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "7860"]
