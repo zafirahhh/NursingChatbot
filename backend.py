@@ -95,17 +95,25 @@ def extract_relevant_answer(question, matched_chunks):
     sentences = [s for s in sentences if not s.strip().startswith('#') and 'add any other content' not in s.lower()]
     keywords = set(re.findall(r'\b\w+\b', question.lower()))
     best_score = 0
-    best_sentence = sentences[0] if sentences else ""
-    for sent in sentences:
+    best_idx = 0
+    for idx, sent in enumerate(sentences):
         sent_words = set(re.findall(r'\b\w+\b', sent.lower()))
         score = len(keywords & sent_words)
         if score > best_score:
             best_score = score
-            best_sentence = sent
-    idx = sentences.index(best_sentence) if best_sentence in sentences else 0
-    answer = best_sentence
-    if idx + 1 < len(sentences):
-        answer += ' ' + sentences[idx + 1]
+            best_idx = idx
+    # If the best match is a heading or very short, return the next 2-3 sentences for context
+    answer = sentences[best_idx].strip()
+    if len(answer.split()) < 6 and best_idx + 1 < len(sentences):
+        # Combine with next 2 sentences if available
+        extra = []
+        for i in range(1, 3):
+            if best_idx + i < len(sentences):
+                extra.append(sentences[best_idx + i].strip())
+        answer = ' '.join([answer] + extra)
+    elif best_idx + 1 < len(sentences):
+        # Otherwise, return the best sentence plus the next one for context
+        answer += ' ' + sentences[best_idx + 1].strip()
     return answer.strip() or "Sorry, I couldn't find a clear answer in the document."
 
 def smart_summarize(text, max_words=60):
