@@ -105,14 +105,12 @@ def extract_relevant_answer(question, matched_chunks):
 
             if score > max_score:
                 max_score = score
-                # --- Collect the full answer block ---
+                # --- Collect the full answer block, but limit to 3 lines ---
                 answer_lines = [line.strip()]
-                # Collect following lines that are not empty and not a new section
                 for j in range(i + 1, len(lines)):
                     next_line = lines[j].strip()
-                    if not next_line:
+                    if not next_line or len(answer_lines) >= 3:
                         break
-                    # Stop if next line looks like a new section (e.g., all caps or starts with a heading number)
                     if re.match(r'^[A-Z\s]{6,}$', next_line) or re.match(r'^\d+\.', next_line):
                         break
                     answer_lines.append(next_line)
