@@ -85,6 +85,7 @@ def format_answer(answer: str) -> str:
 
 def extract_relevant_answer(question, matched_chunks):
     keywords = re.findall(r'\b\w+\b', question.lower())
+    signs_keywords = {'signs', 'symptoms', 'features', 'indicators', 'criteria', 'distress'}
     best_block = ""
     max_score = 0
 
@@ -92,15 +93,12 @@ def extract_relevant_answer(question, matched_chunks):
         lines = chunk.split('\n')
         for i, line in enumerate(lines):
             line_lower = line.strip().lower()
-            if re.search(r'(table \d+|adapted from|figure \d+|source[:\s])', line_lower):
-                continue
             score = sum(1 for word in keywords if word in line_lower)
-            if re.match(r'^[\u2022\*-]', line.strip()):
+            has_signs = any(key in line_lower for key in signs_keywords)
+            if has_signs:
                 score += 3
-            if re.search(r'signs|symptoms|indicated|contraindicated|criteria|manifestation|features', line_lower):
+            if re.match(r'^[\u2022\*-]', line.strip()):
                 score += 2
-            if re.search(r'\d+\s*(mg|ml|mmol|bpm|hr|min)', line_lower):
-                score += 1
             if score > max_score:
                 max_score = score
                 best_block = line.strip()
@@ -109,9 +107,9 @@ def extract_relevant_answer(question, matched_chunks):
                         best_block += "\n" + lines[j].strip()
                     else:
                         break
-    return best_block or matched_chunks[0]
+    return best_block if best_block else matched_chunks[0]
 
-def find_best_answer(user_query, chunks, chunk_embeddings, top_k=3):
+def find_best_answer(user_query, chunks, chunk_embeddings, top_k=4):
     known = match_known_answer(user_query)
     if known:
         return known
