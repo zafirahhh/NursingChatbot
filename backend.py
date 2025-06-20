@@ -80,43 +80,18 @@ def extract_keywords(text):
     return [w for w in words if w not in ENGLISH_STOP_WORDS]
 
 def extract_relevant_answer(question, matched_chunks):
-    keywords = re.findall(r'\b\w+\b', question.lower())
-    best_block = ""
-    max_score = 0
-
-    for chunk in matched_chunks:
-        # Remove bullet points and list markers
-        clean_chunk = re.sub(r'^[\u2022\*-]\s*', '', chunk, flags=re.MULTILINE)
-        lines = clean_chunk.split('\n')
-        for i, line in enumerate(lines):
-            line_lower = line.strip().lower()
-
-            # Skip table headers, metadata
-            if re.search(r'(table \d+|adapted from|figure \d+|source[:\s])', line_lower):
-                continue
-
-            score = sum(1 for word in keywords if word in line_lower)
-
-            # Boost for contextually relevant lines
-            if re.search(r'signs|symptoms|indicated|contraindicated|criteria|manifestation|features', line_lower):
-                score += 2
-            if re.search(r'\d+\s*(mg|ml|mmol|bpm|hr|min)', line_lower):
-                score += 1
-
-            if score > max_score:
-                max_score = score
-                # Collect up to 2 lines for context
-                answer_lines = [line.strip()]
-                for j in range(i + 1, len(lines)):
-                    next_line = lines[j].strip()
-                    if not next_line or len(answer_lines) >= 2:
-                        break
-                    if re.match(r'^[A-Z\s]{6,}$', next_line) or re.match(r'^\d+\.', next_line):
-                        break
-                    answer_lines.append(next_line)
-                best_block = " ".join(answer_lines)
-
-    return best_block or "Sorry, I couldn't find a clear answer in the document."
+    # Instead of picking the best line, pick the most relevant chunk and return its first 2-3 sentences
+    if not matched_chunks:
+        return "Sorry, I couldn't find a clear answer in the document."
+    # Pick the top chunk (most similar)
+    chunk = matched_chunks[0]
+    # Remove bullet points and list markers
+    clean_chunk = re.sub(r'^[\u2022\*-]\s*', '', chunk, flags=re.MULTILINE)
+    # Split into sentences
+    sentences = re.split(r'(?<=[.!?]) +', clean_chunk.strip())
+    # Return the first 2-3 sentences joined
+    answer = ' '.join(sentences[:3]).strip()
+    return answer or "Sorry, I couldn't find a clear answer in the document."
 
 def smart_summarize(text, max_words=60):
     import re
