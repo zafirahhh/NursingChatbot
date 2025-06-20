@@ -129,8 +129,25 @@ def find_best_answer(user_query, chunks, chunk_embeddings, top_k=5):
 
     return extract_relevant_answer(user_query, matched_chunks)
 
-def smart_summarize(text, max_words=60):
+def smart_summarize(text, max_words=90):
     import re
+    # If the answer is a bullet or list, keep the full block up to the word limit
+    if text.strip().startswith(('•', '-', '*')):
+        # Split by bullets, but keep the first block(s) up to max_words
+        bullets = re.split(r'(?:\n|^)([•\-*].*)', text)
+        result = []
+        word_count = 0
+        for b in bullets:
+            b = b.strip()
+            if not b or not b.startswith(('•', '-', '*')):
+                continue
+            b_words = len(b.split())
+            if word_count + b_words > max_words:
+                break
+            result.append(b)
+            word_count += b_words
+        return '\n'.join(result) if result else text
+    # Otherwise, summarize by sentences
     text = re.sub(r"\n+", " ", text.strip())  # Remove line breaks
     sentences = re.split(r"(?<=[.?!]) +", text)
     result = []
