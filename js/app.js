@@ -356,7 +356,34 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         if (!response.ok) throw new Error('Backend error');
         const data = await response.json();
-        return data.answer || 'No relevant information found.';
+
+        if (data.summary && data.full) {
+          const summary = data.summary;
+          const full = data.full;
+
+          // Append the summary
+          appendMessage('bot', summary);
+
+          // Create a toggle button
+          const toggleBtn = document.createElement('button');
+          toggleBtn.textContent = "Show Full Answer";
+          toggleBtn.className = 'toggle-btn';
+          toggleBtn.style.margin = '8px 0 12px 36px';
+          toggleBtn.style.border = 'none';
+          toggleBtn.style.background = '#eef1f7';
+          toggleBtn.style.padding = '6px 12px';
+          toggleBtn.style.borderRadius = '8px';
+          toggleBtn.style.cursor = 'pointer';
+          toggleBtn.onclick = () => {
+            appendMessage('bot', full);
+            toggleBtn.remove();
+          };
+          chatWindow.appendChild(toggleBtn);
+          chatWindow.scrollTop = chatWindow.scrollHeight;
+          return ""; // Skip default appending, already done
+        }
+
+        return data.answer || "No relevant information found.";
       } catch (err) {
         return 'Error contacting backend: ' + err.message;
       }
