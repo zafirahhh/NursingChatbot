@@ -92,18 +92,17 @@ def clean_paragraph(text: str) -> str:
 
     return paragraph
 
-def summarize_text(text: str, max_sentences=4) -> str:
-    sentences = sent_tokenize(text)
-    if len(sentences) > max_sentences:
-        return " ".join(sentences[:max_sentences]) + "..."
-    return text
+def extract_summary_bullets(text: str, max_lines=5) -> str:
+    bullets = re.findall(r'(\b[A-Z][^\.\n]{10,}\.)', text)
+    top_bullets = bullets[:max_lines] if bullets else sent_tokenize(text)[:max_lines]
+    return "\n".join(f"- {s.strip()}" for s in top_bullets)
 
 def find_best_answer(user_query, chunks, chunk_embeddings, top_k=2):
     known = match_known_answer(user_query)
     if known:
         cleaned = clean_paragraph(known)
         return {
-            "summary": summarize_text(cleaned),
+            "summary": extract_summary_bullets(cleaned),
             "full": cleaned
         }
 
@@ -115,7 +114,7 @@ def find_best_answer(user_query, chunks, chunk_embeddings, top_k=2):
     cleaned = clean_paragraph(combined_context)
 
     return {
-        "summary": summarize_text(cleaned),
+        "summary": extract_summary_bullets(cleaned),
         "full": cleaned
     }
 
