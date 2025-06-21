@@ -1,6 +1,7 @@
 // KKH Nursing Chatbot - Basic Chat Interactivity
 
 const BACKEND_URL = "http://127.0.0.1:8000/ask";
+const QUIZ_URL = "http://127.0.0.1:8000/quiz";
 
 document.addEventListener('DOMContentLoaded', () => {
     const chatWindow = document.getElementById('chat-window');
@@ -66,7 +67,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (!e.target.classList.contains('menu-btn')) switchSession(session.id);
             };
 
-            if (session.id !== 'general') {
+            if (session.id !== 'general' && session.id !== 'quiz') {
                 const menuBtn = document.createElement('button');
                 menuBtn.innerHTML = '<span style="font-size:18px;">&#8942;</span>';
                 menuBtn.title = 'More actions';
@@ -249,6 +250,21 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('kkh-active-session', sessionId);
         renderSessions();
         loadHistory();
+
+        if (sessionId === 'quiz') {
+            fetch(`${QUIZ_URL}?n=5`)
+              .then(res => res.json())
+              .then(data => {
+                  if (data.quiz) {
+                      appendMessage('bot', '📝 Here are your quiz questions:');
+                      data.quiz.forEach((q, idx) => {
+                          const optionsText = q.options.map((opt, i) => `${String.fromCharCode(65 + i)}. ${opt}`).join('\n');
+                          const fullText = `Q${idx + 1}: ${q.question}\n${optionsText}`;
+                          appendMessage('bot', fullText);
+                      });
+                  }
+              });
+        }
     }
     function saveSessions() {
         localStorage.setItem('kkh-sessions', JSON.stringify(sessions));
