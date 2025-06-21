@@ -96,7 +96,13 @@ def extract_summary_sentences(text: str, max_sentences=3) -> str:
     sentences = [s.strip() for s in sent_tokenize(text) if 10 < len(s.strip()) < 200]
     key_sents = [s for s in sentences if ':' not in s and '|' not in s and len(s.split()) <= 25]
 
-    selected = key_sents[:max_sentences] if key_sents else sentences[:max_sentences]
+    # Fallback: include formula-like lines
+    formula_lines = [
+        line.strip() for line in text.splitlines()
+        if re.search(r'(\d+\s*[+x*/-]+\s*\(?age\)?|age\s*\*\s*\d+)', line, re.IGNORECASE)
+    ]
+
+    selected = key_sents[:max_sentences] or formula_lines[:max_sentences] or sentences[:max_sentences]
     if not selected:
         return "No relevant sentence found."
     return "\n".join(f"- {s}" for s in selected)
