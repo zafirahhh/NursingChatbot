@@ -93,19 +93,23 @@ def clean_paragraph(text: str) -> str:
     return paragraph
 
 def extract_summary_sentences(text: str, max_sentences=3) -> str:
-    sentences = [s.strip() for s in sent_tokenize(text) if 10 < len(s.strip()) < 200]
-    key_sents = [s for s in sentences if ':' not in s and '|' not in s and len(s.split()) <= 25]
+    lines = [line.strip() for line in text.splitlines() if len(line.strip()) > 5]
 
-    # Fallback: include formula-like lines
+    # Priority: Match lines that explicitly contain math formula patterns
     formula_lines = [
-        line.strip() for line in text.splitlines()
-        if re.search(r'(\d+\s*[+x*/-]+\s*\(?age\)?|age\s*\*\s*\d+)', line, re.IGNORECASE)
+        line for line in lines
+        if re.search(r'70\s*\+\s*\(?(age|\d+).*?\)?', line, re.IGNORECASE)
     ]
 
-    selected = key_sents[:max_sentences] or formula_lines[:max_sentences] or sentences[:max_sentences]
-    if not selected:
-        return "No relevant sentence found."
-    return "\n".join(f"- {s}" for s in selected)
+    if formula_lines:
+        return "\n".join(f"- {line}" for line in formula_lines[:max_sentences])
+
+    # Fallback to filtered sentences
+    sentences = [s.strip() for s in sent_tokenize(text) if 10 < len(s.strip()) < 200]
+    key_sents = [s for s in sentences if ':' not in s and '|' not in s and len(s.split()) <= 25]
+    fallback = key_sents[:max_sentences] or sentences[:max_sentences]
+
+    return "\n".join(f"- {s}" for s in fallback) if fallback else "No relevant sentence found."
 
 def find_best_answer(user_query, chunks, chunk_embeddings, top_k=2):
     known = match_known_answer(user_query)
