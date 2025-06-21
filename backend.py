@@ -77,11 +77,27 @@ class QueryRequest(BaseModel):
 # === Helper Functions ===
 def format_answer(answer: str) -> str:
     import re
-    # Add bullets and line breaks for clarity
-    answer = re.sub(r"(?<=\))\s+", "\n• ", answer)
-    answer = re.sub(r"(?<!\n)[•\-–]\s*", "\n• ", answer)
-    answer = re.sub(r"\s{2,}", " ", answer)
-    return answer.strip()
+
+    # Step 1: Break into lines and remove bullet symbols
+    lines = answer.splitlines()
+    cleaned_lines = []
+
+    for line in lines:
+        # Strip bullets like •, -, *, and whitespace
+        cleaned = re.sub(r"^[\u2022\-–*•\d\.\s]+", "", line).strip()
+        if cleaned:
+            cleaned_lines.append(cleaned)
+
+    # Step 2: Combine into full paragraph and fix spacing
+    paragraph = " ".join(cleaned_lines)
+    paragraph = re.sub(r'\s+', ' ', paragraph)
+    paragraph = re.sub(r'\s*\.\s*', '. ', paragraph).strip()
+
+    # Step 3: Capitalize first letter if missing
+    if paragraph and not paragraph[0].isupper():
+        paragraph = paragraph[0].upper() + paragraph[1:]
+
+    return paragraph
 
 def find_best_answer(user_query, chunks, chunk_embeddings, top_k=2):
     known = match_known_answer(user_query)
