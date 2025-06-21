@@ -93,11 +93,13 @@ def clean_paragraph(text: str) -> str:
     return paragraph
 
 def extract_summary_sentences(text: str, max_sentences=3) -> str:
-    # Prefer short, standalone facts/sentences
     sentences = [s.strip() for s in sent_tokenize(text) if 10 < len(s.strip()) < 200]
     key_sents = [s for s in sentences if ':' not in s and '|' not in s and len(s.split()) <= 25]
-    final = key_sents[:max_sentences] if key_sents else sentences[:max_sentences]
-    return "\n".join(f"- {s}" for s in final)
+
+    selected = key_sents[:max_sentences] if key_sents else sentences[:max_sentences]
+    if not selected:
+        return "No relevant sentence found."
+    return "\n".join(f"- {s}" for s in selected)
 
 def find_best_answer(user_query, chunks, chunk_embeddings, top_k=2):
     known = match_known_answer(user_query)
