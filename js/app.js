@@ -45,10 +45,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 li.onmouseover = () => li.style.background = '#f7f7fa';
                 li.onmouseout = () => li.style.background = '';
             }
-            // Session name
+
             const nameSpan = document.createElement('span');
             nameSpan.className = 'session-name';
-            nameSpan.textContent = session.name.length > 32 ? session.name.slice(0, 30) + '...' : session.name;
+            const isActive = session.id === activeSessionId;
+            const displayName = session.name.length > 32 ? session.name.slice(0, 30) + '...' : session.name;
+            nameSpan.innerHTML = isActive
+                ? `▼ <strong>${displayName}</strong>`
+                : `&#9656; ${displayName}`;
             nameSpan.title = session.name;
             nameSpan.style.overflow = 'hidden';
             nameSpan.style.textOverflow = 'ellipsis';
@@ -57,11 +61,11 @@ document.addEventListener('DOMContentLoaded', () => {
             nameSpan.style.fontSize = '15px';
             nameSpan.style.lineHeight = '22px';
             li.appendChild(nameSpan);
+
             li.onclick = (e) => {
-                // Only switch if not clicking menu
                 if (!e.target.classList.contains('menu-btn')) switchSession(session.id);
             };
-            // 3-dot menu for all except 'General'
+
             if (session.id !== 'general') {
                 const menuBtn = document.createElement('button');
                 menuBtn.innerHTML = '<span style="font-size:18px;">&#8942;</span>';
@@ -89,7 +93,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     menu.style.padding = '8px 0';
                     menu.style.display = 'flex';
                     menu.style.flexDirection = 'column';
-                    // Rename
+
                     const rename = document.createElement('div');
                     rename.innerHTML = '<span style="margin-right:10px;">✏️</span>Rename';
                     rename.className = 'session-menu-item';
@@ -108,12 +112,12 @@ document.addEventListener('DOMContentLoaded', () => {
                         menu.remove();
                     };
                     menu.appendChild(rename);
-                    // Divider
+
                     const divider = document.createElement('div');
                     divider.style.borderTop = '1px solid #eee';
                     divider.style.margin = '4px 0';
                     menu.appendChild(divider);
-                    // Delete
+
                     const del = document.createElement('div');
                     del.innerHTML = '<span style="margin-right:10px;color:#e55353;">🗑️</span><span style="color:#e55353;">Delete</span>';
                     del.className = 'session-menu-item';
@@ -134,6 +138,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         menu.remove();
                     };
                     menu.appendChild(del);
+
                     document.addEventListener('click', function closeMenu(e) {
                         if (!menu.contains(e.target) && e.target !== menuBtn) {
                             menu.remove();
@@ -146,7 +151,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             chatSessionsList.appendChild(li);
         });
-        // Only add one new session button at the bottom (remove duplicate)
+
         const addBtn = document.createElement('button');
         addBtn.className = 'add-session-btn';
         addBtn.textContent = '+ New Chat';

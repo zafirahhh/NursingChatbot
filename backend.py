@@ -12,6 +12,7 @@ import nltk
 from nltk.tokenize import sent_tokenize
 from sklearn.feature_extraction.text import ENGLISH_STOP_WORDS
 from difflib import SequenceMatcher
+import random
 
 nltk.download('punkt')
 
@@ -78,30 +79,23 @@ class QueryRequest(BaseModel):
 def clean_paragraph(text: str) -> str:
     lines = text.splitlines()
     cleaned_lines = []
-
     for line in lines:
         cleaned = re.sub(r"^[\u2022\-\u2013\*\d\.\s]+", "", line).strip()
         if cleaned:
             cleaned_lines.append(cleaned)
-
     paragraph = " ".join(cleaned_lines)
     paragraph = re.sub(r'\s+', ' ', paragraph).strip()
-
     if paragraph and not paragraph[0].isupper():
         paragraph = paragraph[0].upper() + paragraph[1:]
-
     return paragraph
 
 def extract_summary_sentences(text: str, max_sentences=3) -> str:
     lines = [line.strip() for line in text.splitlines() if len(line.strip()) > 5]
-
-    # Extract lines with math/age-based formulas
     formula_lines = [
         line for line in lines
         if re.search(r'70\s*\+\s*\(?.*?age.*?\)?[^\|\n]*', line, re.IGNORECASE)
         or re.search(r'expected systolic bp.*?70.*?age', line, re.IGNORECASE)
     ]
-
     if formula_lines:
         matches = []
         for line in formula_lines:
@@ -109,8 +103,6 @@ def extract_summary_sentences(text: str, max_sentences=3) -> str:
             matches.extend(found)
         if matches:
             return '\n'.join(f'- Expected systolic BP formula: {m.strip()}' for m in matches[:max_sentences])
-
-    # Fallback to filtered sentences
     sentences = [s.strip() for s in sent_tokenize(text) if 10 < len(s.strip()) < 200]
     key_sents = [s for s in sentences if ':' not in s and '|' not in s and len(s.split()) <= 25]
     fallback = key_sents[:max_sentences] or sentences[:max_sentences]
@@ -124,20 +116,16 @@ def find_best_answer(user_query, chunks, chunk_embeddings, top_k=2):
             "summary": extract_summary_sentences(cleaned),
             "full": cleaned
         }
-
     query_embedding = model.encode(user_query, convert_to_tensor=True)
     similarities = util.pytorch_cos_sim(query_embedding, chunk_embeddings)[0]
     top_indices = similarities.topk(k=min(top_k, len(chunks))).indices.tolist()
-
     combined_context = "\n\n".join([chunks[i] for i in top_indices])
     cleaned = clean_paragraph(combined_context)
-
     return {
         "summary": extract_summary_sentences(cleaned),
         "full": cleaned
     }
 
-# === Endpoints ===
 @app.post("/ask")
 async def ask_question(query: QueryRequest):
     result = find_best_answer(query.query, chunks, chunk_embeddings)
@@ -148,7 +136,27 @@ async def search(query: QueryRequest):
     result = find_best_answer(query.query, chunks, chunk_embeddings)
     return result
 
-# === Run the Server ===
+@app.get("/quiz")
+def generate_quiz(n: int = 5, topic: str = None):
+    filtered_chunks = [c for c in chunks if topic.lower() in c.lower()] if topic else chunks
+    selected_chunks = random.sample(filtered_chunks, min(n, len(filtered_chunks)))
+    quiz = []
+    for chunk in selected_chunks:
+        sentences = sent_tokenize(chunk)
+        if not sentences:
+            continue
+        correct = random.choice(sentences).strip()
+        distractors = random.sample([s for s in sentences if s != correct], min(3, len(sentences)-1))
+        options = distractors + [correct]
+        random.shuffle(options)
+        quiz.append({
+            "question": "Which of the following is TRUE based on the nursing guide?",
+            "options": options,
+            "answer": correct,
+            "context": chunk[:250] + ("..." if len(chunk) > 250 else "")
+        })
+    return {"quiz": quiz}
+
 if __name__ == "__main__":
     import time
     time.sleep(2)
