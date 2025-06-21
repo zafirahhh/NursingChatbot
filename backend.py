@@ -98,14 +98,14 @@ def extract_summary_sentences(text: str, max_sentences=3) -> str:
     # Extract lines with math/age-based formulas
     formula_lines = [
         line for line in lines
-        if re.search(r'70\s*\+\s*\(?(age|\d+).*?\)?', line, re.IGNORECASE)
+        if re.search(r'70\s*\+\s*\(?.*?age.*?\)?[^\|\n]*', line, re.IGNORECASE)
         or re.search(r'expected systolic bp.*?70.*?age', line, re.IGNORECASE)
     ]
 
     if formula_lines:
         matches = []
         for line in formula_lines:
-            found = re.findall(r'70\s*\+\s*\(?.*?age.*?\)?', line, re.IGNORECASE)
+            found = re.findall(r'70\s*\+\s*\(?.*?age.*?\)?[^\|\n]*', line, re.IGNORECASE)
             matches.extend(found)
         if matches:
             return '\n'.join(f'- Expected systolic BP formula: {m.strip()}' for m in matches[:max_sentences])
