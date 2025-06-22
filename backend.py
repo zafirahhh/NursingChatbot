@@ -1,5 +1,5 @@
 # backend.py
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from sentence_transformers import SentenceTransformer, util
@@ -21,6 +21,7 @@ app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -70,6 +71,26 @@ chunks = load_chunks_from_text(text)
 # === Load Model and Chunk Embeddings ===
 model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
 chunk_embeddings = model.encode(chunks, convert_to_tensor=True)
+
+# Main QA Logic
+def answer_from_knowledge_base(question: str):
+    question_embedding = model.encode(question, convert_to_tensor=True)
+    scores = util.cos_sim(question_embedding, chunk_embeddings)[0]
+    best_idx = torch.argmax(scores).item()
+    return chunks[best_idx]
+
+# Quiz Generator
+def generate_quiz_from_guide(prompt: str):
+    # Example basic quiz generation logic
+    return (
+        "\U0001F9E0 Quiz Time!\n"
+        "Q: What is the initial management for a febrile seizure?\n"
+        "A. Administer antibiotics\n"
+        "B. Cool the child\n"
+        "C. Administer paracetamol\n"
+        "D. Call ICU\n"
+        "\nType the correct option (A/B/C/D)."
+    )
 
 # === Request Schema ===
 class QueryRequest(BaseModel):
@@ -127,9 +148,16 @@ def find_best_answer(user_query, chunks, chunk_embeddings, top_k=2):
     }
 
 @app.post("/ask")
-async def ask_question(query: QueryRequest):
-    result = find_best_answer(query.query, chunks, chunk_embeddings)
-    return result
+async def ask_question(request: Request):
+    data = await request.json()
+    question = data.get("question")
+    session = data.get("session", "general")
+
+    if session == "quiz":
+        return {"answer": generate_quiz_from_guide(question)}
+    else:
+        result = find_best_answer(question, chunks, chunk_embeddings)
+        return result
 
 @app.post("/search")
 async def search(query: QueryRequest):

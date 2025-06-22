@@ -652,3 +652,94 @@ document.addEventListener('DOMContentLoaded', () => {
     // renderGroupedSessions();
     // loadGroupedHistory();
 });
+
+// --- Minimal Grouped Sessions and Chat Logic (additive, does not remove previous code) ---
+const BACKEND_URL_MINIMAL = "http://127.0.0.1:8000/ask";
+
+document.addEventListener('DOMContentLoaded', () => {
+    const chatWindow = document.getElementById('chat-window');
+    const chatForm = document.getElementById('chat-form');
+    const userInput = document.getElementById('user-input');
+    const clearChatBtn = document.getElementById('clear-chat');
+    const micBtn = document.getElementById('mic-btn');
+    const chatSessionsList = document.getElementById('chat-sessions');
+    const promptList = document.getElementById('prompt-list');
+    const addSessionBtn = document.getElementById('add-session');
+    const addPromptBtn = document.getElementById('add-prompt');
+
+    const avatars = {
+        user: '👩',
+        bot: '🤖'
+    };
+
+    let sessions = JSON.parse(localStorage.getItem('kkh-sessions') || '[{"name":"General","id":"general"},{"name":"Quiz","id":"quiz"}]');
+    let currentSession = localStorage.getItem('kkh-current-session') || 'general';
+
+    function renderChatSessions() {
+        chatSessionsList.innerHTML = '';
+        sessions.forEach(session => {
+            const button = document.createElement('button');
+            button.textContent = (currentSession === session.id ? '▼ ' : '') + session.name;
+            button.className = 'session-btn';
+            if (session.id === 'quiz') button.setAttribute('data-sub', 'true');
+            button.onclick = () => {
+                currentSession = session.id;
+                localStorage.setItem('kkh-current-session', currentSession);
+                renderChatSessions();
+                loadMessages();
+            };
+            chatSessionsList.appendChild(button);
+        });
+    }
+
+    function renderMessage(message, sender) {
+        const msgDiv = document.createElement('div');
+        msgDiv.className = `message ${sender}`;
+        msgDiv.innerHTML = `<span class="avatar">${avatars[sender]}</span><span class="text">${message}</span>`;
+        chatWindow.appendChild(msgDiv);
+        chatWindow.scrollTop = chatWindow.scrollHeight;
+    }
+
+    function loadMessages() {
+        chatWindow.innerHTML = '';
+        const history = JSON.parse(localStorage.getItem(`kkh-history-${currentSession}`) || '[]');
+        history.forEach(({ message, sender }) => renderMessage(message, sender));
+    }
+
+    function saveMessage(message, sender) {
+        const key = `kkh-history-${currentSession}`;
+        const history = JSON.parse(localStorage.getItem(key) || '[]');
+        history.push({ message, sender });
+        localStorage.setItem(key, JSON.stringify(history));
+    }
+
+    chatForm.onsubmit = async (e) => {
+        e.preventDefault();
+        const input = userInput.value.trim();
+        if (!input) return;
+
+        renderMessage(input, 'user');
+        saveMessage(input, 'user');
+        userInput.value = '';
+
+        const res = await fetch(BACKEND_URL_MINIMAL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                question: input,
+                session: currentSession
+            })
+        });
+        const data = await res.json();
+        renderMessage(data.answer, 'bot');
+        saveMessage(data.answer, 'bot');
+    };
+
+    clearChatBtn.onclick = () => {
+        localStorage.removeItem(`kkh-history-${currentSession}`);
+        chatWindow.innerHTML = '';
+    };
+
+    renderChatSessions();
+    loadMessages();
+});
