@@ -80,6 +80,8 @@ def answer_from_knowledge_base(question: str, return_summary=True):
     best_idx = torch.argmax(scores).item()
     best_chunk = chunks[best_idx]
 
+    question_keywords = set(re.findall(r'\w+', question.lower()))
+
     candidate_sents = [
         s.strip() for s in sent_tokenize(best_chunk)
         if 6 <= len(s.split()) <= 25 and not any(x in s for x in ['|', ':'])
@@ -87,6 +89,13 @@ def answer_from_knowledge_base(question: str, return_summary=True):
     if not candidate_sents:
         return best_chunk
 
+    # Priority 1: Find sentence containing matching keywords
+    for sent in candidate_sents:
+        sent_words = set(re.findall(r'\w+', sent.lower()))
+        if question_keywords & sent_words:
+            return sent
+
+    # Priority 2: Fallback to fuzzy match
     best_score = 0
     best_sent = candidate_sents[0]
     for sent in candidate_sents:
@@ -95,7 +104,7 @@ def answer_from_knowledge_base(question: str, return_summary=True):
             best_score = sim
             best_sent = sent
 
-    return best_sent if return_summary else best_chunk
+    return best_sent
 
 
 # Quiz Generator
