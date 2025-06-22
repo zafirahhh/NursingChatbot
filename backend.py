@@ -80,22 +80,29 @@ def answer_from_knowledge_base(question: str, return_summary=True):
     best_idx = torch.argmax(scores).item()
     best_chunk = chunks[best_idx]
 
+    # Extract keywords from question
     question_keywords = set(re.findall(r'\w+', question.lower()))
 
+    # Split into short candidate sentences
     candidate_sents = [
         s.strip() for s in sent_tokenize(best_chunk)
-        if 6 <= len(s.split()) <= 25 and not any(x in s for x in ['|', ':'])
+        if 6 <= len(s.split()) <= 35 and not any(x in s for x in ['|', ':'])
     ]
     if not candidate_sents:
         return best_chunk
 
-    # Priority 1: Find sentence containing matching keywords
+    # Priority 1: Return sentence that includes 2+ question keywords
     for sent in candidate_sents:
-        sent_words = set(re.findall(r'\w+', sent.lower()))
-        if question_keywords & sent_words:
+        words = set(re.findall(r'\w+', sent.lower()))
+        if len(words & question_keywords) >= 2:
             return sent
 
-    # Priority 2: Fallback to fuzzy match
+    # Priority 2: Return longest list-like sentence with commas
+    comma_sents = [s for s in candidate_sents if ',' in s]
+    if comma_sents:
+        return max(comma_sents, key=lambda s: len(s))
+
+    # Priority 3: Fallback to closest fuzzy match
     best_score = 0
     best_sent = candidate_sents[0]
     for sent in candidate_sents:
