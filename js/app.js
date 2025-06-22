@@ -52,11 +52,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function renderSessions() {
     const generalList = document.getElementById('general-sessions');
     const quizList = document.getElementById('quiz-sessions');
-
-    if (!generalList || !quizList) {
-      console.warn("Missing session containers in HTML");
-      return;
-    }
+    if (!generalList || !quizList) return;
 
     generalList.innerHTML = '';
     quizList.innerHTML = '';
@@ -65,45 +61,75 @@ document.addEventListener('DOMContentLoaded', () => {
       const target = group.category === 'General' ? generalList : quizList;
 
       group.chats.forEach((chat, index) => {
-        const div = document.createElement('div');
-        div.className = 'chat-session';
-        if (activeSessionId === chat.id) {
-            div.classList.add('active');
-}
-        div.innerHTML = `
-          <span>${chat.name}</span>
-          <div class="chat-menu">⋮
-            <div class="chat-dropdown">
-              <div class="rename-option" data-group="${group.category}" data-index="${index}">Rename</div>
-              <div class="delete-option" data-group="${group.category}" data-index="${index}">Delete</div>
-            </div>
-          </div>
-        `;
-        div.addEventListener('click', () => switchSession(group, chat, index));
-        target.appendChild(div);
+        const chatDiv = document.createElement('div');
+        chatDiv.className = 'chat-session';
+
+        const nameSpan = document.createElement('span');
+        nameSpan.textContent = chat.name;
+        nameSpan.style.flex = '1';
+        nameSpan.addEventListener('click', () => {
+          // You can later use switchSession(group, chat, index)
+          alert(`Switched to ${chat.name}`);
+        });
+
+        const menu = document.createElement('div');
+        menu.className = 'chat-menu';
+        menu.textContent = '⋮';
+
+        const dropdown = document.createElement('div');
+        dropdown.className = 'chat-dropdown';
+
+        const renameOption = document.createElement('div');
+        renameOption.className = 'rename-option';
+        renameOption.textContent = 'Rename';
+        renameOption.addEventListener('click', () => {
+          const newName = prompt('Enter new session name:');
+          if (newName) {
+            chat.name = newName;
+            localStorage.setItem('kkh-grouped-sessions', JSON.stringify(groupedSessions));
+            renderSessions();
+          }
+        });
+
+        const deleteOption = document.createElement('div');
+        deleteOption.className = 'delete-option';
+        deleteOption.textContent = 'Delete';
+        deleteOption.addEventListener('click', () => {
+          if (confirm('Delete this session?')) {
+            group.chats.splice(index, 1);
+            localStorage.setItem('kkh-grouped-sessions', JSON.stringify(groupedSessions));
+            renderSessions();
+          }
+        });
+
+        dropdown.appendChild(renameOption);
+        dropdown.appendChild(deleteOption);
+        menu.appendChild(dropdown);
+        chatDiv.appendChild(nameSpan);
+        chatDiv.appendChild(menu);
+        target.appendChild(chatDiv);
       });
     });
-    attachMenuHandlers();
   }
 
   // New session buttons
   document.querySelectorAll('.new-session-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const category = btn.getAttribute('data-category');
-      const group = groupedSessions.find(g => g.category === category);
-      if (!group) return;
+  btn.addEventListener('click', () => {
+    const category = btn.getAttribute('data-category');
+    const group = groupedSessions.find(g => g.category === category);
+    if (!group) return;
 
-      const newChat = {
-        name: category === 'Quiz'
-          ? `Quiz Attempt ${group.chats.length + 1}`
-          : `Chat ${group.chats.length + 1}`
-      };
+    const newChat = {
+      name: category === 'Quiz'
+        ? `Quiz Attempt ${group.chats.length + 1}`
+        : `Chat ${group.chats.length + 1}`
+    };
 
-      group.chats.push(newChat);
-      localStorage.setItem('kkh-grouped-sessions', JSON.stringify(groupedSessions));
-      renderSessions();
-    });
+    group.chats.push(newChat);
+    localStorage.setItem('kkh-grouped-sessions', JSON.stringify(groupedSessions));
+    renderSessions();
   });
+});
 
   document.querySelector('.new-prompt-btn')?.addEventListener('click', () => {
     alert('New Prompt Clicked!');
