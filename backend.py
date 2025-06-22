@@ -212,20 +212,27 @@ def evaluate_quiz(request: QuizEvaluationRequest):
         question_text = response.question.lower().strip()
         given_answer = response.answer.strip()
 
-        correct = None
-        for c in chunks:
-            if question_text in c.lower():
-                sentences = sent_tokenize(c)
-                correct = next((s for s in sentences if s in c), None)
-                break
+        best_chunk = ""
+        best_score = 0
+        best_match = ""
 
-        if not correct:
-            correct = "Unknown"  # fallback
+        for chunk in chunks:
+            for sent in sent_tokenize(chunk):
+                score = SequenceMatcher(None, sent.lower(), given_answer.lower()).ratio()
+                if score > best_score:
+                    best_score = score
+                    best_match = sent
+                    best_chunk = chunk
+
+        correct = best_match if best_score > 0.7 else "Unknown"
+        explanation = extract_summary_sentences(best_chunk, max_sentences=2) if best_chunk else "No explanation found."
 
         feedback.append({
             "question": response.question,
             "your_answer": given_answer,
-            "correct": given_answer == correct
+            "correctAnswer": correct,
+            "correct": given_answer == correct,
+            "explanation": explanation
         })
 
     return feedback
