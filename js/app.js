@@ -17,20 +17,20 @@ document.addEventListener('DOMContentLoaded', () => {
   let groupedSessions = JSON.parse(localStorage.getItem('kkh-grouped-sessions'));
   if (!groupedSessions) {
     groupedSessions = [
-      {
-        category: "General",
-        expanded: true,
-        chats: [{ name: "Chat 1" }]
-      },
-      {
-        category: "Quiz",
-        expanded: true,
-        chats: [
-          { name: "Quiz Attempt 1" },
-          { name: "Quiz Attempt 2" }
-        ]
-      }
-    ];
+  {
+    category: "General",
+    expanded: true,
+    chats: [{ id: "general-welcome", name: "Chat 1" }]
+  },
+  {
+    category: "Quiz",
+    expanded: true,
+    chats: [
+      { id: "quiz-1", name: "Quiz Attempt 1" },
+      { id: "quiz-2", name: "Quiz Attempt 2" }
+    ]
+  }
+];
     localStorage.setItem('kkh-grouped-sessions', JSON.stringify(groupedSessions));
   }
 
@@ -120,10 +120,11 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!group) return;
 
     const newChat = {
-      name: category === 'Quiz'
-        ? `Quiz Attempt ${group.chats.length + 1}`
-        : `Chat ${group.chats.length + 1}`
-    };
+  id: `${category.toLowerCase()}-${Date.now()}`,
+  name: category === 'Quiz'
+    ? `Quiz Attempt ${group.chats.length + 1}`
+    : `Chat ${group.chats.length + 1}`
+};
 
     group.chats.push(newChat);
     localStorage.setItem('kkh-grouped-sessions', JSON.stringify(groupedSessions));
