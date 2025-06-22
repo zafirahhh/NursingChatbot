@@ -159,6 +159,18 @@ async def ask_question(request: Request):
         result = find_best_answer(question, chunks, chunk_embeddings)
         return result
 
+@app.post("/ask")
+async def ask_question_minimal(request: Request):
+    data = await request.json()
+    question = data.get("question")
+    session = data.get("session", "general")
+
+    if session == "quiz":
+        return {"answer": generate_quiz_from_guide(question)}
+    else:
+        answer = answer_from_knowledge_base(question)
+        return {"answer": answer}
+
 @app.post("/search")
 async def search(query: QueryRequest):
     result = find_best_answer(query.query, chunks, chunk_embeddings)
