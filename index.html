@@ -38,13 +38,17 @@
       </div>
       <details class="sidebar-section" open>
         <summary>Chat Sessions</summary>
-        <div id="chat-sessions">
-          <div id="session-general-wrapper">
-            <!-- General sessions will be rendered here -->
-          </div>
-          <div id="session-quiz-wrapper">
-            <!-- Quiz sessions will be rendered here -->
-          </div>
+        <!-- General Section -->
+        <div class="session-group">
+          <div class="session-category">▼ General</div>
+          <div id="general-sessions" class="chat-list"></div>
+          <button class="new-session-btn" data-category="General">+ New Chat</button>
+        </div>
+        <!-- Quiz Section -->
+        <div class="session-group">
+          <div class="session-category">▼ Quiz</div>
+          <div id="quiz-sessions" class="chat-list"></div>
+          <button class="new-session-btn" data-category="Quiz">+ New Quiz</button>
         </div>
       </details>
       <details class="sidebar-section" open>
