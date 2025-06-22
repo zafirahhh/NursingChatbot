@@ -162,7 +162,7 @@ def find_best_answer(user_query, chunks, chunk_embeddings, top_k=5):
             overlap = len(sent_keywords & question_keywords)
             sim = SequenceMatcher(None, user_query.lower(), sent.lower()).ratio()
 
-            # Fallback: choose the longest sentence with commas (likely a list of signs)
+            # Fallback: use longest medical-style sentence with commas
             if ',' in sent and len(sent) > len(fallback_sent):
                 fallback_sent = sent
 
@@ -171,13 +171,12 @@ def find_best_answer(user_query, chunks, chunk_embeddings, top_k=5):
                 best_score = score
                 best_sent = sent
 
-    summary = best_sent if best_score > 0.5 else fallback_sent or "No answer found."
+    summary = best_sent if best_score > 0.5 else fallback_sent or "Sorry, no answer found."
     best_chunk = chunks[top_indices[0]]
     return {
         "summary": summary,
         "full": clean_paragraph(best_chunk)
     }
-
 
 
 @app.post("/ask")
