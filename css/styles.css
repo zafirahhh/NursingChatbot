@@ -241,14 +241,14 @@ button[type="submit"]:hover {
 
 /* Sidebar: ChatGPT-like compact style */
 #sidebar {
-  background-color: #e9eff8;  /* ✅ slightly bluish tone */
+  background-color: #afcdf9;  /* ✅ slightly bluish tone */
   padding: 20px 16px;
   width: 260px;
   border-radius: 12px;
   box-shadow: 0 0 0 1px #d8dee9;
   font-family: 'Segoe UI', sans-serif;
   height: calc(100vh - 32px);
-  margin-top: 16px;            /* ✅ Pushes sidebar down */
+  margin-top: 20px;            /* ✅ Pushes sidebar down */
   margin-left: 16px;
   display: flex;
   flex-direction: column;

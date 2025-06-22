@@ -86,11 +86,14 @@ document.addEventListener('DOMContentLoaded', () => {
     btn.addEventListener('click', () => {
       const category = btn.getAttribute('data-category');
       const group = groupedSessions.find(g => g.category === category);
+      if (!group) return;
+
       const newChat = {
         name: category === 'Quiz'
           ? `Quiz Attempt ${group.chats.length + 1}`
           : `Chat ${group.chats.length + 1}`
       };
+
       group.chats.push(newChat);
       localStorage.setItem('kkh-grouped-sessions', JSON.stringify(groupedSessions));
       renderSessions();
@@ -98,7 +101,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   document.querySelector('.new-prompt-btn')?.addEventListener('click', () => {
-    alert('New Prompt functionality not yet implemented.');
+    alert('New Prompt Clicked!');
   });
 
   // --- Rename / Delete ---
