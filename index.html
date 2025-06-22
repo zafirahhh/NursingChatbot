@@ -27,9 +27,9 @@
     </div>
   </header>
 
-  <div class="container center-chat">
+  <div class="container center-chat" style="display: flex; align-items: flex-start;">
     <!-- Sidebar -->
-    <aside class="sidebar">
+    <aside class="sidebar" style="min-width: 270px; max-width: 320px; flex: 0 0 270px; height: 100vh; overflow-y: auto; background: #f8f9fb; border-right: 1px solid #e0e0e0;">
       <div class="sidebar-actions">
         <button id="clear-chat" class="sidebar-btn" title="Clear Chat History">🗑️ Clear Chat History</button>
       </div>
@@ -51,7 +51,7 @@
       </details>
     </aside>
     <!-- Main Chat Area -->
-    <main class="main-chat">
+    <main class="main-chat" style="flex: 1 1 0; min-width: 0;">
       <section class="chatbot-container" aria-label="Nursing Chatbot">
         <div id="chat-window" class="chat-window" tabindex="0" aria-live="polite">
           <!-- Messages will appear here -->
