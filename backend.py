@@ -80,10 +80,8 @@ def answer_from_knowledge_base(question: str, return_summary=True):
     best_idx = torch.argmax(scores).item()
     best_chunk = chunks[best_idx]
 
-    # Extract keywords from question
     question_keywords = set(re.findall(r'\w+', question.lower()))
 
-    # Split into short candidate sentences
     candidate_sents = [
         s.strip() for s in sent_tokenize(best_chunk)
         if 6 <= len(s.split()) <= 35 and not any(x in s for x in ['|', ':'])
@@ -91,18 +89,15 @@ def answer_from_knowledge_base(question: str, return_summary=True):
     if not candidate_sents:
         return best_chunk
 
-    # Priority 1: Return sentence that includes 2+ question keywords
     for sent in candidate_sents:
         words = set(re.findall(r'\w+', sent.lower()))
         if len(words & question_keywords) >= 2:
             return sent
 
-    # Priority 2: Return longest list-like sentence with commas
     comma_sents = [s for s in candidate_sents if ',' in s]
     if comma_sents:
         return max(comma_sents, key=lambda s: len(s))
 
-    # Priority 3: Fallback to closest fuzzy match
     best_score = 0
     best_sent = candidate_sents[0]
     for sent in candidate_sents:
@@ -172,14 +167,7 @@ def extract_summary_sentences(text: str, max_sentences=3) -> str:
     return '\n'.join(f'- {s}' for s in fallback) if fallback else 'No relevant sentence found.'
 
 def find_best_answer(user_query, chunks, chunk_embeddings, top_k=2):
-    known = match_known_answer(user_query)
-    if known:
-        cleaned = clean_paragraph(known)
-        return {
-            "summary": extract_summary_sentences(cleaned),
-            "full": cleaned
-        }
-
+    
     query_embedding = model.encode(user_query, convert_to_tensor=True)
     similarities = util.pytorch_cos_sim(query_embedding, chunk_embeddings)[0]
     top_indices = similarities.topk(k=min(top_k, len(chunks))).indices.tolist()
