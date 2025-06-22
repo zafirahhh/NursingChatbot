@@ -121,6 +121,10 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function saveGroupedMessage(sender, text) {
+    if (!activeSessionId) {
+      console.warn('No active session ID set.');
+      return;
+    }
     const key = 'kkh-chat-history-' + activeSessionId;
     const history = JSON.parse(localStorage.getItem(key) || '[]');
     history.push({ sender, text });
@@ -291,21 +295,22 @@ document.addEventListener('DOMContentLoaded', () => {
     };
   }
 
-  // ✅ Update: Unified submit logic for General & Quiz sessions with debug logging
+  // ✅ Finalized chatForm submission with working message saving for General + Quiz
   chatForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     const userText = userInput.value.trim();
     if (!userText) return;
 
+    console.log('[User Submit]', userText, 'Session:', activeSessionId);
     appendGroupedMessage('user', userText);
     userInput.value = '';
 
     const isQuiz = activeSessionId.startsWith('quiz');
     const url = isQuiz ? QUIZ_URL_FINAL : BACKEND_URL_FINAL;
-    const payload = isQuiz ? { prompt: userText } : { question: userText, session: 'general' };
+    const payload = isQuiz ? { prompt: userText } : { question: userText, session: activeSessionId };
 
-    console.log('[Debug] Submitting to:', url);
-    console.log('[Debug] Payload:', payload);
+    console.log('[Submit to]', url);
+    console.log('[Payload]', payload);
     showTyping();
 
     try {
