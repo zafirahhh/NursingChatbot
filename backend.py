@@ -147,7 +147,7 @@ def extract_summary_sentences(text: str, max_sentences=3) -> str:
 def find_best_answer(user_query, chunks, chunk_embeddings, top_k=5):
     query_embedding = model.encode(user_query, convert_to_tensor=True)
     similarities = util.pytorch_cos_sim(query_embedding, chunk_embeddings)[0]
-    top_indices = similarities.topk(k=min(top_k, len(chunks))).indices.tolist()
+    top_indices = similarities.topk(k=top_k).indices.tolist()
 
     question_keywords = set(re.findall(r'\w+', user_query.lower()))
     best_sent = ""
@@ -157,18 +157,23 @@ def find_best_answer(user_query, chunks, chunk_embeddings, top_k=5):
     for idx in top_indices:
         chunk = chunks[idx]
 
-        # SKIP: title/copyright/boilerplate chunks
-        if "KK Women's and Children's Hospital" in chunk or "The Baby Bear Book" in chunk:
+        # 🛑 Skip non-clinical chunks like vitals tables or title pages
+        if "neonate" in chunk.lower() or "infant" in chunk.lower() and "bpm" in chunk.lower():
+            continue
+        if "© kk women's and children's hospital" in chunk.lower():
+            continue
+        if "vital" in chunk.lower() and "heart rate" in chunk.lower():
             continue
 
-        # Split chunk into sentences
+        # ✅ Extract clinical sentences
         sentences = [s.strip() for s in sent_tokenize(chunk) if 6 <= len(s.split()) <= 50]
+
         for sent in sentences:
             sent_keywords = set(re.findall(r'\w+', sent.lower()))
             overlap = len(sent_keywords & question_keywords)
             sim = SequenceMatcher(None, user_query.lower(), sent.lower()).ratio()
 
-            # Fallback: prefer clinical list-style sentence (commas)
+            # prefer clinical list-style fallback if needed
             if ',' in sent and len(sent) > len(fallback_sent):
                 fallback_sent = sent
 
@@ -183,6 +188,7 @@ def find_best_answer(user_query, chunks, chunk_embeddings, top_k=5):
         "summary": summary,
         "full": clean_paragraph(best_chunk)
     }
+
 
 
 @app.post("/ask")
