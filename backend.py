@@ -149,32 +149,35 @@ def find_best_answer(user_query, chunks, chunk_embeddings, top_k=5):
     similarities = util.pytorch_cos_sim(query_embedding, chunk_embeddings)[0]
     top_indices = similarities.topk(k=min(top_k, len(chunks))).indices.tolist()
 
-    all_sentences = []
-    for idx in top_indices:
-        chunk = chunks[idx]
-        for sent in sent_tokenize(chunk):
-            if 6 <= len(sent.split()) <= 50:
-                all_sentences.append(sent.strip())
-
     question_keywords = set(re.findall(r'\w+', user_query.lower()))
     best_sent = ""
     best_score = 0
+    fallback_sent = ""
 
-    for sent in all_sentences:
-        sent_keywords = set(re.findall(r'\w+', sent.lower()))
-        overlap = len(sent_keywords & question_keywords)
-        sim = SequenceMatcher(None, user_query.lower(), sent.lower()).ratio()
-        score = overlap + sim  # Combined relevance score
+    for idx in top_indices:
+        chunk = chunks[idx]
+        sentences = [s.strip() for s in sent_tokenize(chunk) if 6 <= len(s.split()) <= 50]
+        for sent in sentences:
+            sent_keywords = set(re.findall(r'\w+', sent.lower()))
+            overlap = len(sent_keywords & question_keywords)
+            sim = SequenceMatcher(None, user_query.lower(), sent.lower()).ratio()
 
-        if score > best_score:
-            best_score = score
-            best_sent = sent
+            # Fallback: choose the longest sentence with commas (likely a list of signs)
+            if ',' in sent and len(sent) > len(fallback_sent):
+                fallback_sent = sent
 
+            score = overlap + sim
+            if score > best_score:
+                best_score = score
+                best_sent = sent
+
+    summary = best_sent if best_score > 0.5 else fallback_sent or "No answer found."
     best_chunk = chunks[top_indices[0]]
     return {
-        "summary": best_sent,
+        "summary": summary,
         "full": clean_paragraph(best_chunk)
     }
+
 
 
 @app.post("/ask")
