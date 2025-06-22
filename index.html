@@ -17,29 +17,6 @@
   <!-- Sidebar overlay for mobile -->
   <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
-  <!-- New Sidebar Structure for Grouped Sessions and Prompts -->
-  <div id="sidebar">
-    <button id="clear-chat">🗑 Clear Chat History</button>
-    <div class="nav-header">NAVIGATION</div>
-
-    <div class="session-group">
-      <div class="session-category">▼ General</div>
-      <div class="chat-list" id="general-sessions"></div>
-      <button class="new-session-btn" data-category="General">+ New Chat</button>
-    </div>
-
-    <div class="session-group">
-      <div class="session-category">▼ Quiz</div>
-      <div class="chat-list" id="quiz-sessions"></div>
-      <button class="new-session-btn" data-category="Quiz">+ New Quiz</button>
-    </div>
-
-    <div class="prompt-group">
-      <div class="prompt-header">▼ Prompts</div>
-      <button id="new-prompt">+ New Prompt</button>
-    </div>
-  </div>
-
   <header class="top-header">
     <div class="logo-title">
       <img src="css/KKH Logo.jpg" alt="KKH Logo" class="kkh-logo" />
@@ -51,6 +28,28 @@
   </header>
 
   <div class="container center-chat">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-actions">
+        <button id="clear-chat" class="sidebar-btn" title="Clear Chat History">🗑️ Clear Chat History</button>
+      </div>
+      <div class="sidebar-nav">
+        <label class="nav-label">NAVIGATION</label>
+      </div>
+      <details class="sidebar-section" open>
+        <summary>Chat Sessions</summary>
+        <div id="chat-sessions">
+          <div id="session-general-wrapper">
+            <!-- General and nested Quiz will be rendered here -->
+          </div>
+        </div>
+      </details>
+      <details class="sidebar-section" open>
+        <summary>Prompts</summary>
+        <ul class="sidebar-list" id="prompt-list"></ul>
+        <button id="add-prompt" class="sidebar-btn" style="width:100%;margin-top:0.3rem;">+ New Prompt</button>
+      </details>
+    </aside>
     <!-- Main Chat Area -->
     <main class="main-chat">
       <section class="chatbot-container" aria-label="Nursing Chatbot">
