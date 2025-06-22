@@ -201,7 +201,11 @@ async def ask_question(request: Request):
         return {"answer": generate_quiz_from_guide(question)}
     else:
         result = find_best_answer(question, chunks, chunk_embeddings)
-        return result
+        return {
+            "answer": result["summary"],
+            "summary": result["summary"],
+            "full": result["full"]
+        }
 
 @app.post("/search")
 async def search(query: QueryRequest):
