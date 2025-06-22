@@ -27,25 +27,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# === Load Q&A Reference if available ===
-qa_reference_path = os.path.join("data", "qa_reference.json")
-qa_reference = []
-if os.path.exists(qa_reference_path):
-    with open(qa_reference_path, encoding="utf-8") as f:
-        qa_reference = json.load(f)
-
-def match_known_answer(query):
-    best_match = None
-    best_score = 0
-    for pair in qa_reference:
-        score = SequenceMatcher(None, query.lower(), pair["q"].lower()).ratio()
-        if score > best_score:
-            best_match = pair
-            best_score = score
-    if best_score >= 0.9:
-        return best_match["a"]
-    return None
-
 # === Load Knowledge Base ===
 KNOWLEDGE_PATH = os.path.join("data", "nursing_guide_cleaned.txt")
 with open(KNOWLEDGE_PATH, encoding="utf-8") as f:
@@ -81,7 +62,6 @@ def answer_from_knowledge_base(question: str, return_summary=True):
     best_chunk = chunks[best_idx]
 
     question_keywords = set(re.findall(r'\w+', question.lower()))
-
     candidate_sents = [
         s.strip() for s in sent_tokenize(best_chunk)
         if 6 <= len(s.split()) <= 35 and not any(x in s for x in ['|', ':'])
@@ -143,8 +123,6 @@ def clean_paragraph(text: str) -> str:
             cleaned_lines.append(cleaned)
     paragraph = " ".join(cleaned_lines)
     paragraph = re.sub(r'\s+', ' ', paragraph).strip()
-    if paragraph and not paragraph[0].isupper():
-        paragraph = paragraph[0].upper() + paragraph[1:]
     return paragraph
 
 def extract_summary_sentences(text: str, max_sentences=3) -> str:
@@ -167,7 +145,6 @@ def extract_summary_sentences(text: str, max_sentences=3) -> str:
     return '\n'.join(f'- {s}' for s in fallback) if fallback else 'No relevant sentence found.'
 
 def find_best_answer(user_query, chunks, chunk_embeddings, top_k=2):
-    
     query_embedding = model.encode(user_query, convert_to_tensor=True)
     similarities = util.pytorch_cos_sim(query_embedding, chunk_embeddings)[0]
     top_indices = similarities.topk(k=min(top_k, len(chunks))).indices.tolist()
@@ -192,18 +169,6 @@ async def ask_question(request: Request):
     else:
         result = find_best_answer(question, chunks, chunk_embeddings)
         return result
-
-#@app.post("/ask")
-#async def ask_question_minimal(request: Request):
-    data = await request.json()
-    question = data.get("question")
-    session = data.get("session", "general")
-
-    if session == "quiz":
-        return {"answer": generate_quiz_from_guide(question)}
-    else:
-        answer = answer_from_knowledge_base(question)
-        return {"answer": answer}
 
 @app.post("/search")
 async def search(query: QueryRequest):
