@@ -33,8 +33,8 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   function renderSessions() {
-    const generalList = document.getElementById('general-sessions');
-    const quizList = document.getElementById('quiz-sessions');
+    const generalList = document.getElementById('session-general-wrapper');
+    const quizList = document.getElementById('session-quiz-wrapper');
     generalList.innerHTML = '';
     quizList.innerHTML = '';
 
