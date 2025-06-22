@@ -144,16 +144,35 @@ def extract_summary_sentences(text: str, max_sentences=3) -> str:
     fallback = key_sents[:max_sentences] or sentences[:max_sentences]
     return '\n'.join(f'- {s}' for s in fallback) if fallback else 'No relevant sentence found.'
 
-def find_best_answer(user_query, chunks, chunk_embeddings, top_k=2):
+def find_best_answer(user_query, chunks, chunk_embeddings, top_k=5):
     query_embedding = model.encode(user_query, convert_to_tensor=True)
     similarities = util.pytorch_cos_sim(query_embedding, chunk_embeddings)[0]
     top_indices = similarities.topk(k=min(top_k, len(chunks))).indices.tolist()
 
-    best_chunk = chunks[top_indices[0]]
-    summary = answer_from_knowledge_base(user_query, return_summary=True)
+    all_sentences = []
+    for idx in top_indices:
+        chunk = chunks[idx]
+        for sent in sent_tokenize(chunk):
+            if 6 <= len(sent.split()) <= 50:
+                all_sentences.append(sent.strip())
 
+    question_keywords = set(re.findall(r'\w+', user_query.lower()))
+    best_sent = ""
+    best_score = 0
+
+    for sent in all_sentences:
+        sent_keywords = set(re.findall(r'\w+', sent.lower()))
+        overlap = len(sent_keywords & question_keywords)
+        sim = SequenceMatcher(None, user_query.lower(), sent.lower()).ratio()
+        score = overlap + sim  # Combined relevance score
+
+        if score > best_score:
+            best_score = score
+            best_sent = sent
+
+    best_chunk = chunks[top_indices[0]]
     return {
-        "summary": summary,
+        "summary": best_sent,
         "full": clean_paragraph(best_chunk)
     }
 
