@@ -186,23 +186,28 @@ async def search(query: QueryRequest):
 
 @app.get("/quiz")
 def generate_quiz(n: int = 5, topic: str = None):
-    filtered_chunks = [c for c in chunks if topic.lower() in c.lower()] if topic else chunks
-    selected_chunks = random.sample(filtered_chunks, min(n, len(filtered_chunks)))
+    filtered_chunks = [c for c in chunks if topic and topic.lower() in c.lower()] if topic else chunks
     quiz = []
-    for chunk in selected_chunks:
-        sentences = sent_tokenize(chunk)
-        if not sentences:
-            continue
-        correct = random.choice(sentences).strip()
-        distractors = random.sample([s for s in sentences if s != correct], min(3, len(sentences)-1))
-        options = distractors + [correct]
-        random.shuffle(options)
+    attempts = 0
+    max_attempts = n * 10  # Prevent infinite loop
+    while len(quiz) < n and attempts < max_attempts:
+        chunk = random.choice(filtered_chunks)
+        sentences = [s.strip() for s in sent_tokenize(chunk) if 6 <= len(s.split()) <= 25]
+        sentences = list(set(sentences))  # Deduplicate
+        if len(sentences) < 5:
+            attempts += 1
+            continue  # Ensure at least 5 unique options
+        correct = random.choice(sentences)
+        distractors = [s for s in sentences if s != correct]
+        selected = random.sample(distractors, 4) + [correct]
+        random.shuffle(selected)
         quiz.append({
-            "question": "Which of the following is TRUE based on the nursing guide?",
-            "options": options,
+            "question": ("What is the correct statement regarding " + topic) if topic else "What is the correct statement regarding this medical topic?",
+            "options": selected,
             "answer": correct,
-            "context": chunk[:250] + ("..." if len(chunk) > 250 else "")
+            "context": chunk
         })
+        attempts += 1
     return {"quiz": quiz}
 
 @app.post("/quiz/evaluate")
