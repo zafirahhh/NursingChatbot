@@ -97,6 +97,10 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
+  document.querySelector('.new-prompt-btn')?.addEventListener('click', () => {
+    alert('New Prompt functionality not yet implemented.');
+  });
+
   // --- Rename / Delete ---
   function attachMenuHandlers() {
     document.querySelectorAll('.rename-option').forEach(btn => {
