@@ -74,11 +74,29 @@ model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
 chunk_embeddings = model.encode(chunks, convert_to_tensor=True)
 
 # Main QA Logic
-def answer_from_knowledge_base(question: str):
+def answer_from_knowledge_base(question: str, return_summary=True):
     question_embedding = model.encode(question, convert_to_tensor=True)
     scores = util.cos_sim(question_embedding, chunk_embeddings)[0]
     best_idx = torch.argmax(scores).item()
-    return chunks[best_idx]
+    best_chunk = chunks[best_idx]
+
+    candidate_sents = [
+        s.strip() for s in sent_tokenize(best_chunk)
+        if 6 <= len(s.split()) <= 25 and not any(x in s for x in ['|', ':'])
+    ]
+    if not candidate_sents:
+        return best_chunk
+
+    best_score = 0
+    best_sent = candidate_sents[0]
+    for sent in candidate_sents:
+        sim = SequenceMatcher(None, question.lower(), sent.lower()).ratio()
+        if sim > best_score:
+            best_score = sim
+            best_sent = sent
+
+    return best_sent if return_summary else best_chunk
+
 
 # Quiz Generator
 def generate_quiz_from_guide(prompt: str):
@@ -145,15 +163,19 @@ def find_best_answer(user_query, chunks, chunk_embeddings, top_k=2):
             "summary": extract_summary_sentences(cleaned),
             "full": cleaned
         }
+
     query_embedding = model.encode(user_query, convert_to_tensor=True)
     similarities = util.pytorch_cos_sim(query_embedding, chunk_embeddings)[0]
     top_indices = similarities.topk(k=min(top_k, len(chunks))).indices.tolist()
-    combined_context = "\n\n".join([chunks[i] for i in top_indices])
-    cleaned = clean_paragraph(combined_context)
+
+    best_chunk = chunks[top_indices[0]]
+    summary = answer_from_knowledge_base(user_query, return_summary=True)
+
     return {
-        "summary": extract_summary_sentences(cleaned),
-        "full": cleaned
+        "summary": summary,
+        "full": clean_paragraph(best_chunk)
     }
+
 
 @app.post("/ask")
 async def ask_question(request: Request):
@@ -167,8 +189,8 @@ async def ask_question(request: Request):
         result = find_best_answer(question, chunks, chunk_embeddings)
         return result
 
-@app.post("/ask")
-async def ask_question_minimal(request: Request):
+#@app.post("/ask")
+#async def ask_question_minimal(request: Request):
     data = await request.json()
     question = data.get("question")
     session = data.get("session", "general")
