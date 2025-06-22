@@ -67,7 +67,11 @@ document.addEventListener('DOMContentLoaded', () => {
       group.chats.forEach((chat, index) => {
         const div = document.createElement('div');
         div.className = 'chat-session';
+        if (activeSessionId === chat.id) {
+            div.classList.add('active');
+}
         div.textContent = chat.name;
+        div.addEventListener('click', () => switchSession(group, chat, index));
         target.appendChild(div);
       });
     });
