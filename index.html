@@ -17,6 +17,29 @@
   <!-- Sidebar overlay for mobile -->
   <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
+  <!-- New Sidebar Structure for Grouped Sessions and Prompts -->
+  <div id="sidebar">
+    <button id="clear-chat">🗑 Clear Chat History</button>
+    <div class="nav-header">NAVIGATION</div>
+
+    <div class="session-group">
+      <div class="session-category">▼ General</div>
+      <div class="chat-list" id="general-sessions"></div>
+      <button class="new-session-btn" data-category="General">+ New Chat</button>
+    </div>
+
+    <div class="session-group">
+      <div class="session-category">▼ Quiz</div>
+      <div class="chat-list" id="quiz-sessions"></div>
+      <button class="new-session-btn" data-category="Quiz">+ New Quiz</button>
+    </div>
+
+    <div class="prompt-group">
+      <div class="prompt-header">▼ Prompts</div>
+      <button id="new-prompt">+ New Prompt</button>
+    </div>
+  </div>
+
   <header class="top-header">
     <div class="logo-title">
       <img src="css/KKH Logo.jpg" alt="KKH Logo" class="kkh-logo" />

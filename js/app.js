@@ -295,67 +295,94 @@ document.addEventListener('DOMContentLoaded', () => {
     };
   }
 
-  // ✅ Finalized chatForm submission with working message saving for General + Quiz
-  chatForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const userText = userInput.value.trim();
-    if (!userText) return;
+  // --- Sidebar Grouped Sessions UI Logic for new sidebar structure ---
+  document.addEventListener('DOMContentLoaded', () => {
+    // avatars variable already declared globally, do not redeclare here
 
-    console.log('[User Submit]', userText, 'Session:', activeSessionId);
-    appendGroupedMessage('user', userText);
-    userInput.value = '';
+    // Load sessions or fallback
+    let groupedSessions = JSON.parse(localStorage.getItem('kkh-grouped-sessions') || JSON.stringify([
+      { category: 'General', expanded: true, chats: [] },
+      { category: 'Quiz', expanded: true, chats: [] }
+    ]));
 
-    const isQuiz = activeSessionId.startsWith('quiz');
-    const url = isQuiz ? QUIZ_URL_FINAL : BACKEND_URL_FINAL;
-    const payload = isQuiz ? { prompt: userText } : { question: userText, session: activeSessionId };
+    clearChatBtn.addEventListener('click', () => {
+      localStorage.removeItem('kkh-grouped-sessions');
+      location.reload();
+    });
 
-    console.log('[Submit to]', url);
-    console.log('[Payload]', payload);
-    showTyping();
+    // Render sessions
+    function renderSessions() {
+      const generalList = document.getElementById('general-sessions');
+      const quizList = document.getElementById('quiz-sessions');
+      generalList.innerHTML = '';
+      quizList.innerHTML = '';
 
-    try {
-      const res = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
+      sidebarGroupedSessions.forEach(group => {
+        const target = group.category === 'General' ? generalList : quizList;
+        group.chats.forEach((chat, index) => {
+          const div = document.createElement('div');
+          div.className = 'chat-session';
+          div.innerHTML = `
+            <span>${chat.name}</span>
+            <div class="chat-menu">⋮
+              <div class="chat-dropdown">
+                <div class="rename-option" data-group="${group.category}" data-index="${index}">Rename</div>
+                <div class="delete-option" data-group="${group.category}" data-index="${index}">Delete</div>
+              </div>
+            </div>`;
+          target.appendChild(div);
+        });
       });
-      const data = await res.json();
-      removeTyping();
 
-      if (data.answer) {
-        appendGroupedMessage('bot', data.answer);
-      } else if (data.summary) {
-        appendGroupedMessage('bot', data.summary);
-      } else if (data.full) {
-        appendGroupedMessage('bot', data.full);
-      } else if (data.quiz) {
-        appendGroupedMessage('bot', '📝 Quiz Loaded');
-      } else {
-        appendGroupedMessage('bot', '⚠️ Unexpected response from backend.');
-      }
-    } catch (err) {
-      removeTyping();
-      appendGroupedMessage('bot', '❌ Failed to reach server: ' + err.message);
+      attachMenuHandlers();
     }
+
+    // New session buttons
+    document.querySelectorAll('.new-session-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const category = btn.getAttribute('data-category');
+        const group = sidebarGroupedSessions.find(g => g.category === category);
+        const newSession = {
+          name: category === 'Quiz' ? `Quiz Attempt ${group.chats.length + 1}` : `Chat ${group.chats.length + 1}`
+        };
+        group.chats.push(newSession);
+        localStorage.setItem('kkh-grouped-sessions', JSON.stringify(sidebarGroupedSessions));
+        renderSessions();
+      });
+    });
+
+    // Attach rename/delete
+    function attachMenuHandlers() {
+      document.querySelectorAll('.rename-option').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const group = btn.getAttribute('data-group');
+          const index = btn.getAttribute('data-index');
+          const newName = prompt('Enter new name:');
+          if (newName) {
+            const g = sidebarGroupedSessions.find(g => g.category === group);
+            g.chats[index].name = newName;
+            localStorage.setItem('kkh-grouped-sessions', JSON.stringify(sidebarGroupedSessions));
+            renderSessions();
+          }
+        });
+      });
+
+      document.querySelectorAll('.delete-option').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const group = btn.getAttribute('data-group');
+          const index = btn.getAttribute('data-index');
+          if (confirm('Delete this session?')) {
+            const g = sidebarGroupedSessions.find(g => g.category === group);
+            g.chats.splice(index, 1);
+            localStorage.setItem('kkh-grouped-sessions', JSON.stringify(sidebarGroupedSessions));
+            renderSessions();
+          }
+        });
+      });
+    }
+
+    renderGroupedSessions();
+    loadGroupedHistory();
+    renderSessions();
   });
-
-  function showTyping() {
-    const typingDiv = document.createElement('div');
-    typingDiv.id = 'typing-indicator';
-    typingDiv.className = 'message bot';
-    typingDiv.innerHTML = `
-      <span class="avatar">🤖</span>
-      <div class="message-content">...</div>
-    `;
-    chatWindow.appendChild(typingDiv);
-    chatWindow.scrollTop = chatWindow.scrollHeight;
-  }
-
-  function removeTyping() {
-    const typingDiv = document.getElementById('typing-indicator');
-    if (typingDiv) typingDiv.remove();
-  }
-
-  renderGroupedSessions();
-  loadGroupedHistory();
 });
