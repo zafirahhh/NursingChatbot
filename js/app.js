@@ -324,8 +324,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
       if (data.answer) {
         appendGroupedMessage('bot', data.answer);
-      } else if (data.summary && data.full) {
+      } else if (data.summary) {
         appendGroupedMessage('bot', data.summary);
+      } else if (data.full) {
+        appendGroupedMessage('bot', data.full);
       } else if (data.quiz) {
         appendGroupedMessage('bot', '📝 Quiz Loaded');
       } else {
