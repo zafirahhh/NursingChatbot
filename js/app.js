@@ -65,75 +65,7 @@ document.addEventListener('DOMContentLoaded', () => {
           li.onclick = () => switchGroupedSession(session.id);
 
           // Add right-click context menu for rename/delete
-          li.oncontextmenu = (e) => {
-            e.preventDefault();
-            // Remove any existing menu
-            document.querySelectorAll('.session-menu').forEach(m => m.remove());
-            const menu = document.createElement('div');
-            menu.className = 'session-menu';
-            menu.style.position = 'fixed';
-            menu.style.left = `${e.pageX}px`;
-            menu.style.top = `${e.pageY}px`;
-            menu.style.background = '#fff';
-            menu.style.border = '1px solid #e0e0e0';
-            menu.style.boxShadow = '0 4px 16px rgba(0,0,0,0.12)';
-            menu.style.zIndex = 1000;
-            menu.style.minWidth = '140px';
-            menu.style.borderRadius = '10px';
-            menu.style.padding = '6px 0';
-            menu.style.display = 'flex';
-            menu.style.flexDirection = 'column';
-
-            // Rename Option
-            const rename = document.createElement('div');
-            rename.className = 'session-menu-item';
-            rename.innerHTML = '✏️ Rename';
-            rename.style.padding = '10px 20px';
-            rename.style.cursor = 'pointer';
-            rename.onmouseover = () => rename.style.background = '#f7f7fa';
-            rename.onmouseout = () => rename.style.background = '';
-            rename.onclick = (ev) => {
-              ev.stopPropagation();
-              const newName = prompt('Rename session:', session.name);
-              if (newName && newName.trim()) {
-                session.name = newName.trim();
-                saveGroupedSessions();
-                renderGroupedSessions();
-              }
-              menu.remove();
-            };
-
-            // Delete Option
-            const del = document.createElement('div');
-            del.className = 'session-menu-item';
-            del.innerHTML = '🗑️ Delete';
-            del.style.padding = '10px 20px';
-            del.style.cursor = 'pointer';
-            del.onmouseover = () => del.style.background = '#f7f7fa';
-            del.onmouseout = () => del.style.background = '';
-            del.onclick = (ev) => {
-              ev.stopPropagation();
-              if (confirm('Delete this quiz attempt?')) {
-                const group = groupedSessions.find(g => g.chats.some(c => c.id === session.id));
-                group.chats = group.chats.filter(c => c.id !== session.id);
-                if (activeSessionId === session.id) activeSessionId = 'general-welcome';
-                saveGroupedSessions();
-                renderGroupedSessions();
-                switchGroupedSession(activeSessionId);
-              }
-              menu.remove();
-            };
-
-            menu.appendChild(rename);
-            menu.appendChild(del);
-            document.body.appendChild(menu);
-
-            const closeMenu = () => {
-              menu.remove();
-              document.removeEventListener('click', closeMenu);
-            };
-            setTimeout(() => document.addEventListener('click', closeMenu), 0);
-          };
+          addSessionContextMenu(li, session, group);
 
           chatSessionsList.appendChild(li);
         });
@@ -288,6 +220,75 @@ document.addEventListener('DOMContentLoaded', () => {
         chatWindow.scrollTop = chatWindow.scrollHeight;
       }
     }
+  }
+
+  // Add context menu for rename/delete to both general and quiz sessions
+  function addSessionContextMenu(targetElement, session, group = null) {
+    targetElement.oncontextmenu = (e) => {
+      e.preventDefault();
+
+      const existing = document.querySelector('.session-menu');
+      if (existing) existing.remove();
+
+      const menu = document.createElement('div');
+      menu.className = 'session-menu';
+      menu.style.position = 'fixed';
+      menu.style.left = `${e.pageX}px`;
+      menu.style.top = `${e.pageY}px`;
+      menu.style.zIndex = 2000;
+      menu.style.background = '#fff';
+      menu.style.border = '1px solid #ddd';
+      menu.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)';
+      menu.style.borderRadius = '8px';
+      menu.style.padding = '6px 0';
+
+      const rename = document.createElement('div');
+      rename.className = 'session-menu-item';
+      rename.textContent = '✏️ Rename';
+      rename.style.padding = '8px 20px';
+      rename.style.cursor = 'pointer';
+      rename.onclick = () => {
+        const newName = prompt('Rename session:', session.name);
+        if (newName && newName.trim()) {
+          session.name = newName.trim();
+          if (group) saveGroupedSessions();
+          else saveSessions();
+          renderGroupedSessions();
+        }
+        menu.remove();
+      };
+
+      const del = document.createElement('div');
+      del.className = 'session-menu-item';
+      del.textContent = '🗑️ Delete';
+      del.style.padding = '8px 20px';
+      del.style.cursor = 'pointer';
+      del.onclick = () => {
+        if (confirm('Delete this session?')) {
+          if (group) {
+            group.chats = group.chats.filter(c => c.id !== session.id);
+          } else {
+            sessions = sessions.filter(s => s.id !== session.id);
+          }
+          localStorage.removeItem('kkh-chat-history-' + session.id);
+          if (activeSessionId === session.id) activeSessionId = 'general-welcome';
+          group ? saveGroupedSessions() : saveSessions();
+          renderGroupedSessions();
+          switchGroupedSession(activeSessionId);
+        }
+        menu.remove();
+      };
+
+      menu.appendChild(rename);
+      menu.appendChild(del);
+      document.body.appendChild(menu);
+
+      const closeMenu = () => {
+        menu.remove();
+        document.removeEventListener('click', closeMenu);
+      };
+      document.addEventListener('click', closeMenu);
+    };
   }
 
   renderGroupedSessions();
