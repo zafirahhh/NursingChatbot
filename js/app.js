@@ -291,6 +291,47 @@ document.addEventListener('DOMContentLoaded', () => {
     };
   }
 
+  // ✅ Update: Unified submit logic for General & Quiz sessions with debug logging
+  chatForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const userText = userInput.value.trim();
+    if (!userText) return;
+
+    appendGroupedMessage('user', userText);
+    userInput.value = '';
+
+    const isQuiz = activeSessionId.startsWith('quiz');
+    const url = isQuiz ? QUIZ_URL_FINAL : BACKEND_URL_FINAL;
+    const payload = isQuiz ? { prompt: userText } : { question: userText, session: 'general' };
+
+    console.log('[Debug] Submitting to:', url);
+    console.log('[Debug] Payload:', payload);
+    showTyping();
+
+    try {
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      removeTyping();
+
+      if (data.answer) {
+        appendGroupedMessage('bot', data.answer);
+      } else if (data.summary && data.full) {
+        appendGroupedMessage('bot', data.summary);
+      } else if (data.quiz) {
+        appendGroupedMessage('bot', '📝 Quiz Loaded');
+      } else {
+        appendGroupedMessage('bot', '⚠️ Unexpected response from backend.');
+      }
+    } catch (err) {
+      removeTyping();
+      appendGroupedMessage('bot', '❌ Failed to reach server: ' + err.message);
+    }
+  });
+
   renderGroupedSessions();
   loadGroupedHistory();
 });
