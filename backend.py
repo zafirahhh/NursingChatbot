@@ -156,13 +156,19 @@ def find_best_answer(user_query, chunks, chunk_embeddings, top_k=5):
 
     for idx in top_indices:
         chunk = chunks[idx]
+
+        # SKIP: title/copyright/boilerplate chunks
+        if "KK Women's and Children's Hospital" in chunk or "The Baby Bear Book" in chunk:
+            continue
+
+        # Split chunk into sentences
         sentences = [s.strip() for s in sent_tokenize(chunk) if 6 <= len(s.split()) <= 50]
         for sent in sentences:
             sent_keywords = set(re.findall(r'\w+', sent.lower()))
             overlap = len(sent_keywords & question_keywords)
             sim = SequenceMatcher(None, user_query.lower(), sent.lower()).ratio()
 
-            # Fallback: use longest medical-style sentence with commas
+            # Fallback: prefer clinical list-style sentence (commas)
             if ',' in sent and len(sent) > len(fallback_sent):
                 fallback_sent = sent
 
@@ -171,7 +177,7 @@ def find_best_answer(user_query, chunks, chunk_embeddings, top_k=5):
                 best_score = score
                 best_sent = sent
 
-    summary = best_sent if best_score > 0.5 else fallback_sent or "Sorry, no answer found."
+    summary = best_sent if best_score > 0.5 else fallback_sent or "Sorry, no relevant answer found."
     best_chunk = chunks[top_indices[0]]
     return {
         "summary": summary,
