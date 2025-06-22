@@ -677,19 +677,65 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function renderChatSessions() {
         chatSessionsList.innerHTML = '';
-        sessions.forEach(session => {
-            const button = document.createElement('button');
-            button.textContent = (currentSession === session.id ? '▼ ' : '') + session.name;
-            button.className = 'session-btn';
-            if (session.id === 'quiz') button.setAttribute('data-sub', 'true');
-            button.onclick = () => {
+
+        // Filter main and sub sessions
+        const general = sessions.find(s => s.id === 'general');
+        const quiz = sessions.find(s => s.id === 'quiz');
+        const others = sessions.filter(s => s.id !== 'general' && s.id !== 'quiz');
+
+        const generalWrapper = document.getElementById('session-general-wrapper') || document.createElement('div');
+        generalWrapper.id = 'session-general-wrapper';
+        generalWrapper.innerHTML = '';  // clear old content
+
+        // --- General Button ---
+        const generalBtn = document.createElement('button');
+        generalBtn.textContent = (currentSession === 'general' ? '▼ ' : '') + general.name;
+        generalBtn.className = 'sidebar-btn';
+        generalBtn.onclick = () => {
+            currentSession = 'general';
+            localStorage.setItem('kkh-current-session', currentSession);
+            renderChatSessions();
+            loadMessages();
+        };
+        generalWrapper.appendChild(generalBtn);
+
+        // --- Quiz as sub-session ---
+        const quizBtn = document.createElement('button');
+        quizBtn.textContent = (currentSession === 'quiz' ? '▶ ' : '• ') + 'Quiz';
+        quizBtn.className = 'sidebar-btn';
+        quizBtn.style.marginLeft = '1.8rem'; // Indented under General
+        quizBtn.onclick = () => {
+            currentSession = 'quiz';
+            localStorage.setItem('kkh-current-session', currentSession);
+            renderChatSessions();
+            loadMessages();
+        };
+        generalWrapper.appendChild(quizBtn);
+
+        chatSessionsList.appendChild(generalWrapper);
+
+        // --- Other dynamic sessions if needed
+        others.forEach(session => {
+            const btn = document.createElement('button');
+            btn.textContent = session.name;
+            btn.className = 'sidebar-btn';
+            btn.onclick = () => {
                 currentSession = session.id;
                 localStorage.setItem('kkh-current-session', currentSession);
                 renderChatSessions();
                 loadMessages();
             };
-            chatSessionsList.appendChild(button);
+            chatSessionsList.appendChild(btn);
         });
+
+        // + New Chat
+        const newBtn = document.createElement('button');
+        newBtn.id = 'add-session';
+        newBtn.className = 'sidebar-btn';
+        newBtn.style.width = '100%';
+        newBtn.style.marginTop = '0.3rem';
+        newBtn.textContent = '+ New Chat';
+        chatSessionsList.appendChild(newBtn);
     }
 
     function renderMessage(message, sender) {
