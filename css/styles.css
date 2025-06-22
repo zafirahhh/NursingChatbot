@@ -247,6 +247,33 @@ button[type="submit"]:hover {
   font-family: 'Segoe UI', sans-serif;
 }
 
+/* Sidebar container */
+#sidebar {
+  background-color: #f4f6fa;
+  padding: 16px;
+  width: 260px;
+  border-radius: 12px;
+  box-shadow: 0 0 0 1px #e0e5ee;  /* light border */
+  font-family: 'Segoe UI', sans-serif;
+  height: calc(100vh - 32px); /* full height minus header padding */
+  margin: 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+/* Clear button */
+#clear-chat {
+  background-color: white;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-weight: bold;
+  padding: 6px 12px;
+  margin-bottom: 1rem;
+  cursor: pointer;
+  width: 100%;
+}
+
 /* Section headers */
 .nav-title {
   font-weight: bold;
@@ -254,10 +281,11 @@ button[type="submit"]:hover {
   margin-bottom: 12px;
 }
 
-.group-title, .subgroup-title {
+.group-title,
+.subgroup-title {
   font-weight: bold;
   margin: 12px 0 6px;
-  color: #333;
+  color: #2c3e50;
 }
 
 /* Indented subgroup */
