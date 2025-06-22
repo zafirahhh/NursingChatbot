@@ -13,6 +13,7 @@ from nltk.tokenize import sent_tokenize
 from sklearn.feature_extraction.text import ENGLISH_STOP_WORDS
 from difflib import SequenceMatcher
 import random
+from typing import List
 
 nltk.download('punkt')
 
@@ -95,6 +96,13 @@ def generate_quiz_from_guide(prompt: str):
 # === Request Schema ===
 class QueryRequest(BaseModel):
     query: str
+
+class QuizAnswer(BaseModel):
+    question: str
+    answer: str
+
+class QuizEvaluationRequest(BaseModel):
+    responses: List[QuizAnswer]
 
 # === Helper Functions ===
 def clean_paragraph(text: str) -> str:
@@ -196,6 +204,31 @@ def generate_quiz(n: int = 5, topic: str = None):
             "context": chunk[:250] + ("..." if len(chunk) > 250 else "")
         })
     return {"quiz": quiz}
+
+@app.post("/quiz/evaluate")
+def evaluate_quiz(request: QuizEvaluationRequest):
+    feedback = []
+    for response in request.responses:
+        question_text = response.question.lower().strip()
+        given_answer = response.answer.strip()
+
+        correct = None
+        for c in chunks:
+            if question_text in c.lower():
+                sentences = sent_tokenize(c)
+                correct = next((s for s in sentences if s in c), None)
+                break
+
+        if not correct:
+            correct = "Unknown"  # fallback
+
+        feedback.append({
+            "question": response.question,
+            "your_answer": given_answer,
+            "correct": given_answer == correct
+        })
+
+    return feedback
 
 if __name__ == "__main__":
     import time

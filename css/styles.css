@@ -362,6 +362,27 @@ button[type="submit"]:hover {
   line-height: 22px;
 }
 
+.quiz-option {
+  display: block;
+  margin: 6px 0;
+  padding: 8px 12px;
+  background: #f3f6fb;
+  border: 1px solid #cfdcec;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 15px;
+  text-align: left;
+}
+.quiz-option:hover {
+  background: #e6efff;
+}
+.quiz-block {
+  margin-bottom: 20px;
+  padding: 12px;
+  border-radius: 10px;
+  background: #f8faff;
+}
+
 @media (max-width: 900px) {
     .container.center-chat {
         flex-direction: column;

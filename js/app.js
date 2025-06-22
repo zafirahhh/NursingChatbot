@@ -786,6 +786,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 const BACKEND_URL_FINAL = "http://127.0.0.1:8000/ask";
 const QUIZ_URL_FINAL = "http://127.0.0.1:8000/quiz";
+const QUIZ_EVAL_URL_FINAL = "http://127.0.0.1:8000/quiz/evaluate";
 
 document.addEventListener('DOMContentLoaded', () => {
   const chatWindow = document.getElementById('chat-window');
@@ -811,6 +812,8 @@ document.addEventListener('DOMContentLoaded', () => {
   ]));
 
   let activeSessionId = localStorage.getItem('kkh-active-session') || 'general-welcome';
+  let currentQuiz = [];
+  let quizAnswers = {};
 
   function renderGroupedSessions() {
     chatSessionsList.innerHTML = '';
@@ -915,11 +918,62 @@ document.addEventListener('DOMContentLoaded', () => {
       const data = await response.json();
       if (data.quiz) {
         appendGroupedMessage('bot', '📝 Here are your quiz questions:');
+        currentQuiz = data.quiz;
+        quizAnswers = {};
+
         data.quiz.forEach((q, idx) => {
-          const optionsText = q.options.map((opt, i) => `${String.fromCharCode(65 + i)}. ${opt}`).join('\n');
-          const fullText = `Q${idx + 1}: ${q.question}\n${optionsText}`;
-          appendGroupedMessage('bot', fullText);
+          const quizContainer = document.createElement('div');
+          quizContainer.className = 'quiz-block';
+
+          const questionText = document.createElement('p');
+          questionText.innerHTML = `<strong>Q${idx + 1}:</strong> ${q.question}`;
+          quizContainer.appendChild(questionText);
+
+          q.options.forEach((opt, i) => {
+            const btn = document.createElement('button');
+            btn.textContent = `${String.fromCharCode(65 + i)}. ${opt}`;
+            btn.className = 'quiz-option';
+            btn.onclick = () => {
+              quizAnswers[idx] = opt;
+              [...quizContainer.querySelectorAll('button')].forEach(b => b.style.background = '#f3f6fb');
+              btn.style.background = '#dcefff';
+              btn.setAttribute('data-selected', 'true');
+            };
+            quizContainer.appendChild(btn);
+          });
+
+          chatWindow.appendChild(quizContainer);
         });
+
+        const submitBtn = document.createElement('button');
+        submitBtn.textContent = 'Submit Quiz';
+        submitBtn.className = 'sidebar-btn';
+        submitBtn.style.marginTop = '1rem';
+        submitBtn.onclick = async () => {
+          const userResponses = currentQuiz.map((q, i) => ({ question: q.question, answer: quizAnswers[i] || '' }));
+          const result = await fetch(QUIZ_EVAL_URL_FINAL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ responses: userResponses })
+          });
+          const feedback = await result.json();
+
+          let score = 0;
+          feedback.forEach((item, i) => {
+            const isCorrect = item.correct;
+            if (isCorrect) score++;
+
+            const blocks = document.querySelectorAll('.quiz-block')[i];
+            const selected = blocks.querySelector('[data-selected="true"]');
+            if (selected) {
+              selected.style.background = isCorrect ? '#c8facc' : '#ffc8c8';
+            }
+          });
+
+          appendGroupedMessage('bot', `✅ You scored ${score} out of ${currentQuiz.length}`);
+        };
+        chatWindow.appendChild(submitBtn);
+        chatWindow.scrollTop = chatWindow.scrollHeight;
       }
     }
   }
