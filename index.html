@@ -10,9 +10,9 @@
 <body>
     <!-- Hamburger menu for mobile -->
     <button class="hamburger-menu" id="sidebarToggle" aria-label="Open sidebar">
-      <span></span>
-      <span></span>
-      <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
     </button>
     <!-- Sidebar overlay for mobile -->
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
@@ -41,10 +41,7 @@
             <details class="sidebar-section" open>
                 <summary>Chat Sessions</summary>
                 <ul class="sidebar-list" id="chat-sessions">
-                    <li class="chat-session active">General</li>
-                    <li class="chat-session">Session 1</li>
-                    <li class="chat-session">Session 2</li>
-                    <!-- More sessions can be added dynamically -->
+                    <!-- Dynamic chat sessions will be injected here -->
                 </ul>
                 <button id="add-session" class="sidebar-btn" style="width:100%;margin-top:0.3rem;">+ New Session</button>
             </details>
@@ -55,7 +52,6 @@
                     <li class="prompt-item">Default Prompt</li>
                     <li class="prompt-item">Triage Prompt</li>
                     <li class="prompt-item">FAQ Prompt</li>
-                    <!-- More prompts can be added dynamically -->
                 </ul>
                 <button id="add-prompt" class="sidebar-btn" style="width:100%;margin-top:0.3rem;">+ New Prompt</button>
             </details>
@@ -78,31 +74,31 @@
 
     <script src="js/app.js"></script>
     <script>
-// Mobile sidebar toggle logic
-const sidebar = document.querySelector('.sidebar');
-const overlay = document.getElementById('sidebarOverlay');
-const toggle = document.getElementById('sidebarToggle');
+    // Mobile sidebar toggle logic
+    const sidebar = document.querySelector('.sidebar');
+    const overlay = document.getElementById('sidebarOverlay');
+    const toggle = document.getElementById('sidebarToggle');
 
-function openSidebar() {
-  sidebar.classList.add('open');
-  overlay.classList.add('open');
-  toggle.classList.add('open');
-  document.body.classList.add('sidebar-open');
-}
-function closeSidebar() {
-  sidebar.classList.remove('open');
-  overlay.classList.remove('open');
-  toggle.classList.remove('open');
-  document.body.classList.remove('sidebar-open');
-}
-toggle.addEventListener('click', () => {
-  if (sidebar.classList.contains('open')) {
-    closeSidebar();
-  } else {
-    openSidebar();
-  }
-});
-overlay.addEventListener('click', closeSidebar);
-</script>
+    function openSidebar() {
+        sidebar.classList.add('open');
+        overlay.classList.add('open');
+        toggle.classList.add('open');
+        document.body.classList.add('sidebar-open');
+    }
+    function closeSidebar() {
+        sidebar.classList.remove('open');
+        overlay.classList.remove('open');
+        toggle.classList.remove('open');
+        document.body.classList.remove('sidebar-open');
+    }
+    toggle.addEventListener('click', () => {
+        if (sidebar.classList.contains('open')) {
+            closeSidebar();
+        } else {
+            openSidebar();
+        }
+    });
+    overlay.addEventListener('click', closeSidebar);
+    </script>
 </body>
 </html>
