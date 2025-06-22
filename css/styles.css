@@ -247,6 +247,24 @@ button[type="submit"]:hover {
   font-family: 'Segoe UI', sans-serif;
 }
 
+/* Section headers */
+.nav-title {
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 12px;
+}
+
+.group-title, .subgroup-title {
+  font-weight: bold;
+  margin: 12px 0 6px;
+  color: #333;
+}
+
+/* Indented subgroup */
+.subgroup {
+  margin-left: 12px;
+}
+
 .sidebar {
     min-width: 220px;
     max-width: 260px;
