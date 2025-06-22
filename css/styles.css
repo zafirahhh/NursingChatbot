@@ -249,17 +249,16 @@ button[type="submit"]:hover {
 
 /* Sidebar container */
 #sidebar {
-  background-color: #f4f6fa;
+  background-color: #f5f6fa;
   padding: 16px;
   width: 260px;
   border-radius: 12px;
-  box-shadow: 0 0 0 1px #e0e5ee;  /* light border */
+  box-shadow: 0 0 0 1px #e0e5ee;
   font-family: 'Segoe UI', sans-serif;
-  height: calc(100vh - 32px); /* full height minus header padding */
-  margin: 16px;
+  height: 100vh;
+  margin: 0;
   display: flex;
   flex-direction: column;
-  justify-content: flex-start;
 }
 
 /* Clear button */
@@ -279,18 +278,66 @@ button[type="submit"]:hover {
   font-weight: bold;
   color: #333;
   margin-bottom: 12px;
+  font-size: 14px;
 }
 
-.group-title,
-.subgroup-title {
+.group-title, .subgroup-title {
   font-weight: bold;
   margin: 12px 0 6px;
   color: #2c3e50;
+  font-size: 15px;
 }
 
-/* Indented subgroup */
-.subgroup {
-  margin-left: 12px;
+/* Indent subgroup chats */
+.chat-list {
+  margin-left: 16px;
+}
+
+/* Chat session buttons */
+.chat-session {
+  background: #f3f6fa;
+  padding: 6px 10px;
+  border-radius: 8px;
+  margin-bottom: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Highlighted/Selected session */
+.chat-session.active {
+  background-color: white;
+  font-weight: bold;
+}
+
+/* Normal plain chat text (unselected) */
+.chat-name {
+  margin-left: 18px;
+  font-size: 14px;
+  color: #333;
+  margin-bottom: 4px;
+}
+
+/* Add buttons */
+.new-session-btn,
+.new-prompt-btn {
+  background-color: white;
+  border: 1px solid #ccc;
+  font-weight: bold;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  width: 100%;
+  font-size: 14px;
+  margin-top: 4px;
+  margin-bottom: 6px;
+}
+
+.new-session-btn:hover,
+.new-prompt-btn:hover {
+  background-color: #e8ecf4;
 }
 
 .sidebar {

@@ -59,7 +59,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const targetList = group.category === 'General' ? generalList : quizList;
       group.chats.forEach((chat, index) => {
         const chatDiv = document.createElement('div');
-        chatDiv.className = 'chat-session';
+        chatDiv.className = 'chat-session' + (chat.name === activeSessionId ? ' active' : '');
         chatDiv.innerHTML = `
           <span>${chat.name}</span>
           <div class="chat-menu">⋮
