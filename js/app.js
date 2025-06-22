@@ -13,11 +13,28 @@ document.addEventListener('DOMContentLoaded', () => {
   const micBtn = document.getElementById('mic-btn');
   const avatars = { user: '👩', bot: '🤖' };
 
+  // --- Restore Default Session Structure if Missing ---
+  let groupedSessions = JSON.parse(localStorage.getItem('kkh-grouped-sessions'));
+  if (!groupedSessions) {
+    groupedSessions = [
+      {
+        category: "General",
+        expanded: true,
+        chats: [{ name: "Chat 1" }]
+      },
+      {
+        category: "Quiz",
+        expanded: true,
+        chats: [
+          { name: "Quiz Attempt 1" },
+          { name: "Quiz Attempt 2" }
+        ]
+      }
+    ];
+    localStorage.setItem('kkh-grouped-sessions', JSON.stringify(groupedSessions));
+  }
+
   // Load sessions or fallback
-  let groupedSessions = JSON.parse(localStorage.getItem('kkh-grouped-sessions') || JSON.stringify([
-    { category: 'General', expanded: true, chats: [{ name: "Welcome", id: "general-welcome" }] },
-    { category: 'Quiz', expanded: true, chats: [] }
-  ]));
   let activeSessionId = localStorage.getItem('kkh-active-session') || 'general-welcome';
   let currentQuiz = [];
   let quizAnswers = {};
@@ -39,25 +56,26 @@ document.addEventListener('DOMContentLoaded', () => {
     quizList.innerHTML = '';
 
     groupedSessions.forEach(group => {
-      const target = group.category === 'General' ? generalList : quizList;
+      const targetList = group.category === 'General' ? generalList : quizList;
       group.chats.forEach((chat, index) => {
-        const div = document.createElement('div');
-        div.className = 'chat-session';
-        div.innerHTML = `
+        const chatDiv = document.createElement('div');
+        chatDiv.className = 'chat-session';
+        chatDiv.innerHTML = `
           <span>${chat.name}</span>
           <div class="chat-menu">⋮
             <div class="chat-dropdown">
               <div class="rename-option" data-group="${group.category}" data-index="${index}">Rename</div>
               <div class="delete-option" data-group="${group.category}" data-index="${index}">Delete</div>
             </div>
-          </div>`;
-        if (chat.id === activeSessionId) div.classList.add('active');
-        div.onclick = (e) => {
+          </div>
+        `;
+        if (chat.id === activeSessionId) chatDiv.classList.add('active');
+        chatDiv.onclick = (e) => {
           if (!e.target.classList.contains('chat-menu') && !e.target.classList.contains('chat-dropdown') && !e.target.classList.contains('rename-option') && !e.target.classList.contains('delete-option')) {
             switchSession(group, chat, index);
           }
         };
-        target.appendChild(div);
+        targetList.appendChild(chatDiv);
       });
     });
     attachMenuHandlers();
@@ -68,52 +86,42 @@ document.addEventListener('DOMContentLoaded', () => {
     btn.addEventListener('click', () => {
       const category = btn.getAttribute('data-category');
       const group = groupedSessions.find(g => g.category === category);
-      const id = `${category.toLowerCase()}-${Date.now()}`;
-      const newSession = {
-        name: category === 'Quiz' ? `Quiz Attempt ${group.chats.length + 1}` : `Chat ${group.chats.length + 1}`,
-        id
+      const newChat = {
+        name: category === 'Quiz'
+          ? `Quiz Attempt ${group.chats.length + 1}`
+          : `Chat ${group.chats.length + 1}`
       };
-      group.chats.push(newSession);
+      group.chats.push(newChat);
       localStorage.setItem('kkh-grouped-sessions', JSON.stringify(groupedSessions));
-      activeSessionId = id;
-      localStorage.setItem('kkh-active-session', activeSessionId);
       renderSessions();
-      loadHistory();
     });
   });
 
+  // --- Rename / Delete ---
   function attachMenuHandlers() {
     document.querySelectorAll('.rename-option').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const group = btn.getAttribute('data-group');
+      btn.addEventListener('click', () => {
+        const groupName = btn.getAttribute('data-group');
         const index = btn.getAttribute('data-index');
-        const newName = prompt('Enter new name:');
+        const newName = prompt('Enter new session name:');
         if (newName) {
-          const g = groupedSessions.find(g => g.category === group);
-          g.chats[index].name = newName;
+          const group = groupedSessions.find(g => g.category === groupName);
+          group.chats[index].name = newName;
           localStorage.setItem('kkh-grouped-sessions', JSON.stringify(groupedSessions));
           renderSessions();
         }
       });
     });
+
     document.querySelectorAll('.delete-option').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const group = btn.getAttribute('data-group');
+      btn.addEventListener('click', () => {
+        const groupName = btn.getAttribute('data-group');
         const index = btn.getAttribute('data-index');
-        if (confirm('Delete this session?')) {
-          const g = groupedSessions.find(g => g.category === group);
-          const sessionId = g.chats[index].id;
-          g.chats.splice(index, 1);
+        if (confirm('Are you sure you want to delete this session?')) {
+          const group = groupedSessions.find(g => g.category === groupName);
+          group.chats.splice(index, 1);
           localStorage.setItem('kkh-grouped-sessions', JSON.stringify(groupedSessions));
-          localStorage.removeItem('kkh-chat-history-' + sessionId);
-          if (activeSessionId === sessionId) {
-            activeSessionId = 'general-welcome';
-            localStorage.setItem('kkh-active-session', activeSessionId);
-          }
           renderSessions();
-          loadHistory();
         }
       });
     });
