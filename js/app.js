@@ -339,6 +339,23 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+  function showTyping() {
+    const typingDiv = document.createElement('div');
+    typingDiv.id = 'typing-indicator';
+    typingDiv.className = 'message bot';
+    typingDiv.innerHTML = `
+      <span class="avatar">🤖</span>
+      <div class="message-content">...</div>
+    `;
+    chatWindow.appendChild(typingDiv);
+    chatWindow.scrollTop = chatWindow.scrollHeight;
+  }
+
+  function removeTyping() {
+    const typingDiv = document.getElementById('typing-indicator');
+    if (typingDiv) typingDiv.remove();
+  }
+
   renderGroupedSessions();
   loadGroupedHistory();
 });
