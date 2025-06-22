@@ -29,34 +29,30 @@
 
   <div class="container center-chat" style="display: flex; align-items: flex-start;">
     <!-- Sidebar -->
-    <aside class="sidebar" style="min-width: 270px; max-width: 320px; flex: 0 0 270px; height: 100vh; overflow-y: auto; background: #f8f9fb; border-right: 1px solid #e0e0e0;">
-      <div class="sidebar-actions">
-        <button id="clear-chat" class="sidebar-btn" title="Clear Chat History">🗑️ Clear Chat History</button>
-      </div>
-      <div class="sidebar-nav">
-        <label class="nav-label">NAVIGATION</label>
-      </div>
-      <details class="sidebar-section" open>
-        <summary>Chat Sessions</summary>
-        <!-- General Section -->
-        <div class="session-group">
-          <div class="session-category">▼ General</div>
+    <div id="sidebar">
+      <button id="clear-chat" class="sidebar-btn">🗑️ Clear Chat History</button>
+
+      <div class="nav-section">
+        <div class="nav-title">NAVIGATION</div>
+
+        <div class="nav-group">
+          <div class="group-title">▼ Chat Sessions</div>
+
+          <div class="subgroup-title">▼ General</div>
           <div id="general-sessions" class="chat-list"></div>
           <button class="new-session-btn" data-category="General">+ New Chat</button>
-        </div>
-        <!-- Quiz Section -->
-        <div class="session-group">
-          <div class="session-category">▼ Quiz</div>
+
+          <div class="subgroup-title">▼ Quiz</div>
           <div id="quiz-sessions" class="chat-list"></div>
           <button class="new-session-btn" data-category="Quiz">+ New Quiz</button>
         </div>
-      </details>
-      <details class="sidebar-section" open>
-        <summary>Prompts</summary>
-        <ul class="sidebar-list" id="prompt-list"></ul>
-        <button id="add-prompt" class="sidebar-btn" style="width:100%;margin-top:0.3rem;">+ New Prompt</button>
-      </details>
-    </aside>
+
+        <div class="nav-group">
+          <div class="group-title">▼ Prompts</div>
+          <button id="new-prompt" class="new-prompt-btn">+ New Prompt</button>
+        </div>
+      </div>
+    </div>
     <!-- Main Chat Area -->
     <main class="main-chat" style="flex: 1 1 0; min-width: 0;">
       <section class="chatbot-container" aria-label="Nursing Chatbot">
