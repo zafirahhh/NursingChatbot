@@ -70,11 +70,20 @@ document.addEventListener('DOMContentLoaded', () => {
         if (activeSessionId === chat.id) {
             div.classList.add('active');
 }
-        div.textContent = chat.name;
+        div.innerHTML = `
+          <span>${chat.name}</span>
+          <div class="chat-menu">⋮
+            <div class="chat-dropdown">
+              <div class="rename-option" data-group="${group.category}" data-index="${index}">Rename</div>
+              <div class="delete-option" data-group="${group.category}" data-index="${index}">Delete</div>
+            </div>
+          </div>
+        `;
         div.addEventListener('click', () => switchSession(group, chat, index));
         target.appendChild(div);
       });
     });
+    attachMenuHandlers();
   }
 
   // New session buttons
