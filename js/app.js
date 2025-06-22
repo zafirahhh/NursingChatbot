@@ -50,35 +50,27 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   function renderSessions() {
-    const generalList = document.getElementById('session-general-wrapper');
-    const quizList = document.getElementById('session-quiz-wrapper');
+    const generalList = document.getElementById('general-sessions');
+    const quizList = document.getElementById('quiz-sessions');
+
+    if (!generalList || !quizList) {
+      console.warn("Missing session containers in HTML");
+      return;
+    }
+
     generalList.innerHTML = '';
     quizList.innerHTML = '';
 
     groupedSessions.forEach(group => {
-      const targetList = group.category === 'General' ? generalList : quizList;
+      const target = group.category === 'General' ? generalList : quizList;
+
       group.chats.forEach((chat, index) => {
-        const chatDiv = document.createElement('div');
-        chatDiv.className = 'chat-session' + (chat.name === activeSessionId ? ' active' : '');
-        chatDiv.innerHTML = `
-          <span>${chat.name}</span>
-          <div class="chat-menu">⋮
-            <div class="chat-dropdown">
-              <div class="rename-option" data-group="${group.category}" data-index="${index}">Rename</div>
-              <div class="delete-option" data-group="${group.category}" data-index="${index}">Delete</div>
-            </div>
-          </div>
-        `;
-        if (chat.id === activeSessionId) chatDiv.classList.add('active');
-        chatDiv.onclick = (e) => {
-          if (!e.target.classList.contains('chat-menu') && !e.target.classList.contains('chat-dropdown') && !e.target.classList.contains('rename-option') && !e.target.classList.contains('delete-option')) {
-            switchSession(group, chat, index);
-          }
-        };
-        targetList.appendChild(chatDiv);
+        const div = document.createElement('div');
+        div.className = 'chat-session';
+        div.textContent = chat.name;
+        target.appendChild(div);
       });
     });
-    attachMenuHandlers();
   }
 
   // New session buttons
