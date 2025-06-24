@@ -154,26 +154,37 @@ def find_best_answer(user_query, chunks, chunk_embeddings, top_k=5):
     best_score = 0
     fallback_sent = ""
 
+    # 🔍 Expanded clinical triggers
+    clinical_triggers = [
+        "red flag", "warning signs", "danger signs", "signs of deterioration",
+        "signs of distress", "sepsis indicators", "critically ill child", "high risk symptoms"
+    ]
+
     for idx in top_indices:
         chunk = chunks[idx]
 
-        # 🛑 Skip non-clinical chunks like vitals tables or title pages
-        if "neonate" in chunk.lower() or "infant" in chunk.lower() and "bpm" in chunk.lower():
-            continue
-        if "© kk women's and children's hospital" in chunk.lower():
-            continue
-        if "vital" in chunk.lower() and "heart rate" in chunk.lower():
-            continue
+        # Skip non-clinical boilerplate
+        if "© kk women's" in chunk.lower(): continue
+        if "table" in chunk.lower() and "assessment" in chunk.lower(): continue
+        if "vital" in chunk.lower() and "heart rate" in chunk.lower(): continue
+        if "bpm" in chunk.lower() and "infant" in chunk.lower(): continue
 
-        # ✅ Extract clinical sentences
         sentences = [s.strip() for s in sent_tokenize(chunk) if 6 <= len(s.split()) <= 50]
 
         for sent in sentences:
-            sent_keywords = set(re.findall(r'\w+', sent.lower()))
-            overlap = len(sent_keywords & question_keywords)
-            sim = SequenceMatcher(None, user_query.lower(), sent.lower()).ratio()
+            sent_lower = sent.lower()
+            # 🚨 Shortcut if clinical phrase in both query and sentence
+            for phrase in clinical_triggers:
+                if phrase in sent_lower and phrase in user_query.lower():
+                    return {
+                        "summary": sent,
+                        "full": clean_paragraph(chunk)
+                    }
 
-            # prefer clinical list-style fallback if needed
+            sent_keywords = set(re.findall(r'\w+', sent_lower))
+            overlap = len(sent_keywords & question_keywords)
+            sim = SequenceMatcher(None, user_query.lower(), sent_lower).ratio()
+
             if ',' in sent and len(sent) > len(fallback_sent):
                 fallback_sent = sent
 
