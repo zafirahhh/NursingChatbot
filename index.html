@@ -56,11 +56,9 @@
           <input type="text" id="user-input" placeholder="Type your question..." aria-label="Type your question" required />
           <button type="submit" aria-label="Send">Send</button>
         </form>
-      </section>
-    </main>
+      </section>    </main>
   </div>
 
-  <script src="js/app.js"></script>
   <script>
     // Mobile sidebar toggle logic
     const sidebar = document.querySelector('.sidebar');
@@ -80,9 +78,10 @@
       document.body.classList.remove('sidebar-open');
     }
     toggle.addEventListener('click', () => {
-      sidebar.classList.contains('open') ? closeSidebar() : openSidebar();
-    });
+      sidebar.classList.contains('open') ? closeSidebar() : openSidebar();    });
     overlay.addEventListener('click', closeSidebar);
   </script>
+  <script src="js/config.js"></script>
+  <script src="js/app.js"></script>
 </body>
 </html>

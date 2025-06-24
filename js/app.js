@@ -1,8 +1,6 @@
 // KKH Nursing Chatbot - Final Grouped Sessions App.js (MCQ with radio, explanation, 5 options)
 
-const BACKEND_URL_FINAL = "http://127.0.0.1:8000/ask";
-const QUIZ_URL_FINAL = "http://127.0.0.1:8000/quiz";
-const QUIZ_EVAL_URL_FINAL = "http://127.0.0.1:8000/quiz/evaluate";
+// URLs are now defined in config.js
 
 // --- Sidebar Grouped Sessions UI Logic for new sidebar structure ---
 document.addEventListener('DOMContentLoaded', () => {
