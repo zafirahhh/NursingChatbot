@@ -114,6 +114,14 @@ class QuizEvaluationRequest(BaseModel):
     responses: List[QuizAnswer]
 
 # === Helper Functions ===
+@app.get("/")
+def read_root():
+    return {"message": "KKH Nursing Chatbot API is running!", "status": "healthy"}
+
+@app.get("/health")
+def health_check():
+    return {"status": "healthy", "service": "kkh-nursing-chatbot"}
+
 def clean_paragraph(text: str) -> str:
     lines = text.splitlines()
     cleaned_lines = []
@@ -280,4 +288,5 @@ def evaluate_quiz(request: QuizEvaluationRequest):
 if __name__ == "__main__":
     import time
     time.sleep(2)
-    uvicorn.run("backend:app", host="0.0.0.0", port=8000, reload=True)
+    port = int(os.environ.get("PORT", 8000))
+    uvicorn.run("backend:app", host="0.0.0.0", port=port, reload=True)
